@@ -87,33 +87,33 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
     //return () => ctrl.abort();
   }, []);
 
-  if (!appData) {
-    // Show loading page while initializing
-    return (
-      <div className="flex items-center justify-center h-screen w-screen bg-white">
-        <div className="text-2xl font-semibold text-gray-600">
-          Loading Major Audit...
-        </div>
-        <svg
-          width="64"
-          height="64"
-          viewBox="0 0 64 64"
-          className="animate-spin"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <g>
-            <circle cx="32" cy="32" r="12" fill="#3b82f6" opacity="0.7" />
-            <path
-              d="M32 8v8M32 48v8M8 32h8M48 32h8M16.97 16.97l5.66 5.66M41.37 41.37l5.66 5.66M16.97 47.03l5.66-5.66M41.37 22.63l5.66-5.66"
-              stroke="#2563eb"
-              strokeWidth="3"
-              strokeLinecap="round"
-            />
-          </g>
-        </svg>
-      </div>
-    );
-  }
+  // if (!appData) {
+  //   // Show loading page while initializing
+  //   return (
+  //     <div className="flex items-center justify-center h-screen w-screen bg-white">
+  //       <div className="text-2xl font-semibold text-gray-600">
+  //         Loading Major Audit...
+  //       </div>
+  //       <svg
+  //         width="64"
+  //         height="64"
+  //         viewBox="0 0 64 64"
+  //         className="animate-spin"
+  //         xmlns="http://www.w3.org/2000/svg"
+  //       >
+  //         <g>
+  //           <circle cx="32" cy="32" r="12" fill="#3b82f6" opacity="0.7" />
+  //           <path
+  //             d="M32 8v8M32 48v8M8 32h8M48 32h8M16.97 16.97l5.66 5.66M41.37 41.37l5.66 5.66M16.97 47.03l5.66-5.66M41.37 22.63l5.66-5.66"
+  //             stroke="#2563eb"
+  //             strokeWidth="3"
+  //             strokeLinecap="round"
+  //           />
+  //         </g>
+  //       </svg>
+  //     </div>
+  //   );
+  // }
 
   return (
     <AppContext.Provider value={{ appData, setAppData }}>
