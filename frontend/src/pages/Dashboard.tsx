@@ -316,9 +316,7 @@ function Dashboard() {
             <p className="text-3xl font-semibold">30</p>
           </div>
           <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-gray-500">
-              Distributional Requirements Completed
-            </h2>
+            <h2 className="text-gray-500">Distributional Requirements</h2>
             <p className="text-3xl font-semibold">5 / 7</p>
           </div>
           <div className="bg-white rounded-lg shadow p-6">
@@ -327,7 +325,7 @@ function Dashboard() {
           </div>
         </section>
 
-        <section className="bg-white rounded-lg shadow p-4 pb-2 w-full flex flex-col flex-grow mb-2 overflow-hidden">
+        <section className="bg-white rounded-lg shadow p-4 pb-2 w-full flex flex-col flex-grow mb-2">
           <div className="flex flex-row items-center border-b mb-2">
             <div className="flex gap-4">
               <button
