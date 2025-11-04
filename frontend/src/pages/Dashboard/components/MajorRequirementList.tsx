@@ -1,11 +1,10 @@
 import {
   type MajorProgress,
   type GroupItemProgress,
-} from "../types/type-program";
+} from "@/types/type-program";
+import { formatCourseItemTypes } from "@/utils/formatHelpers";
 
 import { useState } from "react";
-
-import { formatCourseItemTypes } from "../utils/formatHelpers";
 
 interface ClassRequirementMapProps {
   reqProgressGroup: GroupItemProgress;

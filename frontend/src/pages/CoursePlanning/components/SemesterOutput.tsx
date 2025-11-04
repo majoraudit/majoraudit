@@ -1,18 +1,19 @@
-import { type StudentSemester } from "../types/type-user";
-import { type Course } from "../types/type-user";
+import { type StudentSemester } from "@/types/type-user";
+import { type Course } from "@/types/type-user";
 import {
   removeSemester,
   addCourse,
   calcTotalSemesterCredits,
   updateIsCompleted,
-} from "../utils/userDataHelpers";
-import { useUser } from "../contexts/UserContext";
+} from "@/utils/userDataHelpers";
+
+import { useUser } from "@/contexts/UserContext";
 
 import CourseOutput from "./CourseOutput";
 import BlankCourseOutput from "./BlankCourseOutput";
 
 import trashcan from "../assets/trashcan.svg";
-import lockAnimation from "../animations/lockAnimation.json";
+import lockAnimation from "../assets/lockAnimation.json";
 
 import { useDrop } from "react-dnd";
 import { useRef, useEffect, useMemo } from "react";

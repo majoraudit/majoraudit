@@ -1,12 +1,15 @@
+import type { MajorProgress } from "@/types/type-program";
+
+import { useUser } from "@/contexts/UserContext";
+import { useApp } from "@/contexts/AppContext";
+
 import { Link, useLocation } from "react-router-dom";
 import { useEffect } from "react";
-import { useUser } from "../contexts/UserContext";
-import { useApp } from "../contexts/AppContext";
+
 // import sunIcon from "../assets/sun.svg";
-import type { MajorProgress } from "../types/type-program";
 function Navbar() {
-  const { userData, setUserData } = useUser();
-  const { appData } = useApp();
+  //const { userData, setUserData } = useUser();
+  //const { appData } = useApp();
   const location = useLocation();
   const currentPath = location.pathname;
 

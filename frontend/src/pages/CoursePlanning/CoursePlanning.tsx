@@ -1,17 +1,18 @@
-import { type StudentSemester } from "../types/type-user";
-import { addSemester } from "../utils/userDataHelpers";
+import { type StudentSemester } from "@/types/type-user";
+import { addSemester } from "@/utils/userDataHelpers";
 
-import CourseOutput from "../components/CourseOutput";
-import SemesterOutput from "../components/SemesterOutput";
-import { useUser } from "../contexts/UserContext";
+import CourseOutput from "./components/CourseOutput";
+import SemesterOutput from "./components/SemesterOutput";
+
+import { useUser } from "@/contexts/UserContext";
+import { useApp } from "@/contexts/AppContext";
+
+import pencilIcon from "./assets/pencil.svg";
+import addSemesterIcon from "./assets/addSemester.svg";
+
 import React, { useMemo, useState } from "react";
 
-import pencilIcon from "../assets/pencil.svg";
-import addSemesterIcon from "../assets/addSemester.svg";
-
-import { useApp } from "../contexts/AppContext";
-
-import { general_requirements_progress } from "../data/mock_major_progress";
+import { general_requirements_progress } from "@/data/mock_major_progress";
 
 function CoursePlanning() {
   const { userData, setUserData } = useUser();

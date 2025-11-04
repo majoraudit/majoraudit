@@ -34,8 +34,6 @@ You will need a couple of environment variables (put them in a .env file)
 >
 > YALIES_API_KEY="get an api key from yalies"
 
-The CAS URL may have changed, check with Ryan.
-
 You can run the actual backend by doing
 
 > python manage.py migrate

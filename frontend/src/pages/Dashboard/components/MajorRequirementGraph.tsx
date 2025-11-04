@@ -1,5 +1,5 @@
-import type { MajorProgress, GroupItemProgress } from "../types/type-program";
-import { formatCourseItemTypes } from "../utils/formatHelpers";
+import type { MajorProgress, GroupItemProgress } from "@/types/type-program";
+import { formatCourseItemTypes } from "@/utils/formatHelpers";
 
 interface ClassRequirementMapProps {
   reqProgressGroup: GroupItemProgress;

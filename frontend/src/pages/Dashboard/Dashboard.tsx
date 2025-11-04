@@ -1,17 +1,18 @@
-import checkIcon from "../assets/check.svg";
-import { useUser } from "../contexts/UserContext";
-import { useApp } from "../contexts/AppContext";
+import { calcTotalCredits, calcTotalCourses } from "@/utils/userDataHelpers";
+import { formatC_P_UP } from "@/utils/formatHelpers";
+import { removeMajor } from "../../utils/userDataHelpers";
+import type { MajorProgress } from "../../types/type-program";
+
+import { useUser } from "@/contexts/UserContext";
+import { useApp } from "@/contexts/AppContext";
+
+import MajorRequirementList from "./components/MajorRequirementList";
+import MajorRequirementGraph from "./components/MajorRequirementGraph";
+
+import checkIcon from "./assets/check.svg";
+import trashcan from "./assets/trashcan.svg";
 
 import { useMemo, useState, useEffect } from "react";
-
-import { calcTotalCredits, calcTotalCourses } from "../utils/userDataHelpers";
-import { formatC_P_UP } from "../utils/formatHelpers";
-import MajorRequirementList from "../components/MajorRequirementList";
-import MajorRequirementGraph from "../components/MajorRequirementGraph";
-import trashcan from "../assets/trashcan.svg";
-
-import { removeMajor } from "../utils/userDataHelpers";
-import type { MajorProgress } from "../types/type-program";
 
 function Dashboard() {
   const { userData, setUserData } = useUser();

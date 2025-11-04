@@ -1,11 +1,14 @@
-import bookIcon from "../assets/book.svg";
-import { useApp } from "../contexts/AppContext";
-import { useState, useEffect, useMemo, act } from "react";
-import type { MajorProgress, GroupItemProgress } from "../types/type-program";
-import { formatCourseItemTypes } from "../utils/formatHelpers";
-import { useUser } from "../contexts/UserContext";
-import { addMajor } from "../utils/userDataHelpers";
-import type { MajorTemplate } from "../types/type-program";
+import type { MajorProgress, GroupItemProgress } from "@/types/type-program";
+import { formatCourseItemTypes } from "@/utils/formatHelpers";
+import { addMajor } from "@/utils/userDataHelpers";
+import type { MajorTemplate } from "@/types/type-program";
+
+import { useUser } from "@/contexts/UserContext";
+import { useApp } from "@/contexts/AppContext";
+
+import bookIcon from "./assets/book.svg";
+
+import { useState, useEffect, useMemo } from "react";
 
 interface ClassRequirementMapProps {
   reqProgressGroup: GroupItemProgress;
