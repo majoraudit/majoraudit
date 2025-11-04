@@ -61,13 +61,13 @@ interface MajorRequirementGraphProps {
 
 function MajorRequirementGraph({ major_progress }: MajorRequirementGraphProps) {
   return (
-    <div className="flex flex-row h-full w-full overflow-x-auto">
+    <div className="flex flex-row items-stretch gap-2 w-full flex-1 min-h-0 overflow-x-auto">
       {major_progress.requirements.map((reqProgressGroup, index) => (
         <div
           key={index}
-          className="bg-gray-100 border-gray-200 border-2 m-1.5 p-1.5 flex-1 min-w-48 min-h-72 flex flex-col"
+          className="bg-gray-100 border-gray-200 border-2 p-2 flex flex-col flex-1 min-h-0 min-w-48"
         >
-          <span className="font-medium mb-1 mt-1 text-center flex-shrink-0">
+          <span className="font-medium mb-1 mt-1 text-center shrink-0">
             {reqProgressGroup.description} -{" "}
             <span
               className={

@@ -239,7 +239,7 @@ function MajorRequirementList({
   };
 
   return (
-    <div className="h-96 w-102 bg-white border-gray-200 border-2 m-2 shadow flex flex-col">
+    <div className="flex flex-col min-h-40 w-102 bg-white border-gray-200 border-2 m-2 shadow">
       {/* Tab Bar */}
       <div className="flex border-b border-gray-200 bg-gray-50">
         {tabs.map((tab) => (

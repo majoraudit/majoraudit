@@ -206,9 +206,9 @@ function Dashboard() {
 
   return (
     <>
-      <div className=" h-full flex flex-col bg-gray-50 p-6 min-w-screen">
+      <div className=" h-full w-full flex flex-col bg-gray-50 p-6 gap-4">
         {/* Header */}
-        <header className="mb-8 flex gap-3 items-center">
+        <header className="ml-2 flex gap-3 items-center">
           <h1 className="text-3xl font-bold text-gray-800">
             {userData?.first_name}'s Dashboard {/* get first name*/}
           </h1>
@@ -217,7 +217,7 @@ function Dashboard() {
 
         {/* Requirements Progress */}
         <section className="flex flex-row w-full gap-4">
-          <div className="bg-white rounded-lg shadow p-6 mb-8 w-1/2">
+          <div className="bg-white rounded-lg shadow p-6 w-1/2">
             <h3 className="text-md font-semibold mb-2">
               General Progress (Credits)
             </h3>
@@ -261,7 +261,7 @@ function Dashboard() {
             )}
           </div>
 
-          <div className="bg-white rounded-lg shadow p-6 mb-8 w-1/2">
+          <div className="bg-white rounded-lg shadow p-6 w-1/2">
             <h3 className="text-md font-semibold mb-2">
               Major Progress (Courses)
             </h3>
@@ -307,7 +307,7 @@ function Dashboard() {
         </section>
 
         {/* Summary Cards */}
-        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="bg-white rounded-lg shadow p-6">
             <h2 className="text-gray-500">Courses Completed</h2>
             <p className="text-3xl font-semibold">{totalCompletedCourses}</p>
@@ -326,7 +326,8 @@ function Dashboard() {
           </div>
         </section>
 
-        <section className="bg-white rounded-lg shadow p-4 pb-2 w-full flex flex-col flex-grow mb-2">
+        {/*Major List and Major Graph*/}
+        <section className="bg-white rounded-lg shadow p-4 pb-2 w-full flex flex-col min-h-80">
           <div className="flex flex-row items-center border-b mb-2">
             <div className="flex gap-4">
               <button
@@ -456,8 +457,8 @@ function Dashboard() {
               )}
           </div>
 
-          <div className="flex flex-row h-full items-center gap-2 min-h-0">
-            <div className="flex-shrink-0">
+          <div className="flex flex-row gap-2 min-h-40">
+            <div className="flex flex-col min-h-60 flex-shrink-0">
               {activeMajorProgress[tabIndex] ? (
                 <MajorRequirementList
                   major_progress={activeMajorProgress[tabIndex]}
@@ -466,7 +467,7 @@ function Dashboard() {
                 <div>Loading degree requirements...</div>
               )}{" "}
             </div>
-            <div className="flex-1 h-96 bg-white border-gray-200 border-2 m-2 p-2 shadow overflow-hidden min-w-0">
+            <div className="flex flex-col flex-1 min-h-60 bg-white border-gray-200 border-2 m-2 p-2 shadow overflow-hidden min-w-0">
               {activeMajorProgress[tabIndex] ? (
                 <MajorRequirementGraph
                   major_progress={activeMajorProgress[tabIndex]}
