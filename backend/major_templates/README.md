@@ -11,11 +11,11 @@ Each major has a folder that includes a main json and mql files. The json includ
 An example of a completed MajorTemplate can be seen with the computer_science major (bs_ms not yet implemented).
 
 # MQL Syntax
-Basic format for a group requirement is: SELECT <count> FROM [<sources>] : "<requirement name>" : <priority>
-* SELECT <count> → Number of courses required for that requirement.
+Basic format for a group requirement is: SELECT \<count\> FROM [\<sources\>] : "\<requirement name\>" : \<priority\>
+* SELECT \<count\> → Number of courses required for that requirement.
 * FROM [ ... ] → Valid courses (defined using COURSE, RANGE, TAG, or nested SELECT).
-* "<requirement name>" → Human-readable name (used in UI).
-* <priority> → Numeric order used to determine which rules are audited first, not display order (requirements are displayed from top to bottom)
+* "\<requirement name\>" → Human-readable name (used in UI).
+* \<priority\> → Numeric order used to determine which rules are audited first, not display order (requirements are displayed from top to bottom)
 
 
 # Other Elements
