@@ -1,0 +1,22 @@
+{
+    "name": "Chemical Engineering",
+    "id":"chemical_engineering",
+    "abbr": "CENG",
+    "degreeTypes": [
+        ["bs"]
+    ],
+    "courses": -1,
+    "rating": -1,
+    "workload": -1,
+    "discipline": "Engineering",
+    "students": -1,
+    "about": "Energy, the environment, and health care are key challenges facing humanity in the twenty-first century. Chemical engineering is a discipline well placed to confront these challenges. Chemical engineering is rooted in the basic sciences of mathematics, chemistry, physics, and biology; a traditional engineering science core of thermodynamics, transport phenomena, and chemical kinetics; a rigorous design component; and an expanding focus on emerging topics in materials, nanotechnology, and life sciences. The discipline has grown from its petrochemical origins to become central to state-of-the-art technologies in microelectronics, alternative energy, biomedicine, and pharmaceutics.\nThe Chemical Engineering program, with two degree programs (see below), is principally focused on basic and engineering sciences and on problem solving. Additional emphasis is on communication, analysis of experiments, and chemical process design. A special feature of the program is the accessibility of laboratory research—most chemical engineering majors participate in faculty-led research projects, often resulting in publication and/or presentation at national meetings.\nChemical engineering graduates find a wide range of professional opportunities in academia, industry, government, business, and the nonprofit sector. Many majors go on to graduate programs in chemical, biomedical, or environmental engineering, or to medical, law, or business schools.\nUpon graduation, Yale's Chemical Engineering students are expected to have achieved \"Student Outcomes\" as defined by ABET (www.abet.org) and the program. The Chemical Engineering major produces graduates who demonstrate: (1) an ability to identify, formulate, and solve complex engineering problems by applying principles of engineering, science, and mathematics; (2) an ability to apply engineering design to produce solutions that meet specified needs with consideration of public health, safety, and welfare, as well as global, cultural, social, environmental, and economic factors; (3) an ability to communicate effectively with a range of audiences; (4) an ability to recognize ethical and professional responsibilities in engineering situations and to make informed judgments, which must consider the impact of engineering solutions in global, economic, environmental, and societal contexts; (5) an ability to function effectively on a team whose members together provide leadership, create a collaborative and inclusive environment, establish goals, plan tasks, and meet objectives; (6) an ability to develop and conduct appropriate experimentation, analyze and interpret data, and use engineering judgment to draw conclusions; and (7) an ability to acquire and apply new knowledge as needed, using appropriate learning strategies.\nYale and ABET also look ahead, several years beyond graduation. Program educational objectives provide the expectations for graduates early in their career. The Chemical Engineering objectives are to produce graduates who: (1) have mastery of the basic principles of science and modern chemical engineering practice and are able to adapt and creatively apply them to solve new problems in a broad range of fields; (2) become ethical professionals who advance chemical engineering practice and knowledge in multiple fields and recognize the local and global impacts of their work on humans and the environment; (3) are able to work well with people from diverse backgrounds and are committed to the advancement of women and under-represented groups in engineering; (4) have a strong educational foundation enabling them to study in graduate and professional schools as well as become leaders in STEM or non-STEM career paths; and (5) are committed to, and engage in, lifelong learning throughout their careers.",
+    "dus": [
+        ["Paul Van Tassel", "paul.vantassel@yale.edu"]
+    ],
+    "catalogLink": "https://catalog.yale.edu/ycps/subjects-of-instruction/chemical-engineering/",
+    "websiteLink": "https://engineering.yale.edu/academic-study/departments/chemical-and-environmental-engineering",
+    "specializations": [
+        "african_american_studies_ba.mql"
+    ]
+}

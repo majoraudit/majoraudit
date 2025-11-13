@@ -1,0 +1,22 @@
+{
+    "name": "Chemistry",
+    "id":"chemistry",
+    "abbr": "CHEM",
+    "degreeTypes": [
+        ["ba", "bs"]
+    ],
+    "courses": -1,
+    "rating": -1,
+    "workload": -1,
+    "discipline": "Physical Sciences",
+    "students": -1, 
+    "about" : "The wide range of courses offered by the Department of Chemistry reflects the position of chemistry as the foundation of all the molecular sciences. In addition to graduate work in chemistry, biochemistry, or health-related disciplines, the department's graduates find their broad scientific training useful in fields such as technology policy, business management, and law. Chemistry is an especially appropriate major for students interested in energy research or policy and the environment.", 
+    "dus": [
+        ["Sarah Slavoff", "sarah.slavoff@yale.edu"]
+    ],
+    "catalogLink": "https://catalog.yale.edu/ycps/subjects-of-instruction/chemistry/",
+    "websiteLink": "https://chem.yale.edu/",
+    "specializations": [
+        "african_american_studies_ba.mql"
+    ]
+}

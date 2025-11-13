@@ -1,0 +1,23 @@
+{
+    "name": "Cognitive Science",
+    "id":"cognitive_science",
+    "abbr": "CGSC",
+    "degreeTypes": [
+        ["ba", "bs"]
+    ],
+    "courses": -1,
+    "rating": -1,
+    "workload": -1,
+    "discipline": "Social Sciences",
+    "students": -1, 
+    "about" : "Cognitive science explores the nature of cognitive processes such as perception, reasoning, memory, attention, language, decision making, imagery, motor control, and problem solving. The goal of cognitive science, stated simply, is to understand how the mind works. Cognitive science is an inherently interdisciplinary endeavor, drawing on tools and ideas from fields such as psychology, computer science, linguistics, philosophy, economics, and neuroscience. Approaches include empirical studies of the ontogenetic and phylogenetic development of cognitive abilities, experimental work on cognitive processing in adults, attempts to understand perception and cognition based on patterns of breakdown in pathology, computational and robotic research that strives to simulate aspects of cognition and behavior, neuroscientific investigations of the neural bases of cognition using neural recording and brain scanning, and the development of philosophical theories of the nature of mind.", 
+    "dus": [
+        ["Tyler Brooke-Wilson", "tyler.brooke.wilson@yale.edu"],
+        ["Marlene Berke", "marlene.berke@yale.edu"]
+    ],
+    "catalogLink": "https://catalog.yale.edu/ycps/subjects-of-instruction/cognitive-science/",
+    "websiteLink": "https://cogsci.yale.edu/",
+    "specializations": [
+        "african_american_studies_ba.mql"
+    ]
+}

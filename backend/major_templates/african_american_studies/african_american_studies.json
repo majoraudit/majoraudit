@@ -1,0 +1,22 @@
+{
+    "name": "African American Studies",
+    "id":"african_american_studies",
+    "abbr": "AFAM",
+    "degreeTypes": [
+        ["ba"]
+    ],
+    "courses": -1,
+    "rating": -1,
+    "workload": -1,
+    "discipline": "Interdisciplinary",
+    "students": -1,
+    "about": "The African American Studies major examines, from numerous disciplinary perspectives, questions of race, culture, and modern struggles for equality centering on the experiences of people of African descent in Black Atlantic societies including the United States, the Caribbean, Latin America, Europe, and Africa, and the global impact of those experiences. Students in the department explore the historical, cultural, political, economic, and social development of Black Atlantic societies. Majors work to become informed thinkers who are intellectually prepared to offer clarity and insight to ongoing academic and public debates centered in questions concerning race and inequality.\nAfrican American Studies majors become knowledgeable about the history, primary methodologies, and interdisciplinary breadth of the field. Students learn to critique, articulate, analyze, and interpret universal themes concerning both individuals in society and group interactions as they relate to the work of scholars, scientists, writers, artists, musicians, economists, and entrepreneurs.",
+    "dus": [
+        ["Elleza Kelley", "ellezakelley@yale.edu"]
+    ],
+    "catalogLink": "https://catalog.yale.edu/ycps/subjects-of-instruction/african-american-studies/",
+    "websiteLink": "https://afamstudies.yale.edu/",
+    "specializations": [
+        "african_american_studies_ba.mql"
+    ]
+}

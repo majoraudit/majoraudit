@@ -1,0 +1,22 @@
+{
+    "name": "Art",
+    "id":"art",
+    "abbr": "ART",
+    "degreeTypes": [
+        ["ba"]
+    ],
+    "courses": -1,
+    "rating": -1,
+    "workload": -1,
+    "discipline": "Humanities & the Arts",
+    "students": -1,
+    "about" : "Students in the Art major develop a critical and practical understanding of the visual arts and design through a studio-based curriculum that organically blends practice with critical thinking and art historical precedents; apply fundamentals of visual art across a variety of mediums and disciplines; relate the practice of making art and design to culture and the study areas of art history and theory; and learn to embody the knowledge and practice of at least one artistic discipline through active search and research. Students may concentrate on a medium such as painting/printmaking, sculpture, graphic design, photography, or filmmaking, and interdisciplinary study is supported. Art majors learn to place their own work in the context of an inclusive group of contemporary art worlds and national and global cultures. This study is a crucial element in a liberal arts curriculum both for future arts practitioners and for those ultimately studying and working in other fields. A key element of the creative learning process is the critique, which is implemented via both group settings and one-on-one studio visits with faculty and visiting critics. Through rigorous practice and regular feedback, a student gains insight into one's own critical voice. Art majors have access to the graduate program by attending regular lectures, critiques, events, and exhibitions that represent a diverse set of art practitioners who regularly visit the School of Art.",
+    "dus": [
+        ["Alexandria Smith", "alexandria.m.smith@yale.edu"]
+    ],
+    "catalogLink": "https://catalog.yale.edu/ycps/subjects-of-instruction/art/",
+    "websiteLink": "https://www.art.yale.edu/about/study-areas/undergraduate-studies",
+    "specializations": [
+        "art_ba.mql"
+    ]
+}

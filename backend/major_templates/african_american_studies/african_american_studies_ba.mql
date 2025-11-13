@@ -1,0 +1,5 @@
+SELECT 4 FROM [] : "Core Courses" : 4
+SELECT 5 FROM [] : " Focus Area" : 2
+SELECT 1 FROM [] : "Junior Seminar" : 1
+SELECT 1 FROM [] : "Colloquium" : 1
+SELECT 1 FROM [] : "Senior Essay" : 1

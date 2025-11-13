@@ -1,0 +1,22 @@
+{
+    "name": "Applied Physics",
+    "id":"applied_physics",
+    "abbr": "APHY",
+    "degreeTypes": [
+        ["bs"]
+    ],
+    "courses": -1,
+    "rating": -1,
+    "workload": -1,
+    "discipline": "Engineering",
+    "students": -1,
+    "about" : "Physics is the study of the fundamental laws of nature. Applied physics uses these laws to understand phenomena that have practical applications. Engineering in turn makes use of these phenomena for human purposes. Applied physics thus forms a link between the fundamental laws of nature and their applications. Students majoring in Applied Physics take courses in both physics and engineering, as well as courses specifically in applied physics. Students completing the program in Applied Physics are prepared for graduate study in applied physics, in physics, in nanoscience, or in engineering, and, with appropriate prerequisites, in medicine; or they may choose careers in a wide range of technical and commercial fields, or in fields such as technical writing or patent law that draw on interdisciplinary subjects.\nContemporary physical science and engineering are becoming increasingly interdisciplinary. Traditional boundaries between fields have blurred, and new areas are constantly emerging, e.g., nanotechnology. The Applied Physics major provides a flexible framework on which students can build a curriculum tailored to their own interests, in consultation with the director of undergraduate studies (DUS).",
+    "dus": [
+        ["Owen Miller", "owen.miller@yale.edu"]
+    ],
+    "catalogLink": "https://catalog.yale.edu/ycps/subjects-of-instruction/applied-physics/",
+    "websiteLink": "https://engineering.yale.edu/academic-study/departments/applied-physics",
+    "specializations": [
+        "applied_physics_bs.mql"
+    ]
+}
