@@ -1,0 +1,26 @@
+{
+    "name": "Mechanical Engineering",
+    "id": "mechanical_engineering",
+    "abbr": "MENG",
+    "degreeTypes": [
+        ["bs"],
+        ["ba"]
+    ],
+    "courses": -1,
+    "rating": -1,
+    "workload": -1,
+    "discipline": "STEM",
+    "students": 0,
+    "about": "Mechanical engineering is among the most diversified of the traditional engineering disciplines, encompassing the design, analysis, and manufacture of systems that convert energy into useful forms and improve human life. The major emphasizes fundamental knowledge of mechanics, thermodynamics, fluid mechanics, and materials science, as well as computational and experimental methods. Students develop technical and design skills through core courses, laboratory experiences, and independent or team-based projects. The department offers three programs: a B.S. in Mechanical Engineering (ABET-accredited), a B.S. in Engineering Sciences (Mechanical), and a B.A. in Engineering Sciences (Mechanical).",
+    "dus": [
+        ["Beth Anne Bennett", "beth.bennett@yale.edu"]
+    ],
+    "majorEmail": "mecheng@yale.edu",
+    "catalogLink": "https://catalog.yale.edu/ycps/subjects-of-instruction/mechanical-engineering/",
+    "websiteLink": "https://seas.yale.edu/departments/mechanical-engineering-and-materials-science",
+    "specializations": [
+        "mechanical_engineering_bs.mql",
+        "engineering_sciences_mechanical_bs.mql",
+        "engineering_sciences_mechanical_ba.mql"
+    ]
+}

@@ -1,0 +1,36 @@
+SELECT 4 FROM [
+  CLASS(LING 2320),
+  CLASS(LING 2530),
+  ATTRIBUTE(YC LING Brdth Phonetics),
+  ATTRIBUTE(YC LING Brdth Morphology),
+  ATTRIBUTE(YC LING Brdth Semntcs/Pragmat),
+  ATTRIBUTE(YC LING Brdth Comp Ling),
+  ATTRIBUTE(YC LING Brdth Lang&Mind/Brain),
+  ATTRIBUTE(YC LING Brdth Historical Ling)
+] : "Core Classes" : 4;
+
+SELECT 2 FROM [
+  ATTRIBUTE(YC LING Depth Phonology),
+  ATTRIBUTE(YC LING Depth Syntax),
+  ATTRIBUTE(YC LING Depth Morphology),
+  ATTRIBUTE(YC LING Depth Semntcs/Pragmat),
+  ATTRIBUTE(YC LING Depth Comp Linguistic),
+  ATTRIBUTE(YC LING Depth Lang&Mind/Brain),
+  ATTRIBUTE(YC LING Depth Historical Ling),
+  ATTRIBUTE(YC LING Depth Phonetics)
+] : "Depth Requirement" : 2;
+
+SELECT 4 FROM [
+  ATTRIBUTE(YC LING Elective),
+  ATTRIBUTE(YC LING Intermediate Courses),
+  ATTRIBUTE(YC LING Adv Courses/Seminars),
+  ATTRIBUTE(YC CGSC Skills),
+  ATTRIBUTE(YC PHIL Logic),
+  ATTRIBUTE(YC PSYC Social Science),
+  ATTRIBUTE(YC ANTH Linguistic),
+  ATTRIBUTE(YC CPSC Elective)
+] : "Electives" : 4;
+
+SELECT 1 FROM [CLASS(LING 4900)] : "Research Requirement" : 1;
+
+SELECT 1 FROM [CLASS(LING 4910)] : "Senior Requirement" : 1;

@@ -1,0 +1,25 @@
+{
+    "name": "Jewish Studies",
+    "id": "jewish_studies",
+    "abbr": "JDST",
+    "degreeTypes": [
+        ["ba"]
+    ],
+    "courses": -1,
+    "rating": -1,
+    "workload": -1,
+    "discipline": "Humanities",
+    "students": 0,
+    "about": "Jewish Studies enables students to develop a broad knowledge of the history, religion, literature, philosophy, languages, and politics of the Jews. Jewish society, texts, ideologies, material cultures, and institutions are studied from a comparative perspective in the context of histories, cultures, and intellectual traditions among which Jews have lived throughout the ages. As an interdisciplinary program, Jewish Studies employs historical, literary, political, social, and philosophical methods of analysis.\n\nThe Jewish Studies major—especially as a second major with Economics, Political Science, Comparative Literature, English, Philosophy, or History—offers a broad liberal arts background combined with intensive preparation in the historical and religious experience of Jewish culture from antiquity to contemporary times. The major epochs of Jewish history are the Persian and Hellenistic, classical, medieval, early modern, and modern periods.\n\nStudents considering a major in Jewish Studies should contact the director of undergraduate studies (DUS) as early as possible.",
+    "dus": [
+        ["Hannan Hever", "hannan.hever@yale.edu"]
+    ],
+    "majorEmail": "jewish.studies@yale.edu",
+    "catalogLink": "https://catalog.yale.edu/ycps/subjects-of-instruction/jewish-studies/",
+    "websiteLink": "https://jewishstudies.yale.edu/",
+    "specializations": [
+        "jewish_studies_ba.mql"
+    ]
+}
+
+

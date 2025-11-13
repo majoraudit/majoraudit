@@ -1,0 +1,30 @@
+SELECT 1 FROM [
+  LANGUAGE(SPAN L3),
+  LANGUAGE(PORT L3),
+  TAG("Equivalent Placement or Credit")
+] : "Prerequisites" : 1;
+
+SELECT 8 FROM [
+  INTRODUCTORY(LAST Approved Course),
+  ATTRIBUTE(YC PLSC Comparative Govt),
+  ATTRIBUTE(YC ANTH Sociocultural),
+  ATTRIBUTE(YC ECON Development),
+  ATTRIBUTE(YC HIST Latin America),
+  ATTRIBUTE(YC SPAN Taught in Spanish),
+  ATTRIBUTE(YC HSAR The Americas),
+  ATTRIBUTE(YC FILM World Cinema)
+] : "Core Classes" : 8;
+
+SELECT 3 FROM [
+  ATTRIBUTE(YC HUMS Area Literature),
+  ATTRIBUTE(YC HUMS Area History),
+  ATTRIBUTE(YC HUMS Area Arts),
+  ATTRIBUTE(YC SOCY InequalityRaceSociety),
+  ATTRIBUTE(YC ECON International),
+  ATTRIBUTE(YC EVST Core Human/Social Sci)
+] : "Electives" : 3;
+
+SELECT 1 FROM [
+  CLASS(LAST 4491),
+  CLASS(LAST 4492)
+] : "Senior Requirement" : 1;

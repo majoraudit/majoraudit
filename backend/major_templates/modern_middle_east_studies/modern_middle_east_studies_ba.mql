@@ -1,0 +1,26 @@
+SELECT 10 FROM [
+  ATTRIBUTE(YC MMES Survey Course),
+  ATTRIBUTE(YC MMES Survey Course),
+  LANGUAGE(ARBC L5),
+  LANGUAGE(HEBR L5),
+  LANGUAGE(PERS L5),
+  LANGUAGE(TURK L5),
+  ATTRIBUTE(YC HIST Middle East),
+  ATTRIBUTE(YC HIST Preindustrial),
+  ATTRIBUTE(YC MMES Adv Seminar),
+  ATTRIBUTE(YC MMES Adv Seminar)
+] : "Core Classes" : 10;
+
+SELECT 2 FROM [
+  LANGUAGE(ARBC L1-L4),
+  LANGUAGE(HEBR L1-L4),
+  LANGUAGE(PERS L1-L4),
+  LANGUAGE(TURK L1-L4)
+] : "Electives" : 2;
+
+SELECT 1 FROM [
+  CLASS(MMES 4491),
+  CLASS(MMES 4492),
+  CLASS(MMES 4493),
+  ATTRIBUTE(YC MMES Adv Seminar)
+] : "Senior Requirement" : 1;

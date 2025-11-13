@@ -1,0 +1,23 @@
+{
+    "name": "Latin American Studies",
+    "id": "latin_american_studies",
+    "abbr": "LAST",
+    "degreeTypes": [
+        ["ba"]
+    ],
+    "courses": -1,
+    "rating": -1,
+    "workload": -1,
+    "discipline": "Humanities",
+    "students": 0,
+    "about": "The major in Latin American Studies is designed to further understanding of the societies and cultures of Latin America as viewed from regional and global perspectives. The Latin American Studies major builds on a foundation of language and literature, history, history of art, theater studies, humanities, and the social sciences; its faculty is drawn from many departments and professional schools of the University.\n\nThe major in Latin American Studies is interdisciplinary. With two goals in mind—intellectual coherence and individual growth—the student proposes a course of study that must satisfy the requirements listed below. The proposed course of study must be approved by the director of undergraduate studies (DUS). Though all students choose courses in both the humanities and the social sciences, they are expected to concentrate on one or the other.\n\nStudents are held to the prerequisite and major requirements that were in place when they declared their major. However, with approval from the director of undergraduate studies (DUS), the following requirements, updated in the academic year 2024–2025, may be fulfilled by students who declared the major in a prior term.\n\nThe major itself requires twelve term courses: one introductory course approved by the DUS; seven courses related to Latin America from departmental offerings; three additional electives; and the senior essay LAST 4491 or senior project LAST 4492. One of the twelve courses must be taught in Spanish or Portuguese at the L5 level.\n\nStudents must enroll in three seminars or upper-level courses during their junior and senior years. Students are strongly encouraged to take advantage of study abroad opportunities during summers or through the Year or Term Abroad program.",
+    "dus": [
+        ["Ana De La O", "ana.delao@yale.edu"]
+    ],
+    "majorEmail": "macmillan.center@yale.edu",
+    "catalogLink": "https://catalog.yale.edu/ycps/subjects-of-instruction/latin-american-studies/",
+    "websiteLink": "https://macmillan.yale.edu/academic-programs",
+    "specializations": [
+        "latin_american_studies_ba.mql"
+    ]
+}
