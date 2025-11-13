@@ -62,6 +62,8 @@ Examples:
 | `SELECT n-k FROM [...]` |  nested ranged requirement group (n <= k), filtered output will be flattened to parent selection |
 | `DIST(<STRING primitive>)` | yale college distribution designation attributes 
 | `DIST_DEPT(<STRING primitive>, <string primitive>)` | yale college distribution designation attributes and department code |
+| `DEPT(<STRING primitive>)` | choose a class from this department code... for example, CPSC | 
+| `PLACEMENT(<STRING primitive>)` | there is no requirement here that can be auto-filled, here is text explaining what needs to be done (maybe checked with DUS) |
 
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -704,4 +706,10 @@ SELECT 4 FROM [RANGE(CPSC 2000 , CPSC 9999), RANGE(CPSC 2000 , CPSC 9999), RANGE
 SELECT 1 FROM [CLASS(CPSC 4900)] : "Senior Requirement" : 1;
 
 And this is the returned correct MQL Major Requirement Template for computer_science_bs:
+
+SELECT 5 FROM [CLASS(CPSC 2010), SELECT 1 FROM [CLASS(CPSC 2020), CLASS(MATH 2440)], CLASS(CPSC 2230), CLASS(3230), SELECT 1 FROM [CLASS(CPSC 3650), CLASS(CPSC 3650)]] : "Core Classes" : 2
+SELECT 6 FROM [RANGE(CPSC 2000 , CPSC 9999), RANGE(CPSC 2000 , CPSC 9999), RANGE(CPSC 2000 , CPSC 9999), RANGE(CPSC 2000 , CPSC 9999), RANGE(CPSC 2000 , CPSC 9999), RANGE(CPSC 2000 , CPSC 9999)] : "Electives" : 3
+SELECT 1 FROM [CLASS(CPSC 4900)] : "Senior Requirement" : 1
+
+I will now start giving major page information and expect an MQL major requirement template in response.
 
