@@ -1,0 +1,22 @@
+{
+    "name": "Women's, Gender, and Sexuality Studies",
+    "id":"womens_gender_and_sexuality_studies",
+    "abbr": "WGSS",
+    "degreeTypes": [
+        ["ba"]
+    ],
+    "courses": -1,
+    "rating": -1,
+    "workload": -1,
+    "discipline": "Interdisciplinary",
+    "students": -1,
+    "about" : "Genders and sexualities are powerful organizing forces: they shape identities and institutions, nations and economies, cultures, and political systems. Careful study of gender and sexuality thus explains crucial aspects of our everyday lives on both intimate and global scales. Scholarship in Women’s, Gender, and Sexuality Studies is interdisciplinary and wide ranging, drawing on history, literature, cultural studies, social sciences, and natural science to study genders and sexualities as they intersect with race, ethnicity, class, nationality, transnational processes, disability, and religion.\nStudents majoring in Women’s, Gender, and Sexuality Studies take a series of core courses, develop an individual area of focus, and write a yearlong or single-term senior essay. The program encourages work that is interdisciplinary, intersectional, international, and transnational. Individual focus areas evolve along with students’ intellectual growth and academic expertise. Recent examples of areas of focus include literature and queer aesthetics; transnational feminist practices; the intellectual history of civil rights activism; AIDS health policies; gender, religion, and international NGOs; women’s health; food, sexuality, and lesbian community; and gender and sexuality in early education.",
+    "dus": [
+        ["Igor De Souza", "igor.h.desouza@yale.edu"]
+    ],
+    "catalogLink": "https://catalog.yale.edu/ycps/subjects-of-instruction/womens-gender-sexuality-studies/",
+    "websiteLink": "https://wgss.yale.edu/",
+    "specializations": [
+        "african_american_studies_ba.mql"
+    ]
+}

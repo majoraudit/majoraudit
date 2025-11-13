@@ -1,0 +1,7 @@
+SELECT 1 FROM [] : "Intro Laboratory" : 2
+SELECT 1 FROM [] : "Introductory Survey Course" : 2
+SELECT 1 FROM [] : "Advanced Laboratory"
+SELECT 1 FROM [] : "Theory Course" : 2
+SELECT 7 FROM [] : "Electives"
+SELECT 1 FROM [] : "Summer Research Project"
+SELECT 1 FROM [] : "Senior Requirement"

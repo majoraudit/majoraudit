@@ -1,0 +1,22 @@
+{
+    "name": "Astronomy",
+    "id":"astronomy",
+    "abbr": "ASTR",
+    "degreeTypes": [
+        ["ba"]
+    ],
+    "courses": -1,
+    "rating": -1,
+    "workload": -1,
+    "discipline": "Physical Sciences",
+    "students": -1,
+    "about" : "Astronomy and Astrophysics are quantitative physical sciences that apply physics, mathematics, and statistical analysis to observing, describing, and modeling the universe. The courses and degree programs offered by the Department of Astronomy train students in research techniques and quantitative reasoning and develop creative problem solvers. The department offers a B.A. degree in Astronomy and a B.S. degree in Astrophysics. The Astronomy degree is intended for students who plan to continue in adjacent fields such as science policy and science journalism. The Astrophysics degree is intended for students who plan to attend graduate school in related fields. Students who complete either major are sought after by employers in a range of fields from healthcare management to the banking and investment industry.",
+    "dus": [
+        ["Marla Geha", "marla.geha@yale.edu"]
+    ],
+    "catalogLink": "https://catalog.yale.edu/ycps/subjects-of-instruction/astronomy/",
+    "websiteLink": "https://astronomy.yale.edu/",
+    "specializations": [
+        "african_american_studies_ba.mql"
+    ]
+}

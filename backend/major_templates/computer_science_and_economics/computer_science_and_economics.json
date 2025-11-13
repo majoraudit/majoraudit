@@ -1,0 +1,22 @@
+{
+    "name": "Computer Science and Economics",
+    "id":"computer_science_and_economics",
+    "abbr": "CSEC",
+    "degreeTypes": [
+        ["bs"]
+    ],
+    "courses": -1,
+    "rating": -1,
+    "workload": -1,
+    "discipline": "Interdisciplinary",
+    "students": -1,
+    "about" : "Computer Science and Economics (CSEC) is an interdepartmental major for students interested in the theoretical and practical connections between computer science and economics. The B.S. degree in CSEC provides students with foundational knowledge of economics, computation, and data analysis, as well as hands-on experience with empirical analysis of economic data. It prepares students for professional careers that incorporate aspects of both economics and computer science and for academic careers conducting research in the overlap of the two fields. Topics in the overlap include market design, computational finance, economics of online platforms, machine learning, and social media. The CSEC major requires some classes in the intersection between Computer Science and Economics which are not mandatory for either major.",
+    "dus": [
+        ["Philipp Strack", "philipp.strack@yale.edu"]
+    ],
+    "catalogLink": "https://catalog.yale.edu/ycps/subjects-of-instruction/computerscienceandeconomics/",
+    "websiteLink": "https://csec.yale.edu/",
+    "specializations": [
+        "african_american_studies_ba.mql"
+    ]
+}
