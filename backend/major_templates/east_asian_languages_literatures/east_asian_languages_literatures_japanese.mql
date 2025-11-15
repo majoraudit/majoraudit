@@ -1,0 +1,5 @@
+SELECT 1 FROM [CLASS(CHNS 1400), CLASS(JAPN 1400), CLASS(KREN 1400), PLACEMENT("Equivalent Qualification")] : "Prerequisite" : 1;
+SELECT 3 FROM [SELECT 1 FROM [CLASS(JAPN 1500), PLACEMENT("Equivalent Qualification")], SELECT 1 FROM [CLASS(JAPN 1510), PLACEMENT("Equivalent Qualification")], CLASS(JAPN 1700)] : "Japanese Core Classes" : 2;
+SELECT 3 FROM [PLACEMENT("Survey Course in Chinese, Japanese, Korean, or East Asian History and Culture"), RANGE(EALL 2000, EALL 3999), RANGE(EALL 2000, EALL 3999), PLACEMENT("EALL 2000-3999 Course on Postmodern Content")] : "Literature Core Classes" : 2;
+SELECT 3 FROM [PLACEMENT("Advanced Course with Readings in Chinese, Japanese, and/or Korean"), PLACEMENT("Advanced Course with Readings in Chinese, Japanese, and/or Korean"), PLACEMENT("Advanced Course with Readings in Chinese, Japanese, and/or Korean")] : "Electives" : 3;
+SELECT 1 FROM [CLASS(EALL 4910), SELECT 2 FROM [CLASS(EALL 4920), CLASS(4930)]] : "Senior Requirement" : 1;
