@@ -189,34 +189,33 @@ function Programs() {
 
           <hr className="border-gray-200 border-t-3" />
 
-          <main className="flex flex-1 flex-row items-stretch gap-6 p-6">
+          {/* MAIN GRID */}
+          <main className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-2 gap-6 p-6 w-full flex-1">
             {/* Left Panel */}
-            <section className="relative basis-1/2 grow min-w-0 h-full flex flex-col bg-white border-2 border-gray-200 p-6 rounded-xl shadow-md">
+            <section className="relative min-w-0 h-full flex flex-col bg-white border-2 border-gray-200 p-6 rounded-xl shadow-md">
               {/* Always-on-top-right button */}
               <button
                 className={`absolute top-6 right-6 rounded-full w-8 h-8 flex items-center justify-center text-center text-xl leading-none z-10 transition duration-300 ease-in-out
-    ${
-      majorExists
-        ? "bg-green-500 text-white"
-        : "bg-blue-500 text-white hover:scale-110"
-    }
-  `}
+          ${
+            majorExists
+              ? "bg-green-500 text-white"
+              : "bg-blue-500 text-white hover:scale-110"
+          }
+        `}
                 aria-label={majorExists ? "Added" : "Add"}
                 title={majorExists ? "Already in worksheet" : "Add"}
                 onClick={handleMajorAdd}
-                disabled={majorExists} // optional, prevents duplicate adding
+                disabled={majorExists}
               >
                 {majorExists ? "✓" : "+"}
               </button>
 
               {/* Header */}
               <div className="flex flex-col items-start min-w-0 pr-12">
-                {/* Title */}
                 <h1 className="text-3xl font-bold text-gray-800 break-words">
                   {selectedProgram.name}
                 </h1>
 
-                {/* Abbreviation + Type (new line) */}
                 <div className="flex items-center gap-2 mt-2">
                   <span className="text-gray-500 whitespace-nowrap text-lg">
                     {selectedProgram.info.abbr}
@@ -232,26 +231,26 @@ function Programs() {
                 <h2 className="text-gray-700 font-semibold text-sm mb-2">
                   STATS
                 </h2>
-                <div className="grid grid-cols-4 text-center text-sm text-gray-600">
-                  <div>
+                <div className="grid grid-cols-4 text-center text-sm text-gray-600 gap-2">
+                  <div className="bg-gray-100 p-2 rounded-xl">
                     <p className="text-gray-800 font-bold">
                       {selectedProgram.info.stats.courses}
                     </p>
                     Courses
                   </div>
-                  <div>
+                  <div className="bg-green-100 p-2 rounded-xl">
                     <p className="text-green-600 font-bold">
                       ~{selectedProgram.info.stats.rating}
                     </p>
                     Rating
                   </div>
-                  <div>
+                  <div className="bg-orange-100 p-2 rounded-xl">
                     <p className="text-orange-500 font-bold">
                       ~{selectedProgram.info.stats.workload}
                     </p>
                     Workload
                   </div>
-                  <div>
+                  <div className="bg-red-100 p-2 rounded-xl">
                     <p className="text-red-600 font-bold">
                       {selectedProgram.info.degreeType}
                     </p>
@@ -299,18 +298,15 @@ function Programs() {
             </section>
 
             {/* Right Panel */}
-            <section className="basis-1/2 grow min-w-0 h-full flex flex-col bg-white p-6 border-2 border-gray-200 rounded-xl shadow-md">
+            <section className="min-w-0 h-full flex flex-col bg-white p-6 border-2 border-gray-200 rounded-xl shadow-md">
               <div className="flex justify-between gap-4 items-center mb-4">
                 <h2 className="text-2xl font-bold text-gray-800">
                   Requirements
                 </h2>
                 <select
-                  className="px-2 py-2  text-center  border border-black rounded-lg"
+                  className="px-2 py-2 text-center border border-black rounded-lg"
                   value={activeWorksheetId}
-                  onChange={(e) => {
-                    const val = e.target.value;
-                    setActiveWorksheet(val);
-                  }}
+                  onChange={(e) => setActiveWorksheet(e.target.value)}
                 >
                   {worksheets.map((w) => (
                     <option key={w.id} value={w.id}>
@@ -321,7 +317,7 @@ function Programs() {
               </div>
 
               <div className="rounded text-black overflow-auto">
-                <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <ul className="grid grid-cols-1  gap-2">
                   {selectedProgram.requirements.map(
                     (reqProgressGroup, index) => (
                       <li key={index} className="m-0.5">

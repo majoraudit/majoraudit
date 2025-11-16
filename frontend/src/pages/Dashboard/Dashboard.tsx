@@ -216,8 +216,8 @@ function Dashboard() {
         </header>
 
         {/* Requirements Progress */}
-        <section className="flex flex-row w-full gap-4">
-          <div className="bg-white rounded-lg shadow p-6 w-1/2">
+        <section className="grid lg:grid-cols-2 md:grid-cols-1 sm:grid-cols-1 w-full gap-4">
+          <div className="bg-white rounded-lg shadow p-6">
             <h3 className="text-md font-semibold mb-2">
               General Progress (Credits)
             </h3>
@@ -252,6 +252,7 @@ function Dashboard() {
                 className="rounded-lg bg-gray-300 transition-all duration-500 ease-out"
               ></div>
             </div>
+
             {formatC_P_UP(
               totalCompletedCredits,
               totalPlannedCredits,
@@ -261,7 +262,7 @@ function Dashboard() {
             )}
           </div>
 
-          <div className="bg-white rounded-lg shadow p-6 w-1/2">
+          <div className="bg-white rounded-lg shadow p-6">
             <h3 className="text-md font-semibold mb-2">
               Major Progress (Courses)
             </h3>
@@ -296,6 +297,7 @@ function Dashboard() {
                 className="rounded-lg bg-gray-300 transition-all duration-500 ease-out"
               ></div>
             </div>
+
             {formatC_P_UP(
               totalCompletedCredits,
               totalPlannedCredits,
