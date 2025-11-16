@@ -1,0 +1,9 @@
+SELECT 3 FROM [CLASS(ARCH 1001), CLASS(ARCH 2000), SELECT 1 FROM [CLASS(ARCH 2103), CLASS(ARCH 2600), CLASS(ARCH 2601)]] : "Prerequisites" : 3;
+SELECT 4 FROM [CLASS(ARCH 3000), CLASS(ARCH 3001), CLASS(ARCH 2001), CLASS(ARCH 2003)] : "Core Courses (Design Concentration)" : 2;
+SELECT 1 FROM [TAG("YC ARCH History & Theory")] : "History & Theory Elective" : 4;
+SELECT 1 FROM [TAG("YC ARCH Urbanism & Landscape")] : "Urbanism & Landscape Elective" : 4;
+SELECT 1 FROM [TAG("YC ARCH Materials & Design")] : "Materials & Design Elective" : 4;
+SELECT 1 FROM [TAG("YC ARCH Structures & Computation")] : "Structures & Computation Elective" : 4;
+SELECT 2 FROM [CLASS(ARCH 4000), CLASS(ARCH 4001)] : "Senior Requirement (Design Studio Sequence)" : 1;
+SELECT 1 FROM [PLACEMENT("Complete required orientations: advanced technology workshop, library research session, and shop/materials lab orientations")] : "Orientation Requirements" : 5;
+SELECT 1 FROM [PLACEMENT("Submit final portfolio of representative design work, including prerequisite and senior project work")] : "Portfolio Requirement" : 6;

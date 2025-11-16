@@ -1,5 +1,5 @@
-SELECT 4 FROM [] : "Core Courses" : 4
-SELECT 5 FROM [] : " Focus Area" : 2
-SELECT 1 FROM [] : "Junior Seminar" : 1
-SELECT 1 FROM [] : "Colloquium" : 1
-SELECT 1 FROM [] : "Senior Essay" : 1
+SELECT 4 FROM [CLASS(AFAM 1160), CLASS(AFAM 1162), DIST_DEPT("HU", "AFAM"),  DIST_DEPT("SO", "AFAM")] : "Core Courses" : 4
+SELECT 5 FROM [PLACEMENT("Focus area course approved by the DUS"), PLACEMENT("Focus area course approved by the DUS"), PLACEMENT("Focus area course approved by the DUS"), PLACEMENT("Focus area course approved by the DUS"), PLACEMENT("Focus area course approved by the DUS")] : " Focus Area" : 2
+SELECT 1 FROM [CLASS(AFAM 4310)] : "Junior Seminar" : 1
+SELECT 1 FROM [CLASS(AFAM 4380)] : "Colloquium" : 1
+SELECT 1 FROM [CLASS(AFAM 4391)] : "Senior Essay" : 1

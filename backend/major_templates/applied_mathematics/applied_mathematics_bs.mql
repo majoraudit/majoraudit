@@ -1,8 +1,68 @@
-SELECT 1 FROM [] : "Differential Equations" : 2
-SELECT 1 FROM [] : "Probability" : 2
-SELECT 1 FROM [] : "Data Analysis" : 2
-SELECT 1 FROM [] : "Discrete Mathematics" : 2
-SELECT 1 FROM [] : "Vector Analysis"
-SELECT 4 FROM [] : "Electives"
-SELECT 4 FROM [] : "Advanced Electives - Concentration"
-SELECT 1 FROM [] : "Senior Requirement"
+SELECT 4 FROM [
+    SELECT 1 FROM [CLASS(ENAS 1940), CLASS(MATH 2460)],
+    SELECT 1 FROM [CLASS(S&DS 2410), CLASS(S&DS 2380)],
+    SELECT 1 FROM [CLASS(S&DS 3610), CLASS(S&DS 2300)],
+    SELECT 1 FROM [CLASS(AMTH 2440), CLASS(CPSC 2020)]
+] : "Core Requirements (ODEs, Probability, Data Analysis, Discrete Math)" : 3;
+
+SELECT 6 FROM [
+    RANGE(AMTH 2000, AMTH 9999),
+    RANGE(MATH 2000, MATH 9999),
+    RANGE(S&DS 2000, S&DS 9999),
+    RANGE(CPSC 2000, CPSC 9999),
+    RANGE(ECON 2000, ECON 9999),
+    RANGE(ASTR 2000, ASTR 9999),
+    RANGE(CHEM 2000, CHEM 9999),
+    RANGE(EPS 2000, EPS 9999),
+    RANGE(PHYS 2000, PHYS 9999),
+    RANGE(BENG 2000, BENG 9999),
+    RANGE(MENG 2000, MENG 9999),
+    RANGE(CENG 2000, CENG 9999),
+    RANGE(ECE 2000, ECE 9999),
+    RANGE(LING 2000, LING 9999),
+    RANGE(PHIL 2000, PHIL 9999),
+    RANGE(PSYC 2000, PSYC 9999),
+    RANGE(ENAS 2000, ENAS 9999),
+    RANGE(APHY 2000, APHY 9999)
+] : "Breadth and Concentration Courses (Areas a–m; includes ≥3-course concentration)" : 4;
+
+SELECT 1 FROM [
+    CLASS(MATH 3020),
+    CLASS(MATH 3050),
+    CLASS(MATH 3100),
+    CLASS(MATH 3200),
+    CLASS(MATH 3250),
+    CLASS(MATH 4470)
+] : "Vector Analysis / Advanced Analysis (BS-only)" : 5;
+
+SELECT 1 FROM [
+    RANGE(AMTH 2000, AMTH 9999),
+    RANGE(MATH 2000, MATH 9999),
+    RANGE(S&DS 2000, S&DS 9999),
+    RANGE(CPSC 2000, CPSC 9999),
+    RANGE(ECON 2000, ECON 9999),
+    RANGE(ASTR 2000, ASTR 9999),
+    RANGE(CHEM 2000, CHEM 9999),
+    RANGE(EPS 2000, EPS 9999),
+    RANGE(PHYS 2000, PHYS 9999),
+    RANGE(BENG 2000, BENG 9999),
+    RANGE(MENG 2000, MENG 9999),
+    RANGE(CENG 2000, CENG 9999),
+    RANGE(ECE 2000, ECE 9999),
+    RANGE(LING 2000, LING 9999),
+    RANGE(PHIL 2000, PHIL 9999),
+    RANGE(PSYC 2000, PSYC 9999),
+    RANGE(ENAS 2000, ENAS 9999),
+    RANGE(APHY 2000, APHY 9999)
+] : "Additional Applied Math Area Course (BS-only, from Areas a–m)" : 6;
+
+SELECT 1 FROM [
+    RANGE(AMTH 3000, AMTH 9999),
+    RANGE(MATH 3000, MATH 9999),
+    RANGE(S&DS 3000, S&DS 9999),
+    RANGE(CPSC 3000, CPSC 9999),
+    RANGE(ENAS 3000, ENAS 9999),
+    RANGE(ECE 3000, ECE 9999)
+] : "Additional Advanced Quantitative Course (3000+; BS-only)" : 7;
+
+SELECT 1 FROM [CLASS(AMTH 4910)] : "Senior Thesis Research Project" : 1;

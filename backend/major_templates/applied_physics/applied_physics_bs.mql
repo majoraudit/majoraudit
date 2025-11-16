@@ -1,4 +1,9 @@
-SELECT 5 FROM [] : "Prerequisites - Physics" : 2
-SELECT 3 FROM [] : "Core Courses" : 2
-SELECT 3 FROM [] : "Area of Focus"
-SELECT 2 FROM [] : "Senior Requirement" : 2
+SELECT 2 FROM [CLASS(PHYS 1800), CLASS(PHYS 1810), CLASS(PHYS 2000), CLASS(PHYS 2100)] : "Prereq: Intro Physics Lectures (see DUS for allowed sequences)" : 1;
+SELECT 1 FROM [CLASS(PHYS 1660), CLASS(PHYS 2060)] : "Prereq: Physics Lab (PHYS 1660 or 2060)" : 2;
+SELECT 1 FROM [CLASS(APHY 1510), CLASS(MATH 1200)] : "Prereq: Intro Math/Applied Physics (APHY 1510 or MATH 1200)" : 3;
+SELECT 1 FROM [CLASS(PHYS 4000), CLASS(APHY 1940)] : "Prereq: Advanced Physics (PHYS 4000 or APHY 1940)" : 4;
+SELECT 1 FROM [CLASS(MATH 2220), CLASS(MATH 2250), CLASS(MATH 2260)] : "Prereq: Advanced Math (Vector Calc / Linear Algebra)" : 5;
+
+SELECT 3 FROM [CLASS(APHY 3220), CLASS(APHY 4200), SELECT 1 FROM [CLASS(APHY 4390), CLASS(PHYS 4400)]] : "Core Requirements" : 6;
+SELECT 3 FROM [RANGE(APHY 2000, APHY 9999), RANGE(PHYS 2000, PHYS 9999), RANGE(ECE 2000, ECE 9999), RANGE(MATH 2000, MATH 9999), RANGE(CHEM 2000, CHEM 9999), RANGE(MENG 2000, MENG 9999)] : "Area of Focus Electives (adv courses in physical sciences/engineering)" : 7;
+SELECT 2 FROM [CLASS(APHY 4710), CLASS(APHY 4720)] : "Senior Requirement (Independent Research Project)" : 8;

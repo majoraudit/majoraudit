@@ -1,4 +1,4 @@
-SELECT 4 FROM [] : "Gateway Courses" : 2
-SELECT 2 FROM [TAG(YC AMST Junior Seminars), TAG(YC AMST Junior Seminars)] : "Junior Seminars" : 3
-SELECT 5 FROM [] : "Area of Concentration" : 3
-SELECT 1 FROM [] : "Senior Requirement" : 1
+SELECT 3 FROM [TAG("YC ANTH Archaeology"), TAG("YC ANTH Biological"), TAG("YC ANTH Sociocultural"), TAG("YC ANTH Linguistic"), TAG("YC ANTH Medical"), TAG("YC ANTH Theory")] : "Subfield Foundations (3 ANTH subfields, 1000–2000 level)" : 2;
+SELECT 3 FROM [RANGE(ANTH 3000, ANTH 4999), RANGE(ANTH 3000, ANTH 4999), RANGE(ANTH 3000, ANTH 4999)] : "Advanced Anthropology Courses (3000–4000 level, excl senior essay numbers)" : 3;
+SELECT 5 FROM [PLACEMENT("Approved ANTH elective or cognate course (with DUS approval)"), PLACEMENT("Approved ANTH elective or cognate course (with DUS approval)"), PLACEMENT("Approved ANTH elective or cognate course (with DUS approval)"), PLACEMENT("Approved ANTH elective or cognate course (with DUS approval)"), PLACEMENT("Approved ANTH elective or cognate course (with DUS approval)")] : "Anthropology Electives / Cognates" : 4;
+SELECT 1 FROM [PLACEMENT("Senior essay in advanced ANTH seminar (3000–4000 level)"), CLASS(ANTH 4091), SELECT 2 FROM [CLASS(ANTH 4071), CLASS(ANTH 4091)]] : "Senior Requirement (Senior Essay Options)" : 1;
