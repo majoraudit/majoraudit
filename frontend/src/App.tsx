@@ -6,6 +6,7 @@ import Home from "@/pages/Home/Home";
 import Profile from "@/pages/Profile";
 import Programs from "@/pages/Programs/Programs";
 import Navbar from "@/shared-components/Navbar";
+import Footer from "@/shared-components/Footer";
 import {
   ProtectedRoute,
   NavigateIfAuthenticatedRoute,
@@ -17,7 +18,7 @@ function App() {
       <Globals>
         <div className="flex flex-col h-screen">
           <Navbar />
-          <main className="flex-1 overflow-auto">
+          <main className="flex-1">
             <Routes>
               <Route
                 path="/"
@@ -41,6 +42,7 @@ function App() {
               />
             </Routes>
           </main>
+          <Footer />
         </div>
       </Globals>
     </>

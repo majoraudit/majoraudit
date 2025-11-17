@@ -7,47 +7,10 @@ import { Link, useLocation } from "react-router-dom";
 import { useEffect } from "react";
 
 // import sunIcon from "../assets/sun.svg";
+
 function Navbar() {
-  //const { userData, setUserData } = useUser();
-  //const { appData } = useApp();
   const location = useLocation();
   const currentPath = location.pathname;
-
-  /*useEffect(() => {
-    if (
-      location.pathname === "/dashboard" &&
-      userData?.FYP?.degreeProgress2 &&
-      userData?.FYP?.worksheets &&
-      appData?.major_processor
-    ) {
-      const updatedDegreeProgress2 = userData.FYP.degreeProgress2.map(
-        (entry) => {
-          const worksheet = userData.FYP.worksheets.find(
-            (ws) => ws.id === entry.worksheetID
-          );
-          if (!worksheet) return entry;
-          const updatedMajors = entry.majors
-            .map((major) =>
-              appData.major_processor.updateMajorProgress(major, worksheet)
-            )
-            .filter((m): m is MajorProgress => m !== undefined);
-
-          return {
-            ...entry,
-            majors: updatedMajors,
-          };
-        }
-      );
-
-      setUserData({
-        ...userData,
-        FYP: {
-          ...userData.FYP,
-          degreeProgress2: updatedDegreeProgress2,
-        },
-      });
-    }
-  }, [location.pathname, userData?.FYP?.worksheets, appData?.major_processor]);*/
 
   const linkFormat = (path: string) =>
     currentPath === path
