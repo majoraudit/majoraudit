@@ -1,0 +1,23 @@
+{
+    "name": "Physics and Geosciences",
+    "id":"physics_and_geosciences",
+    "abbr": "",
+    "degreeTypes": [
+        ["bs"]
+    ],
+    "courses": -1,
+    "rating": -1,
+    "workload": -1,
+    "discipline": "",
+    "students": -1,
+    "about": "The major in Physics and Geosciences applies fundamental physical principles to the study of the Earth and other planetary bodies, synthesizing concepts and methods from both the Physics majors and the Earth and Planetary Sciences majors.",
+    "dus": [
+        ["David Poland", "david.poland@yale.edu"],
+        ["Juan Lora", "Juan.lora@yale.edu"]
+    ],
+    "catalogLink": "https://catalog.yale.edu/ycps/subjects-of-instruction/physics-geosciences/",
+    "websiteLink": "",
+    "specializations": [
+        "physics_and_geosciences_bs.mql"
+    ]
+}

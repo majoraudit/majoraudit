@@ -1,5 +1,6 @@
-SELECT 2 FROM [DIST_DEPT("HU", "AFST"), DIST_DEPT("SO", "AFST")] : "Humanities & Social Science Courses" : 2;
-SELECT 4 FROM [PLACEMENT("African language course (Year 1–2 requirement)"), PLACEMENT("African language course (Year 1–2 requirement)"), PLACEMENT("African language course (Year 1–2 requirement)"), PLACEMENT("African language course (Year 1–2 requirement)")] : "African Language Requirement (2 Years)" : 3;
-SELECT 1 FROM [CLASS(AFST 5505), PLACEMENT("Alternative research methods course approved by the DUS")] : "Research Methods Course" : 4;
-SELECT 4 FROM [PLACEMENT("Focus area course approved by the DUS"), PLACEMENT("Focus area course approved by the DUS"), PLACEMENT("Focus area course approved by the DUS"), PLACEMENT("Focus area course approved by the DUS")] : "Focus Area Courses" : 5;
-SELECT 1 FROM [CLASS(AFST 4491)] : "Senior Essay" : 1;
+SELECT 1 FROM [] : "Humanities" : 3
+SELECT 1 FROM [] : "Social Sciences" : 2
+SELECT 4 FROM [] : "African Language" : 1
+SELECT 1 FROM [] : "Research Methods" : 1
+SELECT 4 FROM [] : "Area of Focus" : 1
+SELECT 1 FROM [] : "Senior Essay" : 1

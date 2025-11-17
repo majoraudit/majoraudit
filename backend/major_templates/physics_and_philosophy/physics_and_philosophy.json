@@ -1,0 +1,24 @@
+{
+    "name": "Physics and Philosophy",
+    "id":"physics_and_philosophy",
+    "abbr": "",
+    "degreeTypes": [
+        ["ba", "bs"]
+    ],
+    "courses": -1,
+    "rating": -1,
+    "workload": -1,
+    "discipline": "",
+    "students": -1,
+    "about": "Prospective majors in Physics and Philosophy are advised to begin taking the prerequisites during their first year, and to take at least two of the required philosophy courses by the end of their sophomore year. Prerequisites for this major are as follows: mathematics through calculus at the level of MATH 1200; any introductory physics lecture sequence PHYS 1700, 1710 or higher; PHYS 1650L and 1660L, or PHYS 2050L.",
+    "dus": [
+        ["David Poland", "david.poland@yale.edu"],
+        ["Daniel Greco", "Daniel.Greco@yale.edu"]
+    ],
+    "catalogLink": "https://catalog.yale.edu/ycps/subjects-of-instruction/physics-philosophy/",
+    "websiteLink": "",
+    "specializations": [
+        "physics_and_geosciences_bs.mql",
+        "physics_and_geosciences_ba.mql"
+    ]
+}

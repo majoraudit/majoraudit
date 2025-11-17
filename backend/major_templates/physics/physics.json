@@ -1,0 +1,23 @@
+{
+    "name": "Physics",
+    "id":"physics",
+    "abbr": "PHYS",
+    "degreeTypes": [
+        ["bs", "bs_intensive"]
+    ],
+    "courses": -1,
+    "rating": -1,
+    "workload": -1,
+    "discipline": "Physical Sciences",
+    "students": -1,
+    "about": "The overarching goal of the physics program is to train students—majors and nonmajors alike—to think like physicists, the hallmarks of which include: striving for fundamental explanations that have broad predictive power; appreciating that quantitative analysis is necessary for proper understanding; simplifying physical situations to their essentials to enable the development of mathematical models to explain and predict experimental data; and comparing experimental data from the natural world to theory.",
+    "dus": [
+        ["David Poland", "david.poland@yale.edu"]
+    ],
+    "catalogLink": "https://catalog.yale.edu/ycps/subjects-of-instruction/physics/",
+    "websiteLink": "https://physics.yale.edu/academics/undergraduate-studies",
+    "specializations": [
+        "physics_bs.mql",
+        "physics_bs_intensive.mql"
+    ]
+}
