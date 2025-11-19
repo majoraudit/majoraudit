@@ -3,7 +3,7 @@
     "id":"art",
     "abbr": "ART",
     "degreeTypes": [
-        ["ba"]
+        ["ba_graphic_design","ba_painting","ba_photography","ba_sculpture","ba_filmmaking"]
     ],
     "courses": -1,
     "rating": -1,
@@ -17,6 +17,10 @@
     "catalogLink": "https://catalog.yale.edu/ycps/subjects-of-instruction/art/",
     "websiteLink": "https://www.art.yale.edu/about/study-areas/undergraduate-studies",
     "specializations": [
-        "art_ba.mql"
+        "art_ba_graphic_design.mql",
+        "art_ba_painting.mql",
+        "art_ba_photography.mql",
+        "art_ba_sculpture.mql",
+        "art_ba_filmmaking.mql"
     ]
 }
