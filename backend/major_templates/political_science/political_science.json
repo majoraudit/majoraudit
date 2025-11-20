@@ -3,7 +3,7 @@
     "id":"political_science",
     "abbr": "PLSC",
     "degreeTypes": [
-        ["ba", "ba_intensive"]
+        ["", "interdisciplinary"], ["", "intensive"], ["ba"]
     ],
     "courses": -1,
     "rating": -1,
@@ -18,6 +18,8 @@
     "websiteLink": "https://politicalscience.yale.edu/academics/about-undergraduate-program",
     "specializations": [
         "political_science_ba.mql",
-        "political_science_ba_intensive.mql"
+        "political_science_intensive_ba.mql",
+        "political_science_interdisciplinary_ba.mql",
+        "political_science_interdisciplinary_intensive_ba.mql"
     ]
 }
