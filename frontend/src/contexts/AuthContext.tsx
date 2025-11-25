@@ -63,10 +63,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = async (): Promise<void> => {
     try {
-      await fetch(`${apiUrl}/auth/logout/`, {
+      /*await fetch(`${apiUrl}/auth/logout/`, {
         method: "POST",
         credentials: "include",
-      });
+      });*/
+      window.location.href = `${apiUrl}/auth/logout/`;
     } catch (error) {
       console.warn("Logout request failed:", error);
     } finally {
