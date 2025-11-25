@@ -13,7 +13,7 @@ import addSemesterIcon from "./assets/addSemester.svg";
 import React, { useMemo, useState } from "react";
 
 import { general_requirements_progress } from "@/data/mock_major_progress";
-import SidebarLayout from "@/shared-components/SidebarLayout";
+import SidebarLayout from "@/components/shared-components/SidebarLayout";
 
 function CoursePlanning() {
   const { userData, setUserData } = useUser();

@@ -3,14 +3,15 @@ import Globals from "./Globals";
 import CoursePlanning from "@/pages/CoursePlanning/CoursePlanning";
 import Dashboard from "@/pages/Dashboard/Dashboard";
 import Home from "@/pages/Home/Home";
-import Profile from "@/pages/Profile";
+import Profile from "@/pages/Profile/Profile";
 import Programs from "@/pages/Programs/Programs";
-import Navbar from "@/shared-components/Navbar";
-import Footer from "@/shared-components/Footer";
+import About from "@/pages/About/About";
+import Navbar from "@/components/shared-components/Navbar";
+import Footer from "@/components/shared-components/Footer";
 import {
   ProtectedRoute,
   NavigateIfAuthenticatedRoute,
-} from "./shared-components/RedirectionRoutes";
+} from "./components/shared-components/RedirectionRoutes";
 
 function App() {
   return (
@@ -39,6 +40,10 @@ function App() {
               <Route
                 path="/profile"
                 element={<ProtectedRoute element={<Profile />} />}
+              />
+              <Route
+                path="/about"
+                element={<ProtectedRoute element={<About />} />}
               />
             </Routes>
           </main>

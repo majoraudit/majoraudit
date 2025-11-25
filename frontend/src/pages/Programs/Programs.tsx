@@ -9,7 +9,7 @@ import { useApp } from "@/contexts/AppContext";
 import bookIcon from "./assets/book.svg";
 
 import { useState, useEffect, useMemo } from "react";
-import SidebarLayout from "@/shared-components/SidebarLayout";
+import SidebarLayout from "@/components/shared-components/SidebarLayout";
 
 interface ClassRequirementMapProps {
   reqProgressGroup: GroupItemProgress;
