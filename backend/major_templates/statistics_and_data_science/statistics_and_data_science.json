@@ -1,0 +1,23 @@
+{
+    "name": "Psychology",
+    "id":"psychology",
+    "abbr": "PSYC",
+    "degreeTypes": [
+        ["ba", "bs"]
+    ],
+    "courses": -1,
+    "rating": -1,
+    "workload": -1,
+    "discipline": "Social Sciences",
+    "students": -1,
+    "about": "Psychology is the scientific study of the mind, the brain, and human behavior. The Psychology department offers coursework and research opportunities in the fields of clinical, cognitive, developmental, neuroscientific, and social psychology. By studying psychology, students better understand human behavior, including who we are, how we do the things we do, and how we enhance our lives and society. The Psychology major provides a foundation for careers in education and research; law; medicine and public health; politics and public policy; and in business fields such as marketing, finance, and management.",
+    "dus": [
+        ["Yarrow Dunham", "yarrow.dunham@yale.edu"]
+    ],
+    "catalogLink": "https://catalog.yale.edu/ycps/subjects-of-instruction/psychology/",
+    "websiteLink": "https://psychology.yale.edu/",
+    "specializations": [
+        "psychology_ba.mql",
+        "psychology_bs.mql"
+    ]
+}

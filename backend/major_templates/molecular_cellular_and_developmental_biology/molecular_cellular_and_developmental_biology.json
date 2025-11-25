@@ -3,7 +3,7 @@
     "id":"molecular_cellular_and_developmental_biology",
     "abbr": "MCDB",
     "degreeTypes": [
-        ["ba", "bs", "bs_intensive"]
+        ["ba", "bs", "bs_intensive", "bs_ms"], ["", "biotechnology", "neurobiology", "quantitative_biology"]
     ],
     "courses": -1,
     "rating": -1,
@@ -18,7 +18,20 @@
     "websiteLink": "https://mcdb.yale.edu/",
     "specializations": [
         "molecular_cellular_and_developmental_biology_ba.mql",
-        "molecular_cellular_and_developmental_biology_bs.mql", 
-        "molecular_cellular_and_developmental_biology_bs_intensive.mql"
+        "molecular_cellular_and_developmental_biology_ba_biotechnology.mql",
+        "molecular_cellular_and_developmental_biology_ba_neurobiology.mql",
+        "molecular_cellular_and_developmental_biology_ba_quantitative_biology.mql",
+        "molecular_cellular_and_developmental_biology_bs.mql",
+        "molecular_cellular_and_developmental_biology_bs_biotechnology.mql",
+        "molecular_cellular_and_developmental_biology_bs_neurobiology.mql",
+        "molecular_cellular_and_developmental_biology_bs_quantitative_biology.mql",
+        "molecular_cellular_and_developmental_biology_bs_intensive.mql",
+        "molecular_cellular_and_developmental_biology_bs_intensive_biotechnology.mql",
+        "molecular_cellular_and_developmental_biology_bs_intensive_neurobiology.mql",
+        "molecular_cellular_and_developmental_biology_bs_intensive_quantitative_biology.mql",
+        "molecular_cellular_and_developmental_biology_bs_ms.mql",
+        "molecular_cellular_and_developmental_biology_bs_ms_biotechnology.mql",
+        "molecular_cellular_and_developmental_biology_bs_ms_neurobiology.mql",
+        "molecular_cellular_and_developmental_biology_bs_ms_quantitative_biology.mql"
     ]
 }
