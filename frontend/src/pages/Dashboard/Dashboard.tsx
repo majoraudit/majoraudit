@@ -14,6 +14,13 @@ import trashcan from "./assets/trashcan.svg";
 
 import { useMemo, useState, useEffect } from "react";
 
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
+
 function Dashboard() {
   const { userData, setUserData } = useUser();
   const { appData } = useApp();
@@ -206,13 +213,13 @@ function Dashboard() {
 
   return (
     <>
-      <div className=" h-full w-full flex flex-col bg-gray-50 p-6 gap-4">
+      <div className=" h-[calc(100vh-5rem)] w-full flex flex-col bg-gray-50 p-6 gap-4 overflow-y-auto">
         {/* Header */}
         <header className="ml-2 flex gap-3 items-center">
           <h1 className="text-3xl font-bold text-gray-800">
             {userData?.first_name}'s Dashboard {/* get first name*/}
           </h1>
-          <img src={checkIcon} alt="check icon" className="w-9 h-9"></img>
+          <img src={checkIcon} alt="check icon" className="w-9 h-9" />
         </header>
 
         {/* Requirements Progress */}
@@ -230,7 +237,7 @@ function Dashboard() {
                   }%`,
                 }}
                 className="rounded-lg bg-green-700 transition-all duration-500 ease-out"
-              ></div>
+              />
               <div
                 style={{
                   width: `${
@@ -238,7 +245,7 @@ function Dashboard() {
                   }%`,
                 }}
                 className="rounded-lg bg-yellow-500 transition-all duration-500 ease-out"
-              ></div>
+              />
               <div
                 style={{
                   width: `${
@@ -250,7 +257,7 @@ function Dashboard() {
                   }%`,
                 }}
                 className="rounded-lg bg-gray-300 transition-all duration-500 ease-out"
-              ></div>
+              />
             </div>
 
             {formatC_P_UP(
@@ -275,7 +282,7 @@ function Dashboard() {
                   }%`,
                 }}
                 className="rounded-lg bg-green-700 transition-all duration-500 ease-out"
-              ></div>
+              />
               <div
                 style={{
                   width: `${
@@ -283,7 +290,7 @@ function Dashboard() {
                   }%`,
                 }}
                 className="rounded-lg bg-yellow-500 transition-all duration-500 ease-out"
-              ></div>
+              />
               <div
                 style={{
                   width: `${
@@ -295,7 +302,7 @@ function Dashboard() {
                   }%`,
                 }}
                 className="rounded-lg bg-gray-300 transition-all duration-500 ease-out"
-              ></div>
+              />
             </div>
 
             {formatC_P_UP(
@@ -328,8 +335,8 @@ function Dashboard() {
           </div>
         </section>
 
-        {/*Major List and Major Graph*/}
-        <section className="bg-white rounded-lg shadow p-4 pb-2 w-full flex flex-col min-h-80">
+        {/* Major List and Major Graph container */}
+        <section className="bg-white rounded-lg shadow p-4 w-full flex flex-col flex-1 min-h-[26rem]">
           <div className="flex flex-row items-center border-b mb-2">
             <div className="flex gap-4">
               <button
@@ -372,22 +379,35 @@ function Dashboard() {
                   `(${selectedCertificateIndex + 1}/${certificateCount})`}
               </button>
 
-              <select
-                className="px-2 py-2 font-medium text-center text-gray-500 hover:text-blue-600"
-                value={activeWorksheetId}
-                onChange={(e) => setActiveWorksheet(e.target.value)}
-                disabled={worksheets.length === 0}
-              >
-                {worksheets.length === 0 ? (
-                  <option value="baseline">No worksheets</option>
-                ) : (
-                  worksheets.map((w) => (
-                    <option key={w.id} value={w.id}>
-                      {w.name}
-                    </option>
-                  ))
-                )}
-              </select>
+              <DropdownMenu>
+                <DropdownMenuTrigger className="max-w-[16rem] px-3 py-2 flex items-center gap-2 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500">
+                  <span className="text-gray-700 truncate">
+                    {worksheets.find((w) => w.id === activeWorksheetId)?.name ??
+                      "Select worksheet"}
+                  </span>
+                  <span className="text-gray-400 text-xs">▼</span>
+                </DropdownMenuTrigger>
+
+                <DropdownMenuContent
+                  className="max-w-[16rem]"
+                  align="end"
+                  sideOffset={6}
+                >
+                  {worksheets.map((w) => (
+                    <DropdownMenuItem
+                      key={w.id}
+                      className={`text-sm cursor-pointer ${
+                        w.id === activeWorksheetId
+                          ? "bg-gray-100 font-medium"
+                          : ""
+                      }`}
+                      onClick={() => setActiveWorksheet(w.id)}
+                    >
+                      <span className="truncate block">{w.name}</span>
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
 
             {/* Navigation and Title */}
@@ -440,6 +460,7 @@ function Dashboard() {
                 </button>
               )}
             </div>
+
             {/* Trash only for majors/certificates */}
             {(activeTab === "major" || activeTab === "certificate") &&
               activeMajorProgress[tabIndex] && (
@@ -452,31 +473,33 @@ function Dashboard() {
                     <img
                       src={trashcan}
                       alt="Remove"
-                      className="h-6 w-6 float-right active:scale-125 transition duration-300 ease-in-out"
+                      className="h-5 w-5 float-right active:scale-125 transition duration-300 ease-in-out"
                     />
                   </button>
                 </div>
               )}
           </div>
 
-          <div className="flex flex-row gap-2 min-h-40">
-            <div className="flex flex-col min-h-60 flex-shrink-0">
+          {/* NEW: List + Graph row */}
+          <div className="flex flex-row flex-1 gap-4 min-h-0  p-0 mt-2">
+            {/* LEFT: MajorRequirementList */}
+            <div className="flex flex-col w-[26rem] flex-shrink-0 h-full min-h-full bg-white border-gray-200 border-2 shadow overflow-hidden">
               {activeMajorProgress[tabIndex] ? (
                 <MajorRequirementList
                   major_progress={activeMajorProgress[tabIndex]}
                 />
               ) : (
                 <div>Loading degree requirements...</div>
-              )}{" "}
+              )}
             </div>
-            <div className="flex flex-col flex-1 min-h-60 bg-white border-gray-200 border-2 m-2 p-2 shadow overflow-hidden min-w-0">
+            <div className="flex flex-col flex-1 h-full min-h-0 bg-white border-gray-200 border-2 p-2 shadow overflow-hidden min-w-0">
               {activeMajorProgress[tabIndex] ? (
                 <MajorRequirementGraph
                   major_progress={activeMajorProgress[tabIndex]}
                 />
               ) : (
                 <div>Loading degree requirements...</div>
-              )}{" "}
+              )}
             </div>
           </div>
         </section>

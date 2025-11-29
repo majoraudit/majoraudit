@@ -6,6 +6,7 @@ import Home from "@/pages/Home/Home";
 import Profile from "@/pages/Profile/Profile";
 import Programs from "@/pages/Programs/Programs";
 import About from "@/pages/About/About";
+import PrivacyTerms from "./pages/PrivacyTerms/PrivacyTerms";
 import Navbar from "@/components/shared-components/Navbar";
 import Footer from "@/components/shared-components/Footer";
 import {
@@ -17,9 +18,9 @@ function App() {
   return (
     <>
       <Globals>
-        <div className="flex flex-col h-screen">
+        <div className="flex flex-col min-h-screen">
           <Navbar />
-          <main className="flex-1">
+          <main className="flex-1 min-h-0 flex flex-col">
             <Routes>
               <Route
                 path="/"
@@ -41,10 +42,8 @@ function App() {
                 path="/profile"
                 element={<ProtectedRoute element={<Profile />} />}
               />
-              <Route
-                path="/about"
-                element={<ProtectedRoute element={<About />} />}
-              />
+              <Route path="/about" element={<About />} />
+              <Route path="/privacy-terms" element={<PrivacyTerms />} />
             </Routes>
           </main>
           <Footer />

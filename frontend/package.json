@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@lottiefiles/react-lottie-player": "^3.6.0",
     "@radix-ui/react-dropdown-menu": "^2.1.16",
     "@tailwindcss/vite": "^4.1.7",
     "@vitejs/plugin-basic-ssl": "^2.1.0",

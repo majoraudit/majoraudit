@@ -11,6 +11,15 @@ import bookIcon from "./assets/book.svg";
 import { useState, useEffect, useMemo } from "react";
 import SidebarLayout from "@/components/shared-components/SidebarLayout";
 
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
+
+import { Check, Plus } from "lucide-react";
+
 interface ClassRequirementMapProps {
   reqProgressGroup: GroupItemProgress;
 }
@@ -191,14 +200,14 @@ function Programs() {
                 ${
                   majorExists
                     ? "bg-green-500 text-white"
-                    : "bg-blue-500 text-white hover:scale-110"
+                    : "bg-brand-blue text-white hover:scale-110"
                 }`}
               aria-label={majorExists ? "Added" : "Add"}
               title={majorExists ? "Already in worksheet" : "Add"}
               onClick={handleMajorAdd}
               disabled={majorExists}
             >
-              {majorExists ? "✓" : "+"}
+              {majorExists ? <Check size={18} /> : <Plus size={18} />}
             </button>
 
             <div className="flex flex-col items-start min-w-0 pr-12">
@@ -261,7 +270,7 @@ function Programs() {
               <h2 className="text-gray-700 font-semibold mb-1">
                 Director of Undergraduate Studies
               </h2>
-              <div className="text-blue-700 underline">
+              <div className="text-brand-blue underline">
                 {selectedProgram.info.dus.name.map((n: string, i: number) => (
                   <p key={i}>
                     {n}, {selectedProgram.info.dus.email[i]}
@@ -288,17 +297,36 @@ function Programs() {
           <section className="min-w-0 h-full flex flex-col bg-white p-6 border-2 border-gray-200 rounded-xl shadow-md">
             <div className="flex justify-between gap-4 items-center mb-4">
               <h2 className="text-2xl font-bold text-gray-800">Requirements</h2>
-              <select
-                className="px-2 py-2 text-center border border-black rounded-lg"
-                value={activeWorksheetId}
-                onChange={(e) => setActiveWorksheet(e.target.value)}
-              >
-                {worksheets.map((w) => (
-                  <option key={w.id} value={w.id}>
-                    {w.name}
-                  </option>
-                ))}
-              </select>
+
+              <DropdownMenu>
+                <DropdownMenuTrigger className="flex items-center gap-2 px-3 py-2 border rounded-md bg-white text-sm font-medium shadow-sm hover:bg-gray-50 max-w-[16rem]">
+                  <span className="truncate">
+                    {worksheets.find((w) => w.id === activeWorksheetId)?.name ??
+                      "Select worksheet"}
+                  </span>
+                  <span className="text-gray-400 text-xs">▼</span>
+                </DropdownMenuTrigger>
+
+                <DropdownMenuContent
+                  className="max-w-[16rem]"
+                  align="end"
+                  sideOffset={6}
+                >
+                  {worksheets.map((w) => (
+                    <DropdownMenuItem
+                      key={w.id}
+                      className={`text-sm cursor-pointer ${
+                        w.id === activeWorksheetId
+                          ? "bg-gray-100 font-medium"
+                          : ""
+                      }`}
+                      onClick={() => setActiveWorksheet(w.id)}
+                    >
+                      <span className="truncate block">{w.name}</span>
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
 
             <div className="rounded text-black overflow-auto">

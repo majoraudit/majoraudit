@@ -1,10 +1,10 @@
-import type { MajorProgress } from "@/types/type-program";
-
 import { useUser } from "@/contexts/UserContext";
 import { useApp } from "@/contexts/AppContext";
 
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
+
+import { Info, MessageSquareWarning, LogOut, LogIn } from "lucide-react";
 
 import {
   DropdownMenu,
@@ -23,18 +23,29 @@ function Navbar() {
   const currentPath = location.pathname;
 
   const { isAuthenticated, login, logout } = useAuth();
+  const navigate = useNavigate();
 
   const linkFormat = (path: string) =>
     currentPath === path
-      ? "text-blue-500"
-      : "text-black hover:text-blue-500 transition-colors duration-300";
+      ? "text-brand-blue"
+      : "text-black hover:text-brand-blue transition-colors duration-300";
+
+  const handleLogoClick = () => {
+    if (isAuthenticated) {
+      navigate("/dashboard");
+    } else {
+      navigate("/");
+    }
+  };
 
   return (
     <>
       <nav className="flex bg-white items-center justify-between p-5 h-20">
-        <div className="font-serif text-3xl text-black font-thin">
-          Major<span className="text-blue-500">Audit</span>
-        </div>
+        <button onClick={handleLogoClick}>
+          <div className="font-serif text-3xl text-black font-thin select-none cursor-pointer">
+            Major<span className="text-brand-blue">Audit</span>
+          </div>
+        </button>
         <div className="flex items-center justify-around gap-6 text-lg text-black">
           {/* <img
             src={sunIcon}
@@ -61,19 +72,21 @@ function Navbar() {
           </Link>
 */}
           <DropdownMenu>
-            <DropdownMenuTrigger className="flex bg-blue-500 p-3 rounded-full text-white w-10 h-10 items-center justify-center cursor-pointer">
+            <DropdownMenuTrigger className="flex bg-brand-blue p-3 rounded-full text-white w-10 h-10 items-center justify-center cursor-pointer">
               AC
             </DropdownMenuTrigger>
 
             <DropdownMenuContent className="w-48" align="end" sideOffset={10}>
               <Link to="/about">
                 <DropdownMenuItem className="text-md cursor-pointer">
-                  About Us
+                  <Info size={10} /> About Us
                 </DropdownMenuItem>
               </Link>
-              <DropdownMenuItem className="text-md cursor-pointer">
-                Feedback
-              </DropdownMenuItem>
+              <a href="https://majoraudit.canny.io/" target="_blank">
+                <DropdownMenuItem className="text-md cursor-pointer">
+                  <MessageSquareWarning size={10} /> Feedback
+                </DropdownMenuItem>
+              </a>
 
               <DropdownMenuSeparator />
               {isAuthenticated ? (
@@ -81,6 +94,7 @@ function Navbar() {
                   className="text-red-600 text-md cursor-pointer"
                   onClick={logout}
                 >
+                  <LogOut size={10} />
                   Sign Out
                 </DropdownMenuItem>
               ) : (
@@ -88,6 +102,7 @@ function Navbar() {
                   className="text-green-600 text-md cursor-pointer"
                   onClick={login}
                 >
+                  <LogIn size={10} />
                   Sign In
                 </DropdownMenuItem>
               )}
