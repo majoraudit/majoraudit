@@ -1,0 +1,183 @@
+// modal.tsx
+import React, { useEffect, useState } from "react";
+import type { StudentSemester } from "@/types/type-user";
+
+interface CustomCourseModalProps {
+  open: boolean;
+  onClose: () => void;
+  semester: StudentSemester | null;
+  onCreate?: (
+    semester: StudentSemester,
+    data: {
+      title: string;
+      code: string;
+      notes: string;
+    }
+  ) => void;
+}
+
+function getSemesterDisplay(semester: StudentSemester) {
+  const seasonStr = semester.season.toString();
+  const yearPart = Number(seasonStr.slice(0, 4));
+  const termCode = seasonStr.slice(-2); // "03", "01", "02"
+
+  let termLabel = "";
+  let academicStart = yearPart;
+  let academicEnd = yearPart + 1;
+
+  if (termCode === "03") {
+    termLabel = "Fall";
+    academicStart = yearPart;
+    academicEnd = yearPart + 1;
+  } else if (termCode === "01") {
+    termLabel = "Spring";
+    academicStart = yearPart - 1;
+    academicEnd = yearPart;
+  } else if (termCode === "02") {
+    termLabel = "Summer";
+    academicStart = yearPart - 1;
+    academicEnd = yearPart;
+  } else {
+    termLabel = "Unknown term";
+  }
+
+  return {
+    termLabel,
+    academicYearLabel: `${academicStart}-${academicEnd}`,
+  };
+}
+
+const CustomCourseModal: React.FC<CustomCourseModalProps> = ({
+  open,
+  onClose,
+  semester,
+  onCreate,
+}) => {
+  const [courseTitle, setCourseTitle] = useState("");
+  const [courseCode, setCourseCode] = useState("");
+  const [notes, setNotes] = useState("");
+  const [error, setError] = useState("");
+
+  // reset form when opening / switching semester
+  useEffect(() => {
+    if (open) {
+      setCourseTitle("");
+      setCourseCode("");
+      setNotes("");
+      setError("");
+    }
+  }, [open, semester]);
+
+  if (!open || !semester) return null;
+
+  const { termLabel, academicYearLabel } = getSemesterDisplay(semester);
+
+  const handleSubmit = () => {
+    if (!courseTitle.trim()) {
+      setError("Course name is required.");
+      return;
+    }
+
+    if (onCreate) {
+      onCreate(semester, {
+        title: courseTitle.trim(),
+        code: courseCode.trim(),
+        notes: notes.trim(),
+      });
+    }
+
+    onClose();
+  };
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+      onClick={onClose}
+    >
+      <div
+        className="bg-white rounded-xl shadow-xl p-6 w-full max-w-md mx-4"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header / context */}
+        <div className="flex items-start justify-between gap-4 mb-4">
+          <div>
+            <h2 className="text-xl font-semibold text-gray-900">
+              Add custom course
+            </h2>
+            <p className="text-xs text-gray-500 mt-1">
+              {semester.title || "Untitled semester"} &bull; {termLabel} •{" "}
+              {academicYearLabel}
+            </p>
+          </div>
+          <button
+            type="button"
+            className="text-gray-400 hover:text-gray-600 text-xl leading-none cursor-pointer"
+            onClick={onClose}
+          >
+            ×
+          </button>
+        </div>
+
+        {/* Form */}
+        <div className="space-y-3 text-sm">
+          <div className="flex flex-col gap-1">
+            <label className="font-medium text-gray-700">
+              Course name <span className="text-red-500">*</span>
+            </label>
+            <input
+              className="border rounded-md px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="e.g. Independent Study, Research, Transfer Credit"
+              value={courseTitle}
+              onChange={(e) => {
+                setCourseTitle(e.target.value);
+                setError("");
+              }}
+            />
+          </div>
+
+          <div className="flex flex-col gap-1">
+            <label className="font-medium text-gray-700">Course code</label>
+            <input
+              className="border rounded-md px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="e.g. CPSC 490, RSEA 123"
+              value={courseCode}
+              onChange={(e) => setCourseCode(e.target.value)}
+            />
+          </div>
+
+          <div className="flex flex-col gap-1">
+            <label className="font-medium text-gray-700">Notes</label>
+            <textarea
+              className="border rounded-md px-3 py-2 text-sm bg-white min-h-[80px] resize-y focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Optional: requirements this should count toward, advisor notes, etc."
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+            />
+          </div>
+
+          {error && <p className="text-xs text-red-600">{error}</p>}
+        </div>
+
+        {/* Actions */}
+        <div className="mt-6 flex justify-end gap-2">
+          <button
+            type="button"
+            className="px-3 py-2 rounded-md border bg-white text-sm hover:bg-gray-50 cursor-pointer"
+            onClick={onClose}
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            className="px-3 py-2 rounded-md bg-brand-blue text-white text-sm font-medium hover:bg-blue-700 cursor-pointer"
+            onClick={handleSubmit}
+          >
+            Save custom course
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default CustomCourseModal;

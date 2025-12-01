@@ -68,7 +68,7 @@ function CourseOutput({
       >
         {removable && !semesterCompleted && (
           <button
-            className="absolute top-0 right-0 h-5 w-5 m-1 active:scale-125 transition duration-300 ease-in-out"
+            className="absolute top-0 right-0 h-5 w-5 m-1 active:scale-125 transition duration-300 ease-in-out cursor-pointer"
             onClick={handleCourseRemove}
           >
             <img src={cancel} alt="cancel button"></img>

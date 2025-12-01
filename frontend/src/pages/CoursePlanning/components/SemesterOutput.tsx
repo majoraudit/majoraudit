@@ -23,6 +23,7 @@ import type { LottieRefCurrentProps } from "lottie-react";
 
 interface SemesterOutputProps {
   semester: StudentSemester;
+  onAddCustomCourse?: () => void;
 }
 
 function codeToYear(code: number): number {
@@ -35,7 +36,7 @@ function codeToYear(code: number): number {
 }
 
 // semester prop, mainly to specify the season code
-function SemesterOutput({ semester }: SemesterOutputProps) {
+function SemesterOutput({ semester, onAddCustomCourse }: SemesterOutputProps) {
   const { userData, setUserData } = useUser();
 
   const activeWorksheetId = userData?.FYP?.activeWorksheetID; // undefined => Main Worksheet (baseline)
@@ -149,7 +150,10 @@ function SemesterOutput({ semester }: SemesterOutputProps) {
             <span className="text-base text-gray-600 mt-1">
               {codeToYear(semester.season)}-{codeToYear(semester.season) + 1}
             </span>
-            <button className="h-8 w-8 " onClick={handleUpdateIsCompleted}>
+            <button
+              className="h-8 w-8 cursor-pointer"
+              onClick={handleUpdateIsCompleted}
+            >
               <Lottie
                 lottieRef={lottieRef}
                 animationData={lockAnimation}
@@ -179,9 +183,13 @@ function SemesterOutput({ semester }: SemesterOutputProps) {
           ))}
           {!isCompleted && (
             <li>
-              <div className="w-54">
+              <button
+                type="button"
+                className="w-54 cursor-pointer"
+                onClick={onAddCustomCourse}
+              >
                 <BlankCourseOutput />
-              </div>
+              </button>
             </li>
           )}
         </ul>
@@ -190,7 +198,7 @@ function SemesterOutput({ semester }: SemesterOutputProps) {
             <img
               src={trashcan}
               alt="trashcan"
-              className="h-6 w-6 float-right active:scale-125 transition duration-300 ease-in-out"
+              className="h-6 w-6 float-right active:scale-125 transition duration-300 ease-in-out cursor-pointer"
             ></img>
           </button>
         )}

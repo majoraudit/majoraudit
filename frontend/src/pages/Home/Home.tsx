@@ -37,7 +37,7 @@ function Home() {
               <div className="text-slate-500">possibilities to explore</div>
             </div>
           </div>
-          <div className="flex flex-initial gap-6">
+          <div className="flex flex-initial gap-4">
             <button
               onClick={login}
               className="cursor-pointer inline-flex items-center justify-center rounded-lg bg-brand-blue px-5 py-3 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:-translate-y-1  focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2"
@@ -47,9 +47,16 @@ function Home() {
 
             <button
               onClick={() => navigate("/about")}
-              className="cursor-pointer inline-flex items-center justify-center rounded-lg bg-slate-700 px-5 py-3 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:-translate-y-1  focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2"
+              className="cursor-pointer inline-flex items-center justify-center rounded-lg bg-[#344A61] px-5 py-3 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:-translate-y-1  focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2"
             >
               About Us
+            </button>
+
+            <button
+              onClick={() => navigate("/programs")}
+              className="cursor-pointer inline-flex items-center justify-center rounded-lg bg-[#009688] px-5 py-3 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:-translate-y-1  focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2"
+            >
+              Guest
             </button>
           </div>
         </div>

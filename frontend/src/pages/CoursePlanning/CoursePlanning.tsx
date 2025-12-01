@@ -13,6 +13,7 @@ import addSemesterIcon from "./assets/addSemester.svg";
 import React, { useMemo, useState } from "react";
 
 import SidebarLayout from "@/components/shared-components/SidebarLayout";
+import CustomCourseModal from "./components/CustomCourseModal";
 
 import {
   DropdownMenu,
@@ -36,6 +37,10 @@ function CoursePlanning() {
     title: "",
   });
   const [searchTerm, setSearchTerm] = useState("");
+
+  const [selectedSemester, setSelectedSemester] =
+    useState<StudentSemester | null>(null);
+  const [isCustomCourseModalOpen, setIsCustomCourseModalOpen] = useState(false);
 
   // Inline worksheet actions state (for rename/delete/create UI inside dropdown)
   const [isRenaming, setIsRenaming] = useState(false);
@@ -178,6 +183,57 @@ function CoursePlanning() {
         worksheets: nextList,
         activeWorksheetID: nextActiveId,
         degreeProgress2: newDegreeProgress,
+      },
+    });
+  };
+
+  const openCustomCourseModal = (semester: StudentSemester) => {
+    setSelectedSemester(semester);
+    setIsCustomCourseModalOpen(true);
+  };
+
+  const closeCustomCourseModal = () => {
+    setIsCustomCourseModalOpen(false);
+    setSelectedSemester(null);
+  };
+
+  const handleCreateCustomCourse = (
+    semester: StudentSemester,
+    data: { title: string; code: string; notes: string }
+  ) => {
+    if (!userData) return;
+
+    // TODO: adjust to match your actual StudentCourse type / helper
+    // This is a *generic example* of pushing a new custom course
+    const newCourse: any = {
+      id: `custom_${Date.now()}`,
+      title: data.title,
+      code: data.code || "CUSTOM",
+      notes: data.notes,
+      isCustom: true,
+    };
+
+    const updatedWorksheets = (userData.FYP.worksheets ?? []).map((ws) => {
+      if (ws.id !== activeWorksheetId) return ws;
+
+      return {
+        ...ws,
+        studentSemesters: ws.studentSemesters.map((s) =>
+          s.season === semester.season
+            ? {
+                ...s,
+                studentCourses: [...(s.studentCourses ?? []), newCourse],
+              }
+            : s
+        ),
+      };
+    });
+
+    setUserData({
+      ...userData,
+      FYP: {
+        ...userData.FYP,
+        worksheets: updatedWorksheets,
       },
     });
   };
@@ -741,9 +797,20 @@ function CoursePlanning() {
         <hr className="border-gray-200 border-t-3" />
 
         {activeSemesters.map((semester, index) => (
-          <SemesterOutput key={index} semester={semester} />
+          <SemesterOutput
+            key={index}
+            semester={semester}
+            onAddCustomCourse={() => openCustomCourseModal(semester)}
+          />
         ))}
       </div>
+
+      <CustomCourseModal
+        open={isCustomCourseModalOpen}
+        onClose={closeCustomCourseModal}
+        semester={selectedSemester}
+        onCreate={handleCreateCustomCourse}
+      />
     </SidebarLayout>
   );
 }

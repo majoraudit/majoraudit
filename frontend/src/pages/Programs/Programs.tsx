@@ -11,6 +11,8 @@ import bookIcon from "./assets/book.svg";
 import { useState, useEffect, useMemo } from "react";
 import SidebarLayout from "@/components/shared-components/SidebarLayout";
 
+import { useAuth } from "@/contexts/AuthContext";
+
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -68,6 +70,7 @@ function ClassRequirementMap({ reqProgressGroup }: ClassRequirementMapProps) {
 function Programs() {
   const { userData, setUserData } = useUser();
   const { appData } = useApp();
+  const { isAuthenticated } = useAuth();
   const [selectedProgram, setSelectedProgram] = useState<MajorProgress | null>(
     null
   );
@@ -195,20 +198,22 @@ function Programs() {
         <main className="grid grid-cols-1 lg:grid-cols-2 gap-6 p-6 w-full flex-1">
           {/* Left Panel */}
           <section className="relative min-w-0 h-full flex flex-col bg-white border-2 border-gray-200 p-6 rounded-xl shadow-md">
-            <button
-              className={`absolute top-6 right-6 rounded-full w-8 h-8 flex items-center justify-center text-center text-xl leading-none z-10 transition duration-300 ease-in-out
+            {isAuthenticated && (
+              <button
+                className={`absolute top-6 right-6 rounded-full w-8 h-8 flex items-center justify-center text-center text-xl leading-none z-10 transition duration-300 ease-in-out
                 ${
                   majorExists
                     ? "bg-green-500 text-white"
                     : "bg-brand-blue text-white hover:scale-110"
                 }`}
-              aria-label={majorExists ? "Added" : "Add"}
-              title={majorExists ? "Already in worksheet" : "Add"}
-              onClick={handleMajorAdd}
-              disabled={majorExists}
-            >
-              {majorExists ? <Check size={18} /> : <Plus size={18} />}
-            </button>
+                aria-label={majorExists ? "Added" : "Add"}
+                title={majorExists ? "Already in worksheet" : "Add"}
+                onClick={handleMajorAdd}
+                disabled={majorExists}
+              >
+                {majorExists ? <Check size={18} /> : <Plus size={18} />}
+              </button>
+            )}
 
             <div className="flex flex-col items-start min-w-0 pr-12">
               <h1 className="text-3xl font-bold text-gray-800 break-words">

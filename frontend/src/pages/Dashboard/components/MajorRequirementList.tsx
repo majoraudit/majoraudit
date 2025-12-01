@@ -47,7 +47,7 @@ function ClassRequirementMap({
             <div key={itemIdx} className="relative">
               <div className="absolute left-2 top-0 bottom-0 w-0.5 bg-gray-300" />
 
-              <div className="ml-6 bg-white border border-gray-200 rounded-lg p-4 shadow-sm pt-2 relative">
+              <div className="ml-6 bg-white border border-gray-200 rounded-lg p-4 pt-3 shadow-sm relative">
                 {/* Per-item Manually fulfill button (top-right of the item card) */}
                 <button
                   type="button"
@@ -79,7 +79,7 @@ function ClassRequirementMap({
                     <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">
                       Requirement
                     </span>
-                    <div className="text-sm text-gray-700 mt-1 flex items-center">
+                    <div className="text-sm text-gray-700 mt-2 flex items-center">
                       <span className="w-2 h-2 bg-gray-500 rounded-full mr-2 flex-shrink-0" />
                       {pair.requirement}
                     </div>
@@ -90,7 +90,7 @@ function ClassRequirementMap({
                   <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">
                     Status
                   </span>
-                  <div className="text-sm mt-1 flex">
+                  <div className="text-sm mt-2 flex items-center">
                     {pair.fulfillment && pair.fulfillment.course ? (
                       <>
                         <span className="w-2 h-2 rounded-full mr-2 flex-shrink-0 bg-green-700" />

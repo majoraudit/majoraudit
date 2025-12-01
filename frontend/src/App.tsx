@@ -30,10 +30,7 @@ function App() {
                 path="/dashboard"
                 element={<ProtectedRoute element={<Dashboard />} />}
               />
-              <Route
-                path="/programs"
-                element={<ProtectedRoute element={<Programs />} />}
-              />
+              <Route path="/programs" element={<Programs />} />
               <Route
                 path="/course-planning"
                 element={<ProtectedRoute element={<CoursePlanning />} />}
