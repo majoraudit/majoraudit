@@ -28,10 +28,10 @@ const CURRENT_TEAM_MEMBERS = [
   {
     name: "Mateo Rodriguez",
     role: "Software Engineer",
-    imageUrl: "/about/Andy_Cheng.jpg",
-    github: "https://github.com/andycheng233",
-    linkedin: "https://www.linkedin.com/in/andycheng233",
-    portfolio: "https://andycheng.vercel.app",
+    imageUrl: "/about/Mateo_Rodriguez.jpeg",
+    github: "https://github.com/mrodz",
+    linkedin: "https://www.linkedin.com/in/mateo-rodriguez-dev",
+    portfolio: "",
   },
   {
     name: "Rishi Sankhe",
@@ -48,14 +48,6 @@ const CURRENT_TEAM_MEMBERS = [
     github: "https://github.com/swan-07",
     linkedin: "https://www.linkedin.com/in/stephaniewan07/",
     portfolio: " https://swan-07.github.io/",
-  },
-  {
-    name: "Andy Cheng",
-    role: "Founder & Lead Developer",
-    imageUrl: "/about/Andy_Cheng.jpg",
-    github: "https://github.com/andycheng233",
-    linkedin: "https://www.linkedin.com/in/andycheng233",
-    portfolio: "https://andycheng.vercel.app",
   },
 ];
 
