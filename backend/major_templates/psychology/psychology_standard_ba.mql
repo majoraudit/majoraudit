@@ -1,0 +1,11 @@
+SELECT 1 FROM [CLASS(PSYC 1100), PLACEMENT("A score of 5 on the Psychology Advanced Placement test or a score of 7 on the IB Psychology exam")] : "Prerequirements";
+SELECT 2 FROM TAG("YC PSYC Social Science Core") : "Required to take two courses from the social science point of view in psychology.";
+SELECT 2 FROM TAG("YC PSYC Natural Science Core") : "Required to take two from the natural science point of view in psychology.";
+SELECT 1 FROM [
+    SELECT 1 FROM [CLASS(S&DS 1000), CLASS(S&DS 2300)],
+    SELECT 1 FROM [CLASS(S&DS 2300), CLASS(S&DS 1230)],
+    PLACEMENT("If approved in advance by the DUS, a second course in statistics or quantitative methodology that focuses on advanced techniques relevant for research in psychology can be counted towards the major as a PSYC elective.")
+] : "One course in statistics";
+SELECT 1 FROM RANGE(PSYC 2100, PSYC 2990) : "Research requirement";
+
+// LIMIT 3 FROM RANGE(PSYC 4900, PSYC 4990) : "No more than a total of three credits from PSYC 4900–4990 combined may count toward the major";

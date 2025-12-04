@@ -1,27 +1,27 @@
 SELECT 1 FROM [
-  LANGUAGE(SPAN L3),
-  LANGUAGE(PORT L3),
-  TAG("Equivalent Placement or Credit")
+  DIST_DEPT("L3", "SPAN"),
+  DIST_DEPT("L3", "PORT"),
+  PLACEMENT("Equivalent Placement or Credit")
 ] : "Prerequisites" : 1;
 
 SELECT 8 FROM [
-  INTRODUCTORY(LAST Approved Course),
-  ATTRIBUTE(YC PLSC Comparative Govt),
-  ATTRIBUTE(YC ANTH Sociocultural),
-  ATTRIBUTE(YC ECON Development),
-  ATTRIBUTE(YC HIST Latin America),
-  ATTRIBUTE(YC SPAN Taught in Spanish),
-  ATTRIBUTE(YC HSAR The Americas),
-  ATTRIBUTE(YC FILM World Cinema)
+  PLACEMENT("LAST Approved Course"),
+  TAG("YC PLSC Comparative Govt"),
+  TAG("YC ANTH Sociocultural"),
+  TAG("YC ECON Development"),
+  TAG("YC HIST Latin America"),
+  TAG("YC SPAN Taught in Spanish"),
+  TAG("YC HSAR The Americas"),
+  TAG("YC FILM World Cinema")
 ] : "Core Classes" : 8;
 
 SELECT 3 FROM [
-  ATTRIBUTE(YC HUMS Area Literature),
-  ATTRIBUTE(YC HUMS Area History),
-  ATTRIBUTE(YC HUMS Area Arts),
-  ATTRIBUTE(YC SOCY InequalityRaceSociety),
-  ATTRIBUTE(YC ECON International),
-  ATTRIBUTE(YC EVST Core Human/Social Sci)
+  TAG("YC HUMS Area Literature"),
+  TAG("YC HUMS Area History"),
+  TAG("YC HUMS Area Arts"),
+  TAG("YC SOCY InequalityRaceSociety"),
+  TAG("YC ECON International"),
+  TAG("YC EVST Core Human/Social Sci")
 ] : "Electives" : 3;
 
 SELECT 1 FROM [

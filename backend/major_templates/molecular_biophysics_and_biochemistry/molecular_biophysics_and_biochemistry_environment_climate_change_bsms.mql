@@ -17,15 +17,15 @@ SELECT 6 FROM [
   CLASS(MB&B 3000),
   CLASS(MB&B 3010),
   CLASS(CHEM 1750),
-  TAG("Environment Climate Change Concentration"),
-  ATTRIBUTE(YC CHEM Intermediate Courses),
-  ATTRIBUTE(YC MB&B Practical Skills),
-  ATTRIBUTE(YC MB&B Science & Society)
+  PLACEMENT("Environment Climate Change Concentration"),
+  TAG("YC CHEM Intermediate Courses"),
+  TAG("YC MB&B Practical Skills"),
+  TAG("YC MB&B Science & Society")
 ] : "Core Classes" : 6;
 
 SELECT 2 FROM [
-  ATTRIBUTE(YC MB&B Elective),
-  ATTRIBUTE(YC MB&B Practical Skills),
+  TAG("YC MB&B Elective"),
+  TAG("YC MB&B Practical Skills"),
   RANGE(MB&B 2000 , MB&B 9999),
   RANGE(CHEM 2000 , CHEM 9999),
   RANGE(PHYS 2000 , PHYS 9999),

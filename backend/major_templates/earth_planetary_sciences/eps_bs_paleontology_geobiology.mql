@@ -1,4 +1,48 @@
-SELECT 4 FROM [SELECT 1 FROM [CLASS(MATH 1200), CLASS(ENAS 1510)], SELECT 4 FROM [CLASS(BIOL 1010), CLASS(BIOL 1020), CLASS(BIOL 1030), CLASS(BIOL 1040)], CLASS(CHEM 1650), CLASS(CHEM 1670)] : "Prerequisites" : 1;
-SELECT 4 FROM [SELECT 1 FROM [CLASS(EPS 1000), CLASS(EPS 1010), SELECT 2 FROM [CLASS(EPS 1100), CLASS(EPS 1110L)]], CLASS(EPS 1250), CLASS(EPS 1260L), SELECT 4 FROM [SELECT 1 FROM [CLASS(EPS 2320), CLASS(EPS 3550)], CLASS(EEB 2225), SELECT 1 FROM [CLASS(EPS 2700), CLASS(EPS 3250), CLASS(EPS 3750)], CLASS(EPS 3130), CLASS(EPS 3450), CLASS(EPS 2550), SELECT 1 FROM [CLASS(EPS 3100), CLASS(EPS 4020)], PLACEMENT("Statistical Data Analysis Class with DUS Approval")]] : "EPS Core Courses" : 2;
+SELECT 4 FROM [
+    SELECT 1 FROM [
+        CLASS(MATH 1200),
+        CLASS(ENAS 1510)
+    ],
+    SELECT 4 FROM [
+        CLASS(BIOL 1010),
+        CLASS(BIOL 1020),
+        CLASS(BIOL 1030),
+        CLASS(BIOL 1040)
+    ],
+    CLASS(CHEM 1650),
+    CLASS(CHEM 1670)
+] : "Prerequisites" : 1;
+SELECT 4 FROM [
+    SELECT 1 FROM [
+        CLASS(EPS 1000), 
+        CLASS(EPS 1010),
+        SELECT 2 FROM [
+            CLASS(EPS 1100),
+            CLASS(EPS 1110L)
+        ]
+    ], 
+    CLASS(EPS 1250),
+    CLASS(EPS 1260L),
+    SELECT 4 FROM [
+        SELECT 1 FROM [
+            CLASS(EPS 2320),
+            CLASS(EPS 3550)
+        ],
+        CLASS(EEB 2225),
+        SELECT 1 FROM [
+            CLASS(EPS 2700),
+            CLASS(EPS 3250),
+            CLASS(EPS 3750)
+        ],
+        CLASS(EPS 3130),
+        CLASS(EPS 3450),
+        CLASS(EPS 2550),
+        SELECT 1 FROM [
+            CLASS(EPS 3100),
+            CLASS(EPS 4020)
+        ],
+        PLACEMENT("Statistical Data Analysis Class with DUS Approval")
+    ]
+] : "EPS Core Courses" : 2;
 SELECT 4 FROM [PLACEMENT("2000+ Paleontology Class with DUS Approval"), PLACEMENT("2000+ Paleontology Class with DUS Approval"), PLACEMENT("2000+ Paleontology Class with DUS Approval"), PLACEMENT("EPS 2000+ Paleontology Class with DUS Approval")] : "Electives" : 3;
 SELECT 1 FROM [CLASS(EPS 4920), SELECT 2 FROM [CLASS(EPS 4900), CLASS(EPS 4910)]] : "Senior Requirement" : 1;

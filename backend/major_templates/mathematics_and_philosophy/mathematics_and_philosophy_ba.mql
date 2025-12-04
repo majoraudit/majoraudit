@@ -10,18 +10,18 @@ SELECT 7 FROM [
   RANGE(MATH 2220 , MATH 4690),
   RANGE(MATH 2220 , MATH 4690),
   RANGE(MATH 2220 , MATH 4690),
-  ATTRIBUTE(YC PHIL Logic)
+  TAG("YC PHIL Logic")
 ] : "Core Classes" : 7;
 
 SELECT 3 FROM [
-  ATTRIBUTE(YC PHIL Logic),
-  ATTRIBUTE(YC PHIL Metaphysics&Epistemol),
-  ATTRIBUTE(YC PHIL Ethics & Value Theory),
+  TAG("YC PHIL Logic"),
+  TAG("YC PHIL Metaphysics&Epistemol"),
+  TAG("YC PHIL Ethics & Value Theory"),
   RANGE(PHIL 1000 , PHIL 4999),
   RANGE(MATH 2220 , MATH 4690)
 ] : "Electives" : 3;
 
 SELECT 1 FROM [
   RANGE(MATH 4800 , MATH 4890),
-  ATTRIBUTE(YC PHIL Senior Seminar)
+  TAG("YC PHIL Senior Seminar")
 ] : "Senior Requirement" : 1;

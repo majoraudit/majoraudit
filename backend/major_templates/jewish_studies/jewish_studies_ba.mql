@@ -5,17 +5,17 @@ SELECT 3 FROM [
   CLASS(JDST 2001),
   CLASS(JDST 3681),
   CLASS(JDST 3693),
-  TAG("Survey in Hebrew and Jewish Literature")
+  PLACEMENT("Survey in Hebrew and Jewish Literature")
 ] : "Core Classes" : 3;
 
 SELECT 8 FROM [
-  SELECT 2 FROM [CLASS(HEBR 1100), CLASS(HEBR 1200), TRANSLATION_COURSES(Hebrew Literature, 2)],
-  FOCUS(Ancient Israel and Hebrew Bible),
-  FOCUS(Second Temple and Talmudic Judaism),
-  FOCUS(Medieval and Renaissance Jewish Civilization),
-  FOCUS(Modern Jewish History and Civilization),
-  FOCUS(Jewish and Hebrew Literature),
-  FOCUS(Jewish Thought)
+  SELECT 2 FROM [CLASS(HEBR 1100), CLASS(HEBR 1200), PLACEMENT("Hebrew Literature")],
+  PLACEMENT("Ancient Israel and Hebrew Bible"),
+  PLACEMENT("Second Temple and Talmudic Judaism"),
+  PLACEMENT("Medieval and Renaissance Jewish Civilization"),
+  PLACEMENT("Modern Jewish History and Civilization"),
+  PLACEMENT("Jewish and Hebrew Literature"),
+  PLACEMENT("Jewish Thought")
 ] : "Electives" : 8;
 
 SELECT 1 FROM [CLASS(JDST 4491), CLASS(JDST 4492)] : "Senior Requirement" : 1;
