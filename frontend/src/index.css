@@ -39,6 +39,7 @@
     --sidebar-ring: oklch(0.708 0 0);
     
     --brand-blue: #468FF2;
+    --brand-dark-green: #63B37B;
 }
 
 @theme inline {
@@ -79,6 +80,9 @@
     --color-sidebar-ring: var(--sidebar-ring);
 
     --color-brand-blue: var(--brand-blue);
+    --color-brand-dark-green: var(--brand-dark-green);
+
+
 }
 
 .dark {

@@ -134,9 +134,9 @@ function SemesterOutput({ semester, onAddCustomCourse }: SemesterOutputProps) {
     <>
       <div
         className={clsx(
-          "flex flex-col border-4  p-4 m-6 rounded-xl bg-gray-50",
+          "flex flex-col border-4  p-4 m-6 rounded-xl",
           isCompleted
-            ? "border-yellow-400 bg-yellow-50 duration-500"
+            ? "border-green-700 bg-[#F4F7F1] duration-500"
             : isOver
             ? "border-blue-200 bg-gray-50 duration-200"
             : "border-gray-300 bg-gray-50 duration-500"

@@ -20,10 +20,10 @@ const CURRENT_TEAM_MEMBERS = [
   {
     name: "Darren Kao",
     role: "Software Engineer",
-    imageUrl: "/about/Andy_Cheng.jpg",
-    github: "https://github.com/andycheng233",
-    linkedin: "https://www.linkedin.com/in/andycheng233",
-    portfolio: "https://andycheng.vercel.app",
+    imageUrl: "/about/Darren_Kao.jpeg",
+    github: "https://github.com/darren-kao",
+    linkedin: "https://www.linkedin.com/in/darren-kao/",
+    portfolio: "",
   },
   {
     name: "Mateo Rodriguez",
@@ -36,10 +36,10 @@ const CURRENT_TEAM_MEMBERS = [
   {
     name: "Rishi Sankhe",
     role: "Software Engineer",
-    imageUrl: "/about/Andy_Cheng.jpg",
-    github: "https://github.com/andycheng233",
-    linkedin: "https://www.linkedin.com/in/andycheng233",
-    portfolio: "https://andycheng.vercel.app",
+    imageUrl: "/about/Rishi_Sankhe.jpeg",
+    github: "https://github.com/RishiSankhe",
+    linkedin: "https://www.linkedin.com/in/rishi-sankhe/",
+    portfolio: "",
   },
   {
     name: "Stephanie Wan",
@@ -54,11 +54,11 @@ const CURRENT_TEAM_MEMBERS = [
 const PAST_TEAM_MEMBERS = [
   {
     name: "Ryan Gumlia",
-    role: "Founder & Lead Developer",
-    imageUrl: "/about/Andy_Cheng.jpg",
-    github: "https://github.com/andycheng233",
-    linkedin: "https://www.linkedin.com/in/andycheng233",
-    portfolio: "https://andycheng.vercel.app",
+    role: "Former Lead & Software Engineer",
+    imageUrl: "/about/Ryan_Gumlia.jpeg",
+    github: "https://github.com/ryanggum",
+    linkedin: "https://www.linkedin.com/in/ryangumlia/",
+    portfolio: "https://www.ryangumlia.com/",
   },
 ];
 

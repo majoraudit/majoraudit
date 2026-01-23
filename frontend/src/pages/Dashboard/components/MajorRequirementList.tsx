@@ -6,6 +6,8 @@ import { formatCourseItemTypes } from "@/utils/formatHelpers";
 
 import { useState } from "react";
 
+import { Check } from "lucide-react";
+
 interface ClassRequirementMapProps {
   reqProgressGroup: GroupItemProgress;
   groupIdx: number; // NEW
@@ -188,11 +190,15 @@ function MajorRequirementList({
                       <div
                         className={`w-6 h-6 border-2 rounded-sm mt-1 ml-1 shrink-0 flex justify-center items-center text-center${
                           reqProgressGroup.isCompleted
-                            ? "border-green-500 bg-green-500"
+                            ? "bg-gray-100 border-green-700  text-green-700"
                             : "bg-gray-100 border-red-600 text-red-600 font-medium"
                         }`}
                       >
-                        {remainingRequirements > 0 ? remainingRequirements : ""}
+                        {remainingRequirements > 0 ? (
+                          remainingRequirements
+                        ) : (
+                          <Check />
+                        )}
                       </div>
 
                       <div className="flex flex-col flex-grow">
