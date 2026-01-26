@@ -1,17 +1,18 @@
-import { type Course } from "../types/type-user";
-import { removeCourse } from "../utils/userDataHelpers";
+import { type Course } from "@/types/type-user";
+import { removeCourse } from "@/utils/userDataHelpers";
 import {
   formatSeason,
   formatCredits,
   formatDistributions,
-} from "../utils/formatHelpers";
-import { useUser } from "../contexts/UserContext";
+} from "@/utils/formatHelpers";
+
+import { useUser } from "@/contexts/UserContext";
+
+import cancel from "../assets/cancel.svg";
 
 import { useDrag } from "react-dnd";
 import { useRef, useState } from "react";
 import clsx from "clsx";
-
-import cancel from "../assets/cancel.svg";
 
 interface CourseOutputProps {
   course: Course;
@@ -67,7 +68,7 @@ function CourseOutput({
       >
         {removable && !semesterCompleted && (
           <button
-            className="absolute top-0 right-0 h-5 w-5 m-1 active:scale-125 transition duration-300 ease-in-out"
+            className="absolute top-0 right-0 h-5 w-5 m-1 active:scale-125 transition duration-300 ease-in-out cursor-pointer"
             onClick={handleCourseRemove}
           >
             <img src={cancel} alt="cancel button"></img>

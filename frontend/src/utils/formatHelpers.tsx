@@ -1,4 +1,4 @@
-import DistributionOutput from "../components/DistributionOutput";
+import DistributionOutput from "../components/shared-components/DistributionOutput";
 import type { GroupItemProgress } from "../types/type-program";
 
 export function formatSeason(seasons: string[]) {

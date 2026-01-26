@@ -1,11 +1,12 @@
 import {
   type MajorProgress,
   type GroupItemProgress,
-} from "../types/type-program";
+} from "@/types/type-program";
+import { formatCourseItemTypes } from "@/utils/formatHelpers";
 
 import { useState } from "react";
 
-import { formatCourseItemTypes } from "../utils/formatHelpers";
+import { Check } from "lucide-react";
 
 interface ClassRequirementMapProps {
   reqProgressGroup: GroupItemProgress;
@@ -48,7 +49,7 @@ function ClassRequirementMap({
             <div key={itemIdx} className="relative">
               <div className="absolute left-2 top-0 bottom-0 w-0.5 bg-gray-300" />
 
-              <div className="ml-6 bg-white border border-gray-200 rounded-lg p-4 shadow-sm pt-2 relative">
+              <div className="ml-6 bg-white border border-gray-200 rounded-lg p-4 pt-3 shadow-sm relative">
                 {/* Per-item Manually fulfill button (top-right of the item card) */}
                 <button
                   type="button"
@@ -60,7 +61,7 @@ function ClassRequirementMap({
                     ${
                       isCompleted
                         ? "border-gray-300 text-gray-400 cursor-not-allowed"
-                        : "border-blue-600 text-blue-600 hover:bg-blue-50 active:bg-blue-100"
+                        : "border-brand-blue text-brand-blue hover:bg-blue-50 active:bg-blue-100"
                     }`}
                   disabled={isCompleted}
                   aria-label={`Manually fulfill requirement item ${
@@ -80,7 +81,7 @@ function ClassRequirementMap({
                     <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">
                       Requirement
                     </span>
-                    <div className="text-sm text-gray-700 mt-1 flex items-center">
+                    <div className="text-sm text-gray-700 mt-2 flex items-center">
                       <span className="w-2 h-2 bg-gray-500 rounded-full mr-2 flex-shrink-0" />
                       {pair.requirement}
                     </div>
@@ -91,7 +92,7 @@ function ClassRequirementMap({
                   <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">
                     Status
                   </span>
-                  <div className="text-sm mt-1 flex">
+                  <div className="text-sm mt-2 flex items-center">
                     {pair.fulfillment && pair.fulfillment.course ? (
                       <>
                         <span className="w-2 h-2 rounded-full mr-2 flex-shrink-0 bg-green-700" />
@@ -189,11 +190,15 @@ function MajorRequirementList({
                       <div
                         className={`w-6 h-6 border-2 rounded-sm mt-1 ml-1 shrink-0 flex justify-center items-center text-center${
                           reqProgressGroup.isCompleted
-                            ? "border-green-500 bg-green-500"
+                            ? "bg-gray-100 border-green-700  text-green-700"
                             : "bg-gray-100 border-red-600 text-red-600 font-medium"
                         }`}
                       >
-                        {remainingRequirements > 0 ? remainingRequirements : ""}
+                        {remainingRequirements > 0 ? (
+                          remainingRequirements
+                        ) : (
+                          <Check />
+                        )}
                       </div>
 
                       <div className="flex flex-col flex-grow">
@@ -240,7 +245,7 @@ function MajorRequirementList({
   };
 
   return (
-    <div className="h-96 w-102 bg-white border-gray-200 border-2 m-2 shadow flex flex-col">
+    <>
       {/* Tab Bar */}
       <div className="flex border-b border-gray-200 bg-gray-50">
         {tabs.map((tab) => (
@@ -252,7 +257,7 @@ function MajorRequirementList({
             }}
             className={`flex-1 px-3 py-3 text-sm font-medium transition-colors ${
               activeTab === tab.id
-                ? "text-blue-600 border-b-2 border-blue-600 bg-white"
+                ? "text-brand-blue border-b-2 border-brand-blue bg-white"
                 : "text-gray-500 hover:text-gray-700 hover:bg-gray-100"
             }`}
           >
@@ -265,7 +270,7 @@ function MajorRequirementList({
       <div className="flex-1 overflow-hidden flex flex-col">
         {renderTabContent()}
       </div>
-    </div>
+    </>
   );
 }
 

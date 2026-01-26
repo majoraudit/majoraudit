@@ -1,18 +1,19 @@
-import { type StudentSemester } from "../types/type-user";
-import { type Course } from "../types/type-user";
+import { type StudentSemester } from "@/types/type-user";
+import { type Course } from "@/types/type-user";
 import {
   removeSemester,
   addCourse,
   calcTotalSemesterCredits,
   updateIsCompleted,
-} from "../utils/userDataHelpers";
-import { useUser } from "../contexts/UserContext";
+} from "@/utils/userDataHelpers";
+
+import { useUser } from "@/contexts/UserContext";
 
 import CourseOutput from "./CourseOutput";
 import BlankCourseOutput from "./BlankCourseOutput";
 
 import trashcan from "../assets/trashcan.svg";
-import lockAnimation from "../animations/lockAnimation.json";
+import lockAnimation from "../assets/lockAnimation.json";
 
 import { useDrop } from "react-dnd";
 import { useRef, useEffect, useMemo } from "react";
@@ -22,6 +23,7 @@ import type { LottieRefCurrentProps } from "lottie-react";
 
 interface SemesterOutputProps {
   semester: StudentSemester;
+  onAddCustomCourse?: () => void;
 }
 
 function codeToYear(code: number): number {
@@ -34,7 +36,7 @@ function codeToYear(code: number): number {
 }
 
 // semester prop, mainly to specify the season code
-function SemesterOutput({ semester }: SemesterOutputProps) {
+function SemesterOutput({ semester, onAddCustomCourse }: SemesterOutputProps) {
   const { userData, setUserData } = useUser();
 
   const activeWorksheetId = userData?.FYP?.activeWorksheetID; // undefined => Main Worksheet (baseline)
@@ -132,9 +134,9 @@ function SemesterOutput({ semester }: SemesterOutputProps) {
     <>
       <div
         className={clsx(
-          "flex flex-col border-4  p-4 m-6 rounded-xl bg-gray-50",
+          "flex flex-col border-4  p-4 m-6 rounded-xl",
           isCompleted
-            ? "border-yellow-400 bg-yellow-50 duration-500"
+            ? "border-green-700 bg-[#F4F7F1] duration-500"
             : isOver
             ? "border-blue-200 bg-gray-50 duration-200"
             : "border-gray-300 bg-gray-50 duration-500"
@@ -148,7 +150,10 @@ function SemesterOutput({ semester }: SemesterOutputProps) {
             <span className="text-base text-gray-600 mt-1">
               {codeToYear(semester.season)}-{codeToYear(semester.season) + 1}
             </span>
-            <button className="h-8 w-8 " onClick={handleUpdateIsCompleted}>
+            <button
+              className="h-8 w-8 cursor-pointer"
+              onClick={handleUpdateIsCompleted}
+            >
               <Lottie
                 lottieRef={lottieRef}
                 animationData={lockAnimation}
@@ -178,9 +183,13 @@ function SemesterOutput({ semester }: SemesterOutputProps) {
           ))}
           {!isCompleted && (
             <li>
-              <div className="w-54">
+              <button
+                type="button"
+                className="w-54 cursor-pointer"
+                onClick={onAddCustomCourse}
+              >
                 <BlankCourseOutput />
-              </div>
+              </button>
             </li>
           )}
         </ul>
@@ -189,7 +198,7 @@ function SemesterOutput({ semester }: SemesterOutputProps) {
             <img
               src={trashcan}
               alt="trashcan"
-              className="h-6 w-6 float-right active:scale-125 transition duration-300 ease-in-out"
+              className="h-6 w-6 float-right active:scale-125 transition duration-300 ease-in-out cursor-pointer"
             ></img>
           </button>
         )}
