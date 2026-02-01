@@ -16,10 +16,10 @@ export async function getMajors() {
   return res.json();
 }
 
-export async function getSemesters() {
+/* export async function getSemesters() {
   const res = await apiClient.get("/semesters/");
   return res.json();
-}
+} */
 
 export async function getWorksheets() {
   const res = await apiClient.get("/worksheets/");

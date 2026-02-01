@@ -1,6 +1,7 @@
-import { useMemo, useState, useCallback } from "react";
+import { useMemo, useState, useCallback, useEffect } from "react";
 import { useUser } from "@/contexts/UserContext";
 import { type StudentSemester } from "@/types/type-user";
+import { getWorksheets } from "@/api/coursePlanning";
 
 type UseWorksheetManagerReturn = {
   worksheets: any[];
@@ -63,6 +64,35 @@ export function useWorksheetManager(): UseWorksheetManagerReturn {
     },
     [worksheets]
   );
+// NOTE: This effect assumes authenticated user data.
+// It has not yet been fully tested against the live backend.
+
+  useEffect(() => {
+    if (!userData) return;
+
+    // If worksheets already exist, do nothing
+    if (userData.FYP?.worksheets?.length) return;
+
+    const loadWorksheets = async () => {
+      try {
+        const data = await getWorksheets();
+        console.log("WORKSHEETS FROM API:", data);
+
+        setUserData({
+          ...userData,
+          FYP: {
+            ...userData.FYP,
+            worksheets: data,
+            activeWorksheetID: data[0]?.id ?? "ws_main",
+          },
+        });
+      } catch (err) {
+        console.error("Failed to load worksheets", err);
+      }
+    };
+
+    loadWorksheets();
+  }, [userData, setUserData]);
 
   // ---------- Inline worksheet actions state ----------
   const [isRenaming, setIsRenaming] = useState(false);
