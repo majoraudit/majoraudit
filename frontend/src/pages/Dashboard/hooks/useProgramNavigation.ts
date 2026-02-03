@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, useLayoutEffect} from "react";
 
 type Tab = "degree" | "major" | "certificate";
 
@@ -15,6 +15,11 @@ export function useProgramNavigation(opts: {
   const [activeTab, setActiveTab] = useState<Tab>("degree");
   const [selectedMajorIndex, setSelectedMajorIndex] = useState(0);
   const [selectedCertificateIndex, setSelectedCertificateIndex] = useState(0);
+
+useLayoutEffect(() => {
+  if (activeTab === "major" && majorCount === 0) setActiveTab("degree");
+  if (activeTab === "certificate" && certificateCount === 0) setActiveTab("degree");
+}, [activeTab, majorCount, certificateCount]);
 
   // Keep indices valid if counts change (after remove)
   useEffect(() => {
@@ -63,10 +68,38 @@ export function useProgramNavigation(opts: {
   }, [activeTab, majorCount, certificateCount]);
 
   const activeIndex = useMemo(() => {
-    if (activeTab === "major") return selectedMajorIndex;
-    if (activeTab === "certificate") return selectedCertificateIndex;
+    if (activeTab === "major") return selectedMajorIndex + 1;
+    if (activeTab === "certificate") return 1 + selectedMajorIndex + selectedCertificateIndex;
     return 0;
   }, [activeTab, selectedMajorIndex, selectedCertificateIndex]);
+
+  const afterRemove = useCallback(
+  (next: { majorCount: number; certificateCount: number }) => {
+    const nextMajorCount = next.majorCount;
+    const nextCertCount = next.certificateCount;
+
+    if (activeTab === "major") {
+      if (nextMajorCount === 0) {
+        setActiveTab("degree");
+        setSelectedMajorIndex(0);
+      } else {
+        setSelectedMajorIndex((i) => clamp(i - 1, 0, nextMajorCount - 1));
+      }
+      return;
+    }
+
+    if (activeTab === "certificate") {
+      if (nextCertCount === 0) {
+        setActiveTab("degree");
+        setSelectedCertificateIndex(0);
+      } else {
+        setSelectedCertificateIndex((i) => clamp(i - 1, 0, nextCertCount - 1));
+      }
+    }
+  },
+  [activeTab]
+);
+
 
   return {
     activeTab,
@@ -84,5 +117,6 @@ export function useProgramNavigation(opts: {
     canNext,
     prev,
     next,
+    afterRemove
   };
 }

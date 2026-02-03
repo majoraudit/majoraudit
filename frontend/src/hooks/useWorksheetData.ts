@@ -1,6 +1,7 @@
 import { useMemo, useCallback } from "react";
 import type { Course, StudentCourse, StudentSemester, Worksheet } from "@/types/type-user";
 import { useWorksheetManager } from "@/hooks/useWorksheetManager";
+import { useUser } from "@/contexts/UserContext";
 
 /**
  * Try to get numeric credits from a course.
@@ -22,6 +23,7 @@ function getCourseKey(course: Course | undefined | null): string {
 }
 
 export function useWorksheetData() {
+    const {userData} = useUser();
   const { activeWorksheet, activeSemesters } = useWorksheetManager();
 
   /**
@@ -150,6 +152,14 @@ export function useWorksheetData() {
   return completedStudentCourses.length;
 }, [completedStudentCourses]);
 
+const majorCount = useMemo(() => {
+  return activeWorksheet ? (userData?.FYP?.statCount?.majorNum ?? 0) : 0;
+}, [userData?.FYP?.statCount?.majorNum, activeWorksheet]);
+
+const certificateCount = useMemo(() => {
+  return activeWorksheet ? (userData?.FYP?.statCount?.certificateNum ?? 0) : 0;
+}, [userData?.FYP?.statCount?.certificateNum, activeWorksheet]);
+
   return {
     // raw worksheet
     activeWorksheet: activeWorksheet as Worksheet | undefined,
@@ -171,5 +181,7 @@ export function useWorksheetData() {
     totalCredits,
     completedCredits,
     getSemesterCredits,
+    majorCount,
+    certificateCount
   };
 }

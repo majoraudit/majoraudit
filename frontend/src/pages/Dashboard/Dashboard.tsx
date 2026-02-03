@@ -1,5 +1,4 @@
 import { formatC_P_UP } from "@/utils/formatHelpers";
-import { removeMajor } from "../../utils/userDataHelpers";
 import type { MajorProgress } from "../../types/type-program";
 
 import { useUser } from "@/contexts/UserContext";
@@ -13,6 +12,7 @@ import trashcan from "./assets/trashcan.svg";
 
 import { useMemo, useEffect } from "react";
 
+import { useWorksheetActions } from "@/hooks/useWorksheetActions";
 import { useWorksheetData } from "@/hooks/useWorksheetData";
 import { useProgramNavigation } from "./hooks/useProgramNavigation";
 
@@ -26,8 +26,14 @@ import {
 function Dashboard() {
   const { userData, setUserData } = useUser();
   const { appData } = useApp();
-  const { totalCredits, completedCredits, completedCourseCount } =
-    useWorksheetData();
+  const { removeProgram } = useWorksheetActions();
+  const {
+    totalCredits,
+    completedCredits,
+    completedCourseCount,
+    majorCount,
+    certificateCount,
+  } = useWorksheetData();
 
   const graduationCreditsRequired = 36;
 
@@ -58,7 +64,7 @@ function Dashboard() {
       (w) => w.worksheetID === activeWorksheetId,
     );
     return dP?.majors ?? [];
-  }, [activeWorksheetId]);
+  }, [userData, activeWorksheetId]);
 
   const totalCompletedCredits = completedCredits;
 
@@ -66,14 +72,10 @@ function Dashboard() {
 
   const totalCompletedCourses = completedCourseCount;
 
-  // Calculate counts
-  const majorCount = userData?.FYP?.statCount?.majorNum ?? 0;
-  const certificateCount = userData?.FYP?.statCount?.certificateNum ?? 0;
-
   const nav = useProgramNavigation({ majorCount, certificateCount });
 
   const activeProgram = useMemo(() => {
-    if (nav.activeTab === "degree") return null;
+    if (nav.activeTab === "degree") return activeMajorProgress[0];
     return activeMajorProgress[nav.activeIndex] ?? null;
   }, [nav.activeTab, nav.activeIndex, activeMajorProgress]);
 
@@ -81,24 +83,15 @@ function Dashboard() {
     console.log("Removing major/certificate...");
     if (!userData) return;
 
-    // The program currently shown (major or certificate)
-    const programToRemove = activeMajorProgress[nav.activeIndex];
-    if (!programToRemove) return;
-
     // Compute the next user snapshot after removal
-    const nextUser = removeMajor(userData, programToRemove);
-
-    // Updated counts after removal
-    const nextMajorCount = nextUser.FYP?.statCount?.majorNum ?? 0;
-    const nextCertCount = nextUser.FYP?.statCount?.certificateNum ?? 0;
-
+    const res = removeProgram(activeProgram);
+    if (!res.ok) {
+      return;
+    }
     nav.afterRemove({
-      majorCount: nextMajorCount,
-      certificateCount: nextCertCount,
+      majorCount: majorCount,
+      certificateCount: certificateCount,
     });
-
-    // Finally commit the user update
-    setUserData(nextUser);
   };
 
   useEffect(() => {
