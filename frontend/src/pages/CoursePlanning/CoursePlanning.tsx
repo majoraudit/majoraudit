@@ -1,5 +1,4 @@
 import { type StudentSemester } from "@/types/type-user";
-import { addSemester } from "@/utils/userDataHelpers";
 
 import CourseOutput from "./components/CourseOutput";
 import SemesterOutput from "./components/SemesterOutput";
@@ -7,7 +6,8 @@ import SemesterOutput from "./components/SemesterOutput";
 import { useUser } from "@/contexts/UserContext";
 import { useApp } from "@/contexts/AppContext";
 
-import { useWorksheetManager } from "../../hooks/useWorksheetManager";
+import { useWorksheetManager } from "@/hooks/useWorksheetManager";
+import { useWorksheetActions } from "@/hooks/useWorksheetActions";
 
 import pencilIcon from "./assets/pencil.svg";
 import addSemesterIcon from "./assets/addSemester.svg";
@@ -79,6 +79,8 @@ function CoursePlanning() {
 
     resetWorksheetInlineState,
   } = useWorksheetManager();
+
+  const { addSemester } = useWorksheetActions();
 
   if (!appData) return <div>Loading courses and majors...</div>;
 
@@ -158,7 +160,10 @@ function CoursePlanning() {
       isCompleted: false,
     };
 
-    setUserData(addSemester(userData, newSemester));
+    const res = addSemester(newSemester);
+    if (!res.ok) {
+      return;
+    }
 
     // Clear form + error after success
     setFormData({ term: "", year: "", title: "" });

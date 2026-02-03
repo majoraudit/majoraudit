@@ -1,13 +1,5 @@
 import { type StudentSemester } from "@/types/type-user";
-import { type Course } from "@/types/type-user";
-import {
-  removeSemester,
-  addCourse,
-  calcTotalSemesterCredits,
-  updateIsCompleted,
-} from "@/utils/userDataHelpers";
-
-import { useUser } from "@/contexts/UserContext";
+import { type Course, type StudentCourse } from "@/types/type-user";
 
 import CourseOutput from "./CourseOutput";
 import BlankCourseOutput from "./BlankCourseOutput";
@@ -15,8 +7,12 @@ import BlankCourseOutput from "./BlankCourseOutput";
 import trashcan from "../assets/trashcan.svg";
 import lockAnimation from "../assets/lockAnimation.json";
 
+import { useWorksheetManager } from "@/hooks/useWorksheetManager";
+import { useWorksheetActions } from "@/hooks/useWorksheetActions";
+import { useWorksheetData } from "@/hooks/useWorksheetData";
+
 import { useDrop } from "react-dnd";
-import { useRef, useEffect, useMemo } from "react";
+import { useRef, useEffect } from "react";
 import clsx from "clsx";
 import Lottie from "lottie-react";
 import type { LottieRefCurrentProps } from "lottie-react";
@@ -37,19 +33,11 @@ function codeToYear(code: number): number {
 
 // semester prop, mainly to specify the season code
 function SemesterOutput({ semester, onAddCustomCourse }: SemesterOutputProps) {
-  const { userData, setUserData } = useUser();
+  const { removeSemester, addCourse, setSemesterCompleted } =
+    useWorksheetActions();
+  const { activeSemesters } = useWorksheetManager();
+  const { getSemesterCredits } = useWorksheetData();
 
-  const activeWorksheetId = userData?.FYP?.activeWorksheetID; // undefined => Main Worksheet (baseline)
-
-  const worksheets = userData?.FYP?.worksheets ?? [];
-
-  const activeSemesters: StudentSemester[] = useMemo(() => {
-    if (!userData) return [];
-    const ws = worksheets.find((w) => w.id === activeWorksheetId);
-    return ws?.studentSemesters ?? [];
-  }, [userData, activeWorksheetId, worksheets]);
-
-  // semester doesn't auto update as a prop --> need this to get userData which auto updates
   const updatedSemester =
     activeSemesters.find((s) => s.season === semester.season) ?? semester;
 
@@ -61,7 +49,7 @@ function SemesterOutput({ semester, onAddCustomCourse }: SemesterOutputProps) {
     if (lottieRef.current && !isCompleted) {
       lottieRef.current.goToAndStop(lockAnimation.op / 2, true);
     }
-  }, []);
+  }, [isCompleted]);
 
   const handleUpdateIsCompleted = () => {
     if (!lottieRef.current) return;
@@ -71,20 +59,16 @@ function SemesterOutput({ semester, onAddCustomCourse }: SemesterOutputProps) {
     if (newCompletedState) {
       lottieRef.current.playSegments(
         [lockAnimation.op / 2, lockAnimation.op],
-        true
+        true,
       );
     } else {
       lottieRef.current.playSegments(
         [lockAnimation.op, lockAnimation.op / 2],
-        true
+        true,
       );
     }
 
-    //setIsCompleted(newCompletedState);
-    if (userData)
-      setUserData(
-        updateIsCompleted(userData, newCompletedState, semester.season)
-      );
+    setSemesterCompleted(updatedSemester.season, newCompletedState);
   };
 
   // drop logic
@@ -101,18 +85,15 @@ function SemesterOutput({ semester, onAddCustomCourse }: SemesterOutputProps) {
     () => ({
       accept: "course",
       drop: (item) => {
-        if (userData) {
-          const updatedUser = addCourse(
-            userData,
-            {
-              course: item.selectedCourse,
-              term: semester.season,
-              status: "DA_COMPLETE",
-            },
-            semester.season
-          );
+        const newStudentCourse: StudentCourse = {
+          course: item.selectedCourse,
+          term: semester.season,
+          status: "DA_COMPLETE",
+        };
 
-          setUserData(updatedUser);
+        const res = addCourse(semester.season, newStudentCourse);
+        if (!res.ok) {
+          return;
         }
       },
       canDrop: () => !isCompleted,
@@ -120,14 +101,17 @@ function SemesterOutput({ semester, onAddCustomCourse }: SemesterOutputProps) {
         isOver: !!monitor.isOver(),
       }),
     }),
-    [userData, semester.season, isCompleted]
+    [addCourse, updatedSemester.season, isCompleted],
   );
 
   // connects useDrop to DOM element
   drop(ref);
 
   const handleSemesterRemove = () => {
-    if (userData) setUserData(removeSemester(userData, semester));
+    const res = removeSemester(semester.season);
+    if (!res.ok) {
+      return;
+    }
   };
 
   return (
@@ -138,8 +122,8 @@ function SemesterOutput({ semester, onAddCustomCourse }: SemesterOutputProps) {
           isCompleted
             ? "border-green-700 bg-[#F4F7F1] duration-500"
             : isOver
-            ? "border-blue-200 bg-gray-50 duration-200"
-            : "border-gray-300 bg-gray-50 duration-500"
+              ? "border-blue-200 bg-gray-50 duration-200"
+              : "border-gray-300 bg-gray-50 duration-500",
         )}
         ref={ref}
       >
@@ -163,8 +147,7 @@ function SemesterOutput({ semester, onAddCustomCourse }: SemesterOutputProps) {
             </button>
           </h2>
           <h2 className="text-base text-gray-600 font-bold mb-2">
-            Total Credits:{" "}
-            {userData && calcTotalSemesterCredits(userData, semester.season)}
+            Total Credits: {getSemesterCredits(updatedSemester.season)}
           </h2>
         </div>
         <ul className="flex flex-row p-2 gap-4 flex-wrap">

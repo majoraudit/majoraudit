@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from "react";
+import { useCallback } from "react";
 import { useUser } from "@/contexts/UserContext";
 import { useWorksheetManager } from "@/hooks/useWorksheetManager";
 
@@ -9,17 +9,17 @@ import type { Course, StudentCourse, StudentSemester } from "@/types/type-user";
  * - No alerts: returns { ok, error } so UI can decide.
  * - Uses activeWorksheet from useWorksheetManager.
  */
+
 export function useWorksheetActions() {
   const { userData, setUserData } = useUser();
 
-  const { activeWorksheetId, activeWorksheet, activeSemesters } =
+  const { activeWorksheetId, activeWorksheet } =
     useWorksheetManager();
 
   const worksheet = activeWorksheet;
 
   const canMutate = Boolean(userData && worksheet && activeWorksheetId);
 
-  // Helper: update userData by replacing ONLY the active worksheet
   const updateActiveWorksheet = useCallback(
     (updater: (ws: any) => any) => {
       if (!userData || !worksheet) return;
@@ -43,7 +43,6 @@ export function useWorksheetActions() {
     (newSemester: StudentSemester) => {
       if (!canMutate) return { ok: false, error: "No active worksheet." };
 
-      // Prevent duplicate season on this worksheet
       const exists = worksheet.studentSemesters.some(
         (s: StudentSemester) => s.season === newSemester.season
       );
@@ -150,22 +149,29 @@ export function useWorksheetActions() {
     [canMutate, updateActiveWorksheet]
   );
 
-  // Optional: expose derived data so CoursePlanning doesn't need to import both hooks
-  const state = useMemo(
-    () => ({
-      activeWorksheetId,
-      worksheet,
-      activeSemesters,
-      canMutate,
-    }),
-    [activeWorksheetId, worksheet, activeSemesters, canMutate]
-  );
+  const setSemesterCompleted = useCallback(
+  (season: number, isCompleted: boolean) => {
+    if (!canMutate) return { ok: false as const, error: "No active worksheet." };
+
+    updateActiveWorksheet((ws) => {
+      const updatedSemesters = ws.studentSemesters.map((semester: StudentSemester) => {
+        if (semester.season !== season) return semester;
+        return { ...semester, isCompleted };
+      });
+
+      return { ...ws, studentSemesters: updatedSemesters };
+    });
+
+    return { ok: true as const };
+  },
+  [canMutate, updateActiveWorksheet]
+);
 
   return {
-    ...state,
     addSemester,
     removeSemester,
     addCourse,
     removeCourse,
+    setSemesterCompleted
   };
 }
