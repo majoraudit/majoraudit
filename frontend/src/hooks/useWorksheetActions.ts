@@ -4,7 +4,6 @@ import { useWorksheetManager } from "@/hooks/useWorksheetManager";
 
 import type { Course, StudentCourse, StudentSemester} from "@/types/type-user";
 import type { MajorProgress } from "../types/type-program";
-import { removeMajor } from "@/utils/userDataHelpers";
 
 /**
  * Hook that mutates the active worksheet inside userData.

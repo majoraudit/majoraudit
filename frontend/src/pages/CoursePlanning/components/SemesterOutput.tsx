@@ -45,11 +45,16 @@ function SemesterOutput({ semester, onAddCustomCourse }: SemesterOutputProps) {
 
   const lottieRef = useRef<LottieRefCurrentProps | null>(null);
 
+  const ip = lockAnimation.ip ?? 0;
+  const op = lockAnimation.op ?? 0;
+  const mid = Math.floor((ip + op) / 2);
+
   useEffect(() => {
-    if (lottieRef.current && !isCompleted) {
-      lottieRef.current.goToAndStop(lockAnimation.op / 2, true);
-    }
-  }, [isCompleted]);
+    if (!lottieRef.current) return;
+
+    // Snap to correct resting pose for the current state
+    lottieRef.current.goToAndStop(isCompleted ? op : mid, true);
+  }, [isCompleted, op, mid]);
 
   const handleUpdateIsCompleted = () => {
     if (!lottieRef.current) return;
@@ -57,15 +62,11 @@ function SemesterOutput({ semester, onAddCustomCourse }: SemesterOutputProps) {
     const newCompletedState = !isCompleted;
 
     if (newCompletedState) {
-      lottieRef.current.playSegments(
-        [lockAnimation.op / 2, lockAnimation.op],
-        true,
-      );
+      // unlocked -> locked
+      lottieRef.current.playSegments([mid, op], true);
     } else {
-      lottieRef.current.playSegments(
-        [lockAnimation.op, lockAnimation.op / 2],
-        true,
-      );
+      // locked -> unlocked
+      lottieRef.current.playSegments([ip, mid], true);
     }
 
     setSemesterCompleted(updatedSemester.season, newCompletedState);
