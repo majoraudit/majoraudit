@@ -7,7 +7,7 @@ import SemesterOutput from "./components/SemesterOutput";
 import { useUser } from "@/contexts/UserContext";
 import { useApp } from "@/contexts/AppContext";
 
-import { useWorksheetManager } from "./hooks/useWorksheetManager";
+import { useWorksheetManager } from "../../hooks/useWorksheetManager";
 
 import pencilIcon from "./assets/pencil.svg";
 import addSemesterIcon from "./assets/addSemester.svg";
@@ -360,7 +360,6 @@ function CoursePlanning() {
                 </DropdownMenuContent>
               </DropdownMenu>
 
-              {/* Worksheets dropdown */}
               {/* Worksheets dropdown */}
               <DropdownMenu
                 onOpenChange={(open) => {
