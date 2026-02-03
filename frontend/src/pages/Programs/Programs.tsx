@@ -1,12 +1,14 @@
 import type { MajorProgress, GroupItemProgress } from "@/types/type-program";
 import { formatCourseItemTypes } from "@/utils/formatHelpers";
-import { addMajor } from "@/utils/userDataHelpers";
 import type { MajorTemplate } from "@/types/type-program";
 
 import { useUser } from "@/contexts/UserContext";
 import { useApp } from "@/contexts/AppContext";
 
 import bookIcon from "./assets/book.svg";
+
+import { useWorksheetManager } from "@/hooks/useWorksheetManager";
+import { useWorksheetActions } from "@/hooks/useWorksheetActions";
 
 import { useState, useEffect, useMemo } from "react";
 import SidebarLayout from "@/components/shared-components/SidebarLayout";
@@ -31,7 +33,7 @@ function ClassRequirementMap({ reqProgressGroup }: ClassRequirementMapProps) {
 
   const maxLength = Math.max(
     requirements.length,
-    reqProgressGroup.completedNum
+    reqProgressGroup.completedNum,
   );
   const pairs = [];
 
@@ -71,30 +73,12 @@ function Programs() {
   const { userData, setUserData } = useUser();
   const { appData } = useApp();
   const { isAuthenticated } = useAuth();
+  const { worksheets, activeWorksheetId, activeWorksheet } =
+    useWorksheetManager();
+  const { addProgram } = useWorksheetActions();
   const [selectedProgram, setSelectedProgram] = useState<MajorProgress | null>(
-    null
+    null,
   );
-
-  const worksheets = useMemo(
-    () => userData?.FYP?.worksheets ?? [],
-    [userData?.FYP?.worksheets]
-  );
-
-  const activeWorksheetId = useMemo(
-    () => userData?.FYP?.activeWorksheetID ?? worksheets[0]?.id ?? "baseline",
-    [userData?.FYP?.activeWorksheetID, worksheets]
-  );
-
-  const activeWorksheet = useMemo(() => {
-    const found = worksheets.find((w) => w.id === activeWorksheetId);
-    if (found) return found;
-
-    return {
-      id: "main_ws",
-      name: "Main Worksheet",
-      studentSemesters: [],
-    };
-  }, [worksheets, activeWorksheetId]);
 
   const setActiveWorksheet = (id: string | null) => {
     if (!userData) return;
@@ -112,7 +96,7 @@ function Programs() {
     return [...appData.major_templates.slice(1)].sort((a, b) =>
       (a.name ?? a.name).localeCompare(b.name ?? b.name, "en", {
         sensitivity: "base",
-      })
+      }),
     );
   }, [appData?.major_templates]);
 
@@ -120,22 +104,23 @@ function Programs() {
     if (appData && majorTemplatesSorted.length > 0) {
       const defaultProgram = appData.major_processor.processMajorTemplate(
         selectedProgram ? selectedProgram : majorTemplatesSorted[0],
-        activeWorksheet
+        activeWorksheet,
       );
       setSelectedProgram(defaultProgram);
     }
   }, [appData, activeWorksheet, majorTemplatesSorted]);
 
   const handleMajorAdd = () => {
-    if (userData && selectedProgram) {
-      setUserData(addMajor(userData, selectedProgram));
+    const res = addProgram(selectedProgram);
+    if (!res.ok) {
+      return;
     }
   };
 
   const majorExists = useMemo(() => {
     if (!userData || !selectedProgram) return false;
     const entry = userData.FYP.degreeProgress2.find(
-      (d) => d.worksheetID === activeWorksheetId
+      (d) => d.worksheetID === activeWorksheetId,
     );
     return entry?.majors.some((m) => m.id === selectedProgram.id) ?? false;
   }, [userData?.FYP.degreeProgress2, selectedProgram?.id, activeWorksheetId]);
@@ -163,8 +148,8 @@ function Programs() {
                       setSelectedProgram(
                         appData.major_processor.processMajorTemplate(
                           major_template,
-                          activeWorksheet
-                        )
+                          activeWorksheet,
+                        ),
                       )
                     }
                     className={`w-full text-left m-0 p-2 cursor-pointer transition-colors duration-200 hover:bg-blue-200 ${

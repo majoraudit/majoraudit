@@ -3,7 +3,6 @@ import { type StudentSemester } from "@/types/type-user";
 import CourseOutput from "./components/CourseOutput";
 import SemesterOutput from "./components/SemesterOutput";
 
-import { useUser } from "@/contexts/UserContext";
 import { useApp } from "@/contexts/AppContext";
 
 import { useWorksheetManager } from "@/hooks/useWorksheetManager";

@@ -177,9 +177,10 @@ function isCertificateType(t?: string) {
 );
 
 const addProgram = useCallback(
-    (program: MajorProgress) => {
+    (program: MajorProgress | null) => {
       if (!activeWorksheetId) return { ok: false as const, error: "No active worksheet." };
-
+        
+      if(!program) return { ok: false as const, error: "Program is null." };
       setUserData((prev) => {
         if (!prev) return prev;
 
