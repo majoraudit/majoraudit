@@ -12,7 +12,7 @@ import { useWorksheetManager } from "./hooks/useWorksheetManager";
 import pencilIcon from "./assets/pencil.svg";
 import addSemesterIcon from "./assets/addSemester.svg";
 
-import React, { useMemo, useState } from "react";
+import React, { useState } from "react";
 
 import SidebarLayout from "@/components/shared-components/SidebarLayout";
 import CustomCourseModal from "./components/CustomCourseModal";
@@ -52,9 +52,6 @@ function CoursePlanning() {
 
     isMainId,
     setActiveWorksheet,
-    createWorksheet,
-    renameWorksheet,
-    deleteWorksheet,
 
     // inline UI
     isRenaming,

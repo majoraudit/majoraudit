@@ -11,9 +11,6 @@ type UseWorksheetManagerReturn = {
   // helpers / actions
   isMainId: (id: string | null | undefined) => boolean;
   setActiveWorksheet: (id: string | null) => void;
-  createWorksheet: (name?: string) => void;
-  renameWorksheet: (id: string, newName: string) => boolean; // returns success
-  deleteWorksheet: (id: string) => void;
 
   // inline UI state (rename/delete/create in dropdown)
   isRenaming: boolean;
@@ -303,9 +300,6 @@ export function useWorksheetManager(): UseWorksheetManagerReturn {
 
     isMainId,
     setActiveWorksheet,
-    createWorksheet,
-    renameWorksheet,
-    deleteWorksheet,
 
     isRenaming,
     renameTargetId,
