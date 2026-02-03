@@ -12,6 +12,7 @@ import trashcan from "./assets/trashcan.svg";
 
 import { useMemo, useEffect } from "react";
 
+import { useWorksheetManager } from "@/hooks/useWorksheetManager";
 import { useWorksheetActions } from "@/hooks/useWorksheetActions";
 import { useWorksheetData } from "@/hooks/useWorksheetData";
 import { useProgramNavigation } from "./hooks/useProgramNavigation";
@@ -26,6 +27,8 @@ import {
 function Dashboard() {
   const { userData, setUserData } = useUser();
   const { appData } = useApp();
+  const { worksheets, activeWorksheetId, setActiveWorksheet } =
+    useWorksheetManager();
   const { removeProgram } = useWorksheetActions();
   const {
     totalCredits,
@@ -36,27 +39,6 @@ function Dashboard() {
   } = useWorksheetData();
 
   const graduationCreditsRequired = 36;
-
-  const worksheets = useMemo(
-    () => userData?.FYP?.worksheets ?? [],
-    [userData?.FYP?.worksheets],
-  );
-
-  const activeWorksheetId = useMemo(
-    () => userData?.FYP?.activeWorksheetID ?? worksheets[0]?.id ?? "baseline",
-    [userData?.FYP?.activeWorksheetID, worksheets],
-  );
-
-  const setActiveWorksheet = (id: string | null) => {
-    if (!userData) return;
-    setUserData({
-      ...userData,
-      FYP: {
-        ...userData.FYP,
-        activeWorksheetID: id ?? "main_ws",
-      },
-    });
-  };
 
   const activeMajorProgress: MajorProgress[] = useMemo(() => {
     if (!userData) return [];
