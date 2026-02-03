@@ -29,7 +29,6 @@ import {
 import { Pencil, Trash2 } from "lucide-react";
 
 function CoursePlanning() {
-  const { userData, setUserData } = useUser();
   const { appData } = useApp();
 
   // term/year now strings so they work nicely with labels + custom dropdowns
@@ -98,8 +97,6 @@ function CoursePlanning() {
     semester: StudentSemester,
     data: { title: string; code: string; notes: string },
   ) => {
-    if (!userData) return;
-
     // TODO: adjust to match your actual StudentCourse type / helper
     // This is a *generic example* of pushing a new custom course
     const newCourse: any = {
@@ -136,8 +133,6 @@ function CoursePlanning() {
   };
 
   const handleInputSubmit = () => {
-    if (!userData) return;
-
     if (!(formData.term && formData.year && formData.title)) {
       return;
     }

@@ -21,12 +21,6 @@ function getCourseKey(course: Course | undefined | null): string {
   return code || `${course.title ?? "untitled"}`;
 }
 
-/** You can expand this if you have more statuses */
-function isStudentCourseCompleted(sc: StudentCourse): boolean {
-  // Your code uses "DA_COMPLETE"
-  return sc.status === "DA_COMPLETE";
-}
-
 export function useWorksheetData() {
   const { activeWorksheet, activeSemesters } = useWorksheetManager();
 
@@ -65,7 +59,7 @@ export function useWorksheetData() {
    * Completed courses (by student-course status, not by semester lock).
    */
   const completedStudentCourses = useMemo(() => {
-    return allStudentCourses.filter(({ sc }) => isStudentCourseCompleted(sc));
+    return allStudentCourses.filter(({ semester }) => Boolean(semester.isCompleted));
   }, [allStudentCourses]);
 
   /**
@@ -89,13 +83,6 @@ export function useWorksheetData() {
     return total;
   }, [creditsBySeason]);
 
-  const completedCredits = useMemo(() => {
-    let total = 0;
-    for (const { sc } of completedStudentCourses) {
-      total += getCourseCredits(sc.course);
-    }
-    return total;
-  }, [completedStudentCourses]);
 
   /**
    * Unique courses (de-duped) in the worksheet.
@@ -147,6 +134,22 @@ export function useWorksheetData() {
     [creditsBySeason]
   );
 
+  const completedCredits = useMemo(() => {
+    let total = 0;
+    for(const sem of semestersSorted)
+    {
+        if(sem.isCompleted)
+        {
+            total += getSemesterCredits(sem.season);
+        }
+    }
+    return total;
+  }, [completedStudentCourses]);
+
+  const completedCourseCount = useMemo(() => {
+  return completedStudentCourses.length;
+}, [completedStudentCourses]);
+
   return {
     // raw worksheet
     activeWorksheet: activeWorksheet as Worksheet | undefined,
@@ -161,6 +164,7 @@ export function useWorksheetData() {
     completedStudentCourses, // same shape
     uniqueCourses,
     uniqueCompletedCourses,
+    completedCourseCount,
 
     // credits
     creditsBySeason,

@@ -1,4 +1,3 @@
-import { calcTotalCredits, calcTotalCourses } from "@/utils/userDataHelpers";
 import { formatC_P_UP } from "@/utils/formatHelpers";
 import { removeMajor } from "../../utils/userDataHelpers";
 import type { MajorProgress } from "../../types/type-program";
@@ -14,6 +13,8 @@ import trashcan from "./assets/trashcan.svg";
 
 import { useMemo, useState, useEffect } from "react";
 
+import { useWorksheetData } from "@/hooks/useWorksheetData";
+
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -24,6 +25,8 @@ import {
 function Dashboard() {
   const { userData, setUserData } = useUser();
   const { appData } = useApp();
+  const { totalCredits, completedCredits, completedCourseCount } =
+    useWorksheetData();
   const [activeTab, setActiveTab] = useState("degree");
   const [tabIndex, setTabIndex] = useState(0);
   const [selectedMajorIndex, setSelectedMajorIndex] = useState(0);
@@ -33,12 +36,12 @@ function Dashboard() {
 
   const worksheets = useMemo(
     () => userData?.FYP?.worksheets ?? [],
-    [userData?.FYP?.worksheets]
+    [userData?.FYP?.worksheets],
   );
 
   const activeWorksheetId = useMemo(
     () => userData?.FYP?.activeWorksheetID ?? worksheets[0]?.id ?? "baseline",
-    [userData?.FYP?.activeWorksheetID, worksheets]
+    [userData?.FYP?.activeWorksheetID, worksheets],
   );
 
   const setActiveWorksheet = (id: string | null) => {
@@ -55,25 +58,16 @@ function Dashboard() {
   const activeMajorProgress: MajorProgress[] = useMemo(() => {
     if (!userData) return [];
     const dP = userData.FYP.degreeProgress2.find(
-      (w) => w.worksheetID === activeWorksheetId
+      (w) => w.worksheetID === activeWorksheetId,
     );
     return dP?.majors ?? [];
   }, [activeWorksheetId]);
 
-  const totalCompletedCredits = useMemo(
-    () => (userData ? calcTotalCredits(userData, true) : 0),
-    [userData]
-  );
+  const totalCompletedCredits = completedCredits;
 
-  const totalPlannedCredits = useMemo(
-    () => (userData ? calcTotalCredits(userData, false) : 0),
-    [userData]
-  );
+  const totalPlannedCredits = totalCredits - completedCredits;
 
-  const totalCompletedCourses = useMemo(
-    () => (userData ? calcTotalCourses(userData, true) : 0),
-    [userData]
-  );
+  const totalCompletedCourses = completedCourseCount;
 
   // Calculate counts
   const majorCount = userData?.FYP?.statCount?.majorNum ?? 0;
@@ -185,12 +179,12 @@ function Dashboard() {
       const updatedDegreeProgress2 = userData.FYP.degreeProgress2.map(
         (entry) => {
           const worksheet = userData.FYP.worksheets.find(
-            (ws) => ws.id === entry.worksheetID
+            (ws) => ws.id === entry.worksheetID,
           );
           if (!worksheet) return entry;
           const updatedMajors = entry.majors
             .map((major) =>
-              appData.major_processor.updateMajorProgress(major, worksheet)
+              appData.major_processor.updateMajorProgress(major, worksheet),
             )
             .filter((m): m is MajorProgress => m !== undefined);
 
@@ -198,7 +192,7 @@ function Dashboard() {
             ...entry,
             majors: updatedMajors,
           };
-        }
+        },
       );
 
       setUserData({
@@ -265,7 +259,7 @@ function Dashboard() {
               totalPlannedCredits,
               graduationCreditsRequired -
                 totalCompletedCredits -
-                totalPlannedCredits
+                totalPlannedCredits,
             )}
           </div>
 
@@ -310,7 +304,7 @@ function Dashboard() {
               totalPlannedCredits,
               graduationCreditsRequired -
                 totalCompletedCredits -
-                totalPlannedCredits
+                totalPlannedCredits,
             )}
           </div>
         </section>
