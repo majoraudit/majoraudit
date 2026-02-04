@@ -1,16 +1,17 @@
 import { type StudentSemester } from "@/types/type-user";
-import { addSemester } from "@/utils/userDataHelpers";
 
 import CourseOutput from "./components/CourseOutput";
 import SemesterOutput from "./components/SemesterOutput";
 
-import { useUser } from "@/contexts/UserContext";
 import { useApp } from "@/contexts/AppContext";
+
+import { useWorksheetManager } from "@/hooks/useWorksheetManager";
+import { useWorksheetActions } from "@/hooks/useWorksheetActions";
 
 import pencilIcon from "./assets/pencil.svg";
 import addSemesterIcon from "./assets/addSemester.svg";
 
-import React, { useMemo, useState } from "react";
+import React, { useState } from "react";
 
 import SidebarLayout from "@/components/shared-components/SidebarLayout";
 import CustomCourseModal from "./components/CustomCourseModal";
@@ -27,7 +28,6 @@ import {
 import { Pencil, Trash2 } from "lucide-react";
 
 function CoursePlanning() {
-  const { userData, setUserData } = useUser();
   const { appData } = useApp();
 
   // term/year now strings so they work nicely with labels + custom dropdowns
@@ -42,150 +42,45 @@ function CoursePlanning() {
     useState<StudentSemester | null>(null);
   const [isCustomCourseModalOpen, setIsCustomCourseModalOpen] = useState(false);
 
-  // Inline worksheet actions state (for rename/delete/create UI inside dropdown)
-  const [isRenaming, setIsRenaming] = useState(false);
-  const [renameTargetId, setRenameTargetId] = useState<string | null>(null);
-  const [renameValue, setRenameValue] = useState("");
-  const [renameError, setRenameError] = useState("");
+  const {
+    worksheets,
+    activeWorksheetId,
+    activeWorksheet,
+    activeSemesters,
 
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
+    isMainId,
+    setActiveWorksheet,
 
-  const [isCreating, setIsCreating] = useState(false);
-  const [newWorksheetName, setNewWorksheetName] = useState("");
-  const [newWorksheetError, setNewWorksheetError] = useState("");
-  const [semesterError, setSemesterError] = useState("");
+    // inline UI
+    isRenaming,
+    renameTargetId,
+    renameValue,
+    renameError,
+    beginRename,
+    cancelRename,
+    setRenameValue,
+    commitRename,
 
-  const worksheets = userData?.FYP?.worksheets ?? [];
-  const activeWorksheetId = userData?.FYP?.activeWorksheetID ?? null;
+    isDeleting,
+    deleteTargetId,
+    beginDelete,
+    cancelDelete,
+    confirmDelete,
 
-  const activeSemesters: StudentSemester[] = useMemo(() => {
-    if (!userData) return [];
-    const ws = worksheets.find((w) => w.id === activeWorksheetId);
-    return ws?.studentSemesters ?? [];
-  }, [userData, activeWorksheetId, worksheets]);
+    isCreating,
+    newWorksheetName,
+    newWorksheetError,
+    beginCreate,
+    cancelCreate,
+    setNewWorksheetName,
+    commitCreate,
 
-  const activeWorksheet = worksheets.find((w) => w.id === activeWorksheetId);
+    resetWorksheetInlineState,
+  } = useWorksheetManager();
+
+  const { addSemester } = useWorksheetActions();
 
   if (!appData) return <div>Loading courses and majors...</div>;
-
-  const isMainId = (id: string | null | undefined) => {
-    const ws = worksheets.find((w) => w.id === id);
-    if (!ws) return false;
-    return ws.name === "Main Worksheet" || ws.id === "ws_main";
-  };
-
-  // ---------- Worksheet helpers ----------
-  const resetWorksheetInlineState = () => {
-    setIsRenaming(false);
-    setIsDeleting(false);
-    setIsCreating(false);
-    setRenameTargetId(null);
-    setDeleteTargetId(null);
-    setRenameValue("");
-    setRenameError("");
-    setNewWorksheetName("");
-    setNewWorksheetError("");
-  };
-
-  const setActiveWorksheet = (id: string | null) => {
-    if (!userData) return;
-    setUserData({
-      ...userData,
-      FYP: {
-        ...userData.FYP,
-        activeWorksheetID: id ?? "ws_main",
-      },
-    });
-
-    // Reset inline actions when switching
-    resetWorksheetInlineState();
-  };
-
-  const createWorksheet = (name?: string) => {
-    if (!userData) return;
-
-    const defaultName = `Worksheet ${worksheets.length}`;
-    const finalName = (name ?? defaultName).trim() || defaultName;
-
-    const pastDegreeProgress = userData.FYP.degreeProgress2 ?? [];
-
-    const mainWsMajors =
-      pastDegreeProgress.find((dp) => dp.worksheetID === "ws_main")?.majors ??
-      [];
-
-    const newWs = {
-      id: `ws_${Date.now()}`,
-      name: finalName,
-      studentSemesters: [],
-    };
-
-    setUserData({
-      ...userData,
-      FYP: {
-        ...userData.FYP,
-        worksheets: [...worksheets, newWs],
-        activeWorksheetID: newWs.id,
-        degreeProgress2: [
-          ...pastDegreeProgress,
-          { worksheetID: newWs.id, majors: [...mainWsMajors] },
-        ],
-      },
-    });
-  };
-
-  const renameWorksheet = (id: string, newName: string) => {
-    if (!userData) return;
-    const trimmed = newName.trim();
-    if (!trimmed) {
-      setRenameError("Name cannot be empty.");
-      return;
-    }
-
-    const duplicate = worksheets.some(
-      (w) =>
-        w.id !== id && w.name.trim().toLowerCase() === trimmed.toLowerCase()
-    );
-    if (duplicate) {
-      setRenameError("A worksheet with this name already exists.");
-      return;
-    }
-
-    setUserData({
-      ...userData,
-      FYP: {
-        ...userData.FYP,
-        worksheets: worksheets.map((w) =>
-          w.id === id ? { ...w, name: trimmed } : w
-        ),
-      },
-    });
-    setRenameError("");
-  };
-
-  const deleteWorksheet = (id: string) => {
-    if (!userData || isMainId(id)) return;
-
-    const nextList = worksheets.filter((w) => w.id !== id);
-    const newDegreeProgress = (userData.FYP.degreeProgress2 ?? []).filter(
-      (dp) => dp.worksheetID !== id
-    );
-
-    let nextActiveId = userData.FYP.activeWorksheetID;
-    if (nextActiveId === id) {
-      nextActiveId = "ws_main";
-    }
-
-    setUserData({
-      ...userData,
-      FYP: {
-        ...userData.FYP,
-        worksheets: nextList,
-        activeWorksheetID: nextActiveId,
-        degreeProgress2: newDegreeProgress,
-      },
-    });
-  };
 
   const openCustomCourseModal = (semester: StudentSemester) => {
     setSelectedSemester(semester);
@@ -199,10 +94,8 @@ function CoursePlanning() {
 
   const handleCreateCustomCourse = (
     semester: StudentSemester,
-    data: { title: string; code: string; notes: string }
+    data: { title: string; code: string; notes: string },
   ) => {
-    if (!userData) return;
-
     // TODO: adjust to match your actual StudentCourse type / helper
     // This is a *generic example* of pushing a new custom course
     const newCourse: any = {
@@ -212,30 +105,6 @@ function CoursePlanning() {
       notes: data.notes,
       isCustom: true,
     };
-
-    const updatedWorksheets = (userData.FYP.worksheets ?? []).map((ws) => {
-      if (ws.id !== activeWorksheetId) return ws;
-
-      return {
-        ...ws,
-        studentSemesters: ws.studentSemesters.map((s) =>
-          s.season === semester.season
-            ? {
-                ...s,
-                studentCourses: [...(s.studentCourses ?? []), newCourse],
-              }
-            : s
-        ),
-      };
-    });
-
-    setUserData({
-      ...userData,
-      FYP: {
-        ...userData.FYP,
-        worksheets: updatedWorksheets,
-      },
-    });
   };
 
   // ---------- Search ----------
@@ -249,25 +118,21 @@ function CoursePlanning() {
       course.codes[0]
         .toLowerCase()
         .replace(/\s+/g, "")
-        .includes(searchNormalized)
+        .includes(searchNormalized),
   );
 
   const slicedCourses = filteredCourses.slice(0, 250);
 
   // ---------- Form handling ----------
   const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-    setSemesterError(""); // clear error as user edits
   };
 
   const handleInputSubmit = () => {
-    if (!userData) return;
-
     if (!(formData.term && formData.year && formData.title)) {
-      setSemesterError("Please fill out term, year, and label.");
       return;
     }
 
@@ -279,9 +144,6 @@ function CoursePlanning() {
     // Check for duplicate semester (same year + term) on this worksheet
     const duplicateSemester = activeSemesters.some((s) => s.season === season);
     if (duplicateSemester) {
-      setSemesterError(
-        "You already have a semester for this term and year on this worksheet."
-      );
       return;
     }
 
@@ -292,11 +154,13 @@ function CoursePlanning() {
       isCompleted: false,
     };
 
-    setUserData(addSemester(userData, newSemester));
+    const res = addSemester(newSemester);
+    if (!res.ok) {
+      return;
+    }
 
     // Clear form + error after success
     setFormData({ term: "", year: "", title: "" });
-    setSemesterError("");
   };
 
   // term label helper
@@ -304,10 +168,10 @@ function CoursePlanning() {
     formData.term === "03"
       ? "Fall"
       : formData.term === "01"
-      ? "Spring"
-      : formData.term === "02"
-      ? "Summer"
-      : "Select a term";
+        ? "Spring"
+        : formData.term === "02"
+          ? "Summer"
+          : "Select a term";
 
   const yearLabel = formData.year
     ? `${formData.year}-${Number(formData.year) + 1}`
@@ -389,7 +253,6 @@ function CoursePlanning() {
                                   ...prev,
                                   term: "03",
                                 }));
-                                setSemesterError("");
                               }}
                             >
                               Fall
@@ -402,7 +265,6 @@ function CoursePlanning() {
                                   ...prev,
                                   term: "01",
                                 }));
-                                setSemesterError("");
                               }}
                             >
                               Spring
@@ -415,7 +277,6 @@ function CoursePlanning() {
                                   ...prev,
                                   term: "02",
                                 }));
-                                setSemesterError("");
                               }}
                             >
                               Summer
@@ -460,7 +321,6 @@ function CoursePlanning() {
                                     ...prev,
                                     year,
                                   }));
-                                  setSemesterError("");
                                 }}
                               >
                                 {year}-{Number(year) + 1}
@@ -488,10 +348,6 @@ function CoursePlanning() {
                       />
                     </div>
 
-                    {semesterError && (
-                      <p className="text-xs text-red-600">{semesterError}</p>
-                    )}
-
                     <button
                       type="button"
                       onClick={handleInputSubmit}
@@ -503,7 +359,6 @@ function CoursePlanning() {
                 </DropdownMenuContent>
               </DropdownMenu>
 
-              {/* Worksheets dropdown */}
               {/* Worksheets dropdown */}
               <DropdownMenu
                 onOpenChange={(open) => {
@@ -571,12 +426,7 @@ function CoursePlanning() {
                                     className="p-1 rounded hover:bg-gray-200 cursor-pointer"
                                     onClick={(e) => {
                                       e.stopPropagation();
-                                      setIsDeleting(false);
-                                      setDeleteTargetId(null);
-                                      setIsRenaming(true);
-                                      setRenameTargetId(w.id);
-                                      setRenameValue(w.name);
-                                      setRenameError("");
+                                      beginRename(w.id, w.name);
                                     }}
                                   >
                                     <Pencil className="h-3.5 w-3.5" />
@@ -586,11 +436,7 @@ function CoursePlanning() {
                                     className="p-1 rounded hover:bg-red-50 text-red-600 cursor-pointer"
                                     onClick={(e) => {
                                       e.stopPropagation();
-                                      setIsRenaming(false);
-                                      setRenameTargetId(null);
-                                      setRenameError("");
-                                      setIsDeleting(true);
-                                      setDeleteTargetId(w.id);
+                                      beginDelete(w.id);
                                     }}
                                   >
                                     <Trash2 className="h-3.5 w-3.5" />
@@ -612,7 +458,6 @@ function CoursePlanning() {
                               value={renameValue}
                               onChange={(e) => {
                                 setRenameValue(e.target.value);
-                                setRenameError("");
                               }}
                               autoFocus
                               onFocus={(e) => e.target.select()}
@@ -630,10 +475,7 @@ function CoursePlanning() {
                                 className="px-2 py-1 rounded-md border bg-white hover:bg-gray-50 cursor-pointer"
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  setIsRenaming(false);
-                                  setRenameTargetId(null);
-                                  setRenameValue("");
-                                  setRenameError("");
+                                  cancelRename();
                                 }}
                               >
                                 Cancel
@@ -643,17 +485,7 @@ function CoursePlanning() {
                                 className="px-2 py-1 rounded-md bg-brand-blue text-white hover:bg-blue-700 cursor-pointer"
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  if (renameTargetId) {
-                                    renameWorksheet(
-                                      renameTargetId,
-                                      renameValue
-                                    );
-                                    // Only close if no error
-                                    if (!renameError) {
-                                      setIsRenaming(false);
-                                      setRenameTargetId(null);
-                                    }
-                                  }
+                                  commitRename();
                                 }}
                               >
                                 Save
@@ -674,8 +506,7 @@ function CoursePlanning() {
                                 className="px-2 py-1 rounded-md border bg-white hover:bg-gray-50 cursor-pointer"
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  setIsDeleting(false);
-                                  setDeleteTargetId(null);
+                                  cancelDelete();
                                 }}
                               >
                                 Cancel
@@ -685,11 +516,7 @@ function CoursePlanning() {
                                 className="px-2 py-1 rounded-md bg-red-600 text-white hover:bg-red-700 cursor-pointer"
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  if (deleteTargetId) {
-                                    deleteWorksheet(deleteTargetId);
-                                  }
-                                  setIsDeleting(false);
-                                  setDeleteTargetId(null);
+                                  confirmDelete();
                                 }}
                               >
                                 Delete
@@ -703,7 +530,6 @@ function CoursePlanning() {
 
                   <DropdownMenuSeparator />
 
-                  {/* New worksheet (inline name, closes on menu close) */}
                   <DropdownMenuItem
                     onSelect={(e) => e.preventDefault()}
                     className="cursor-pointer text-sm"
@@ -714,14 +540,7 @@ function CoursePlanning() {
                         className="w-full text-left"
                         onClick={(e) => {
                           e.stopPropagation();
-                          setIsRenaming(false);
-                          setIsDeleting(false);
-                          setRenameTargetId(null);
-                          setDeleteTargetId(null);
-                          setRenameError("");
-                          setNewWorksheetError("");
-                          setIsCreating(true);
-                          setNewWorksheetName("New Worksheet");
+                          beginCreate();
                         }}
                       >
                         New worksheet
@@ -736,7 +555,6 @@ function CoursePlanning() {
                           value={newWorksheetName}
                           onChange={(e) => {
                             setNewWorksheetName(e.target.value);
-                            setNewWorksheetError("");
                           }}
                           autoFocus
                           onFocus={(e) => e.target.select()}
@@ -745,31 +563,10 @@ function CoursePlanning() {
                             e.stopPropagation();
                             if (e.key === "Enter") {
                               e.preventDefault();
-                              const trimmed = newWorksheetName.trim();
-                              if (!trimmed) {
-                                setNewWorksheetError("Name cannot be empty.");
-                                return;
-                              }
-                              const duplicate = worksheets.some(
-                                (w) =>
-                                  w.name.trim().toLowerCase() ===
-                                  trimmed.toLowerCase()
-                              );
-                              if (duplicate) {
-                                setNewWorksheetError(
-                                  "A worksheet with this name already exists."
-                                );
-                                return;
-                              }
-                              createWorksheet(trimmed);
-                              setIsCreating(false);
-                              setNewWorksheetName("");
-                              setNewWorksheetError("");
+                              commitCreate();
                             } else if (e.key === "Escape") {
                               e.preventDefault();
-                              setIsCreating(false);
-                              setNewWorksheetName("");
-                              setNewWorksheetError("");
+                              cancelCreate();
                             }
                           }}
                         />

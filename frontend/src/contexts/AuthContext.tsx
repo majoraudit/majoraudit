@@ -1,7 +1,7 @@
 import React, { createContext, useState, useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { apiUrl } from "../constants.ts";
-import { apiClient } from "../utils/apiClient.ts";
+import { apiClient } from "../api/apiClient.ts";
 
 interface AuthContextType {
   isAuthenticated: boolean;

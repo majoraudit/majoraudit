@@ -1,6 +1,4 @@
-import { calcTotalCredits, calcTotalCourses } from "@/utils/userDataHelpers";
 import { formatC_P_UP } from "@/utils/formatHelpers";
-import { removeMajor } from "../../utils/userDataHelpers";
 import type { MajorProgress } from "../../types/type-program";
 
 import { useUser } from "@/contexts/UserContext";
@@ -12,7 +10,12 @@ import MajorRequirementGraph from "./components/MajorRequirementGraph";
 import checkIcon from "./assets/check.svg";
 import trashcan from "./assets/trashcan.svg";
 
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useEffect } from "react";
+
+import { useWorksheetManager } from "@/hooks/useWorksheetManager";
+import { useWorksheetActions } from "@/hooks/useWorksheetActions";
+import { useWorksheetData } from "@/hooks/useWorksheetData";
+import { useProgramNavigation } from "./hooks/useProgramNavigation";
 
 import {
   DropdownMenu,
@@ -24,156 +27,53 @@ import {
 function Dashboard() {
   const { userData, setUserData } = useUser();
   const { appData } = useApp();
-  const [activeTab, setActiveTab] = useState("degree");
-  const [tabIndex, setTabIndex] = useState(0);
-  const [selectedMajorIndex, setSelectedMajorIndex] = useState(0);
-  const [selectedCertificateIndex, setSelectedCertificateIndex] = useState(0);
+  const { worksheets, activeWorksheetId, setActiveWorksheet } =
+    useWorksheetManager();
+  const { removeProgram } = useWorksheetActions();
+  const {
+    totalCredits,
+    completedCredits,
+    completedCourseCount,
+    majorCount,
+    certificateCount,
+  } = useWorksheetData();
 
   const graduationCreditsRequired = 36;
-
-  const worksheets = useMemo(
-    () => userData?.FYP?.worksheets ?? [],
-    [userData?.FYP?.worksheets]
-  );
-
-  const activeWorksheetId = useMemo(
-    () => userData?.FYP?.activeWorksheetID ?? worksheets[0]?.id ?? "baseline",
-    [userData?.FYP?.activeWorksheetID, worksheets]
-  );
-
-  const setActiveWorksheet = (id: string | null) => {
-    if (!userData) return;
-    setUserData({
-      ...userData,
-      FYP: {
-        ...userData.FYP,
-        activeWorksheetID: id ?? "main_ws",
-      },
-    });
-  };
 
   const activeMajorProgress: MajorProgress[] = useMemo(() => {
     if (!userData) return [];
     const dP = userData.FYP.degreeProgress2.find(
-      (w) => w.worksheetID === activeWorksheetId
+      (w) => w.worksheetID === activeWorksheetId,
     );
     return dP?.majors ?? [];
-  }, [activeWorksheetId]);
+  }, [userData, activeWorksheetId]);
 
-  const totalCompletedCredits = useMemo(
-    () => (userData ? calcTotalCredits(userData, true) : 0),
-    [userData]
-  );
+  const totalCompletedCredits = completedCredits;
 
-  const totalPlannedCredits = useMemo(
-    () => (userData ? calcTotalCredits(userData, false) : 0),
-    [userData]
-  );
+  const totalPlannedCredits = totalCredits - completedCredits;
 
-  const totalCompletedCourses = useMemo(
-    () => (userData ? calcTotalCourses(userData, true) : 0),
-    [userData]
-  );
+  const totalCompletedCourses = completedCourseCount;
 
-  // Calculate counts
-  const majorCount = userData?.FYP?.statCount?.majorNum ?? 0;
-  const certificateCount = userData?.FYP?.statCount?.certificateNum ?? 0;
+  const nav = useProgramNavigation({ majorCount, certificateCount });
 
-  // Helper functions for navigation
-  const handleTabChange = (tab: string) => {
-    setActiveTab(tab);
-
-    switch (tab) {
-      case "degree":
-        setTabIndex(0);
-        break;
-      case "major":
-        if (majorCount > 0) {
-          setTabIndex(1 + selectedMajorIndex);
-        }
-        break;
-      case "certificate":
-        if (certificateCount > 0) {
-          setTabIndex(1 + majorCount + selectedCertificateIndex);
-        }
-        break;
-    }
-  };
-
-  const handleMajorNavigation = (direction: "prev" | "next") => {
-    if (direction === "prev" && selectedMajorIndex > 0) {
-      const newIndex = selectedMajorIndex - 1;
-      setSelectedMajorIndex(newIndex);
-      setTabIndex(1 + newIndex);
-    } else if (direction === "next" && selectedMajorIndex < majorCount - 1) {
-      const newIndex = selectedMajorIndex + 1;
-      setSelectedMajorIndex(newIndex);
-      setTabIndex(1 + newIndex);
-    }
-  };
-
-  const handleCertificateNavigation = (direction: "prev" | "next") => {
-    if (direction === "prev" && selectedCertificateIndex > 0) {
-      const newIndex = selectedCertificateIndex - 1;
-      setSelectedCertificateIndex(newIndex);
-      setTabIndex(1 + majorCount + newIndex);
-    } else if (
-      direction === "next" &&
-      selectedCertificateIndex < certificateCount - 1
-    ) {
-      const newIndex = selectedCertificateIndex + 1;
-      setSelectedCertificateIndex(newIndex);
-      setTabIndex(1 + majorCount + newIndex);
-    }
-  };
+  const activeProgram = useMemo(() => {
+    if (nav.activeTab === "degree") return activeMajorProgress[0];
+    return activeMajorProgress[nav.activeIndex] ?? null;
+  }, [nav.activeTab, nav.activeIndex, activeMajorProgress]);
 
   const handleRemoveMajor = () => {
     console.log("Removing major/certificate...");
-    if (!userData || !activeMajorProgress[tabIndex]) return;
-
-    // The program currently shown (major or certificate)
-    const programToRemove = activeMajorProgress[tabIndex];
-    console.log("To remove:", programToRemove);
+    if (!userData) return;
 
     // Compute the next user snapshot after removal
-    const nextUser = removeMajor(userData, programToRemove);
-
-    // Updated counts after removal
-    const nextMajorCount = nextUser.FYP?.statCount?.majorNum ?? 0;
-    const nextCertCount = nextUser.FYP?.statCount?.certificateNum ?? 0;
-
-    if (activeTab === "major") {
-      if (nextMajorCount === 0) {
-        // No majors left -> go to Degree
-        setActiveTab("degree");
-        setSelectedMajorIndex(0);
-        setTabIndex(0);
-      } else {
-        // Show the previous major (index - 1), clamped
-        const newMajorIdx = Math.max(0, selectedMajorIndex - 1);
-        setSelectedMajorIndex(newMajorIdx);
-        setTabIndex(1 + newMajorIdx);
-      }
-    } else if (activeTab === "certificate") {
-      if (nextCertCount === 0) {
-        // No certificates left -> go to Degree
-        setActiveTab("degree");
-        setSelectedCertificateIndex(0);
-        setTabIndex(0);
-      } else {
-        // Show the previous certificate (index - 1), clamped
-        const newCertIdx = Math.max(0, selectedCertificateIndex - 1);
-        setSelectedCertificateIndex(newCertIdx);
-        // Certificates start after Degree (0) + all majors
-        setTabIndex(1 + nextMajorCount + newCertIdx);
-      }
-    } else {
-      // Safety: on Degree tab, just keep degree selected
-      setTabIndex(0);
+    const res = removeProgram(activeProgram);
+    if (!res.ok) {
+      return;
     }
-
-    // Finally commit the user update
-    setUserData(nextUser);
+    nav.afterRemove({
+      majorCount: majorCount,
+      certificateCount: certificateCount,
+    });
   };
 
   useEffect(() => {
@@ -185,12 +85,12 @@ function Dashboard() {
       const updatedDegreeProgress2 = userData.FYP.degreeProgress2.map(
         (entry) => {
           const worksheet = userData.FYP.worksheets.find(
-            (ws) => ws.id === entry.worksheetID
+            (ws) => ws.id === entry.worksheetID,
           );
           if (!worksheet) return entry;
           const updatedMajors = entry.majors
             .map((major) =>
-              appData.major_processor.updateMajorProgress(major, worksheet)
+              appData.major_processor.updateMajorProgress(major, worksheet),
             )
             .filter((m): m is MajorProgress => m !== undefined);
 
@@ -198,7 +98,7 @@ function Dashboard() {
             ...entry,
             majors: updatedMajors,
           };
-        }
+        },
       );
 
       setUserData({
@@ -265,7 +165,7 @@ function Dashboard() {
               totalPlannedCredits,
               graduationCreditsRequired -
                 totalCompletedCredits -
-                totalPlannedCredits
+                totalPlannedCredits,
             )}
           </div>
 
@@ -310,7 +210,7 @@ function Dashboard() {
               totalPlannedCredits,
               graduationCreditsRequired -
                 totalCompletedCredits -
-                totalPlannedCredits
+                totalPlannedCredits,
             )}
           </div>
         </section>
@@ -341,42 +241,41 @@ function Dashboard() {
             <div className="flex gap-4">
               <button
                 className={`py-2 px-4 font-medium ${
-                  activeTab === "degree"
+                  nav.activeTab === "degree"
                     ? "border-b-2 border-blue-600 text-blue-600"
                     : "text-gray-500"
                 }`}
-                onClick={() => handleTabChange("degree")}
+                onClick={() => nav.goToTab("degree")}
               >
                 Degree
               </button>
               <button
                 className={`py-2 px-4 font-medium ${
-                  activeTab === "major"
+                  nav.activeTab === "major"
                     ? "border-b-2 border-blue-600 text-blue-600"
                     : "text-gray-500"
                 } ${majorCount === 0 ? "opacity-50 cursor-not-allowed" : ""}`}
-                onClick={() => majorCount > 0 && handleTabChange("major")}
+                onClick={() => nav.goToTab("major")}
                 disabled={majorCount === 0}
               >
                 Major{" "}
-                {majorCount > 1 && `(${selectedMajorIndex + 1}/${majorCount})`}
+                {majorCount > 1 &&
+                  `(${nav.selectedMajorIndex + 1}/${majorCount})`}
               </button>
               <button
                 className={`py-2 px-4 font-medium ${
-                  activeTab === "certificate"
+                  nav.activeTab === "certificate"
                     ? "border-b-2 border-blue-600 text-blue-600"
                     : "text-gray-500"
                 } ${
                   certificateCount === 0 ? "opacity-50 cursor-not-allowed" : ""
                 }`}
-                onClick={() =>
-                  certificateCount > 0 && handleTabChange("certificate")
-                }
+                onClick={() => nav.goToTab("certificate")}
                 disabled={certificateCount === 0}
               >
                 Certificates{" "}
                 {certificateCount > 1 &&
-                  `(${selectedCertificateIndex + 1}/${certificateCount})`}
+                  `(${nav.selectedCertificateIndex + 1}/${certificateCount})`}
               </button>
 
               <DropdownMenu>
@@ -413,18 +312,15 @@ function Dashboard() {
             {/* Navigation and Title */}
             <div className="flex-1 flex justify-center items-center gap-4">
               {/* Previous button for majors/certificates */}
-              {((activeTab === "major" && majorCount > 1) ||
-                (activeTab === "certificate" && certificateCount > 1)) && (
+              {((nav.activeTab === "major" && majorCount > 1) ||
+                (nav.activeTab === "certificate" && certificateCount > 1)) && (
                 <button
-                  onClick={() =>
-                    activeTab === "major"
-                      ? handleMajorNavigation("prev")
-                      : handleCertificateNavigation("prev")
-                  }
+                  onClick={() => nav.prev()}
                   disabled={
-                    (activeTab === "major" && selectedMajorIndex === 0) ||
-                    (activeTab === "certificate" &&
-                      selectedCertificateIndex === 0)
+                    (nav.activeTab === "major" &&
+                      nav.selectedMajorIndex === 0) ||
+                    (nav.activeTab === "certificate" &&
+                      nav.selectedCertificateIndex === 0)
                   }
                   className="p-2 rounded-md bg-gray-100 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
@@ -435,24 +331,20 @@ function Dashboard() {
               {/* Program name */}
               <div>
                 <span className="font-bold text-2xl">
-                  {activeMajorProgress[tabIndex]?.name || "Loading..."}
+                  {activeProgram?.name || "Loading..."}
                 </span>
               </div>
 
               {/* Next button for majors/certificates */}
-              {((activeTab === "major" && majorCount > 1) ||
-                (activeTab === "certificate" && certificateCount > 1)) && (
+              {((nav.activeTab === "major" && majorCount > 1) ||
+                (nav.activeTab === "certificate" && certificateCount > 1)) && (
                 <button
-                  onClick={() =>
-                    activeTab === "major"
-                      ? handleMajorNavigation("next")
-                      : handleCertificateNavigation("next")
-                  }
+                  onClick={() => nav.next()}
                   disabled={
-                    (activeTab === "major" &&
-                      selectedMajorIndex === majorCount - 1) ||
-                    (activeTab === "certificate" &&
-                      selectedCertificateIndex === certificateCount - 1)
+                    (nav.activeTab === "major" &&
+                      nav.selectedMajorIndex === majorCount - 1) ||
+                    (nav.activeTab === "certificate" &&
+                      nav.selectedCertificateIndex === certificateCount - 1)
                   }
                   className="p-2 rounded-md bg-gray-100 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
@@ -462,8 +354,8 @@ function Dashboard() {
             </div>
 
             {/* Trash only for majors/certificates */}
-            {(activeTab === "major" || activeTab === "certificate") &&
-              activeMajorProgress[tabIndex] && (
+            {(nav.activeTab === "major" || nav.activeTab === "certificate") &&
+              activeProgram && (
                 <div className="ml-auto py-2 px-4">
                   <button
                     onClick={handleRemoveMajor}
@@ -484,19 +376,15 @@ function Dashboard() {
           <div className="flex flex-row flex-1 gap-4 min-h-0  p-0 mt-2">
             {/* LEFT: MajorRequirementList */}
             <div className="flex flex-col w-[26rem] flex-shrink-0 h-full min-h-full bg-white border-gray-200 border-2 shadow overflow-hidden">
-              {activeMajorProgress[tabIndex] ? (
-                <MajorRequirementList
-                  major_progress={activeMajorProgress[tabIndex]}
-                />
+              {activeProgram ? (
+                <MajorRequirementList major_progress={activeProgram} />
               ) : (
                 <div>Loading degree requirements...</div>
               )}
             </div>
             <div className="flex flex-col flex-1 h-full min-h-0 bg-white border-gray-200 border-2 p-2 shadow overflow-hidden min-w-0">
-              {activeMajorProgress[tabIndex] ? (
-                <MajorRequirementGraph
-                  major_progress={activeMajorProgress[tabIndex]}
-                />
+              {activeProgram ? (
+                <MajorRequirementGraph major_progress={activeProgram} />
               ) : (
                 <div>Loading degree requirements...</div>
               )}
