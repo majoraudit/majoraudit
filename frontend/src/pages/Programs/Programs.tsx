@@ -136,7 +136,6 @@ function Programs() {
             type="text"
             placeholder="Search by major or certificate..."
             className="px-4 py-2 border-b-4 border-gray-200 bg-blue-100 placeholder-shown:bg-white w-full focus:outline-none focus:bg-gray-100 transition-colors duration-200 ease-in-out border-t-2"
-            // (optional) hook this up to a searchTerm if you add that state
           />
           <div className="overflow-y-auto flex-1 pb-2">
             <ul className="flex flex-col w-full">

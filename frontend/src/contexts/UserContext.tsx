@@ -1,6 +1,7 @@
 import { type User } from "../types/type-user";
 import React, { useState, createContext, useContext, useEffect } from "react";
 import { initialUserData } from "../data/mock_initial_user_data";
+import { fetchProfile } from "@/api/authApi";
 
 type UserContextType = {
   userData: User | undefined;
@@ -15,7 +16,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
   const [userData, setUserData] = useState<User | undefined>(undefined);
 
   // init user data or retrieve from localStorage
-  useEffect(() => {
+  /*useEffect(() => {
     const stored = localStorage.getItem("mockUserData");
     console.log(stored);
     //if (stored) setUserData(JSON.parse(stored));
@@ -24,6 +25,26 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
     setUserData(initialUserData); //to reset mock user data
     //}
     //console.log(`[UserData] Using ${initialUserData}`);
+  }, []);*/
+
+  useEffect(() => {
+    const init = async () => {
+      // Reset mock data (dev only)
+      setUserData(initialUserData);
+
+      const profile = await fetchProfile();
+      if (!profile) return;
+
+      setUserData((prev) => ({
+        ...(prev ?? initialUserData),
+        first_name: profile.first_name,
+        last_name: profile.last_name,
+        netID: profile.email.split("@")[0],
+        onboard: true,
+      }));
+    };
+
+    init();
   }, []);
 
   // save data to local storage on change
