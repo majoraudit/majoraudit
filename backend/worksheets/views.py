@@ -73,20 +73,20 @@ class UserWorksheetClassListCreateView(generics.ListCreateAPIView):
     permission_classes = [permissions.IsAuthenticated, IsOwnerPermission]
 
     def get_queryset(self):
-        semester_id = self.kwargs.get('semester_pk')
+        worksheet_semester_id = self.kwargs.get('semester_pk')
         return UserWorksheetClass.objects.filter(
-            semester_id=semester_id,
-            semester__worksheet__user=self.request.user
+            worksheet_semester_id=worksheet_semester_id,
+            worksheet_semester__worksheet__user=self.request.user
         )
 
     def perform_create(self, serializer):
-        semester_id = self.kwargs.get('semester_pk')
-        semester = get_object_or_404(
+        worksheet_semester_id = self.kwargs.get('semester_pk')
+        worksheet_semester = get_object_or_404(
             UserWorksheetSemester,
-            id=semester_id,
+            id=worksheet_semester_id,
             worksheet__user=self.request.user
         )
-        serializer.save(semester=semester)
+        serializer.save(worksheet_semester=worksheet_semester)
 
 
 class UserWorksheetClassDetailView(generics.RetrieveUpdateDestroyAPIView):
@@ -94,8 +94,8 @@ class UserWorksheetClassDetailView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [permissions.IsAuthenticated, IsOwnerPermission]
 
     def get_queryset(self):
-        semester_id = self.kwargs.get('semester_pk')
+        worksheet_semester_id = self.kwargs.get('semester_pk')
         return UserWorksheetClass.objects.filter(
-            semester_id=semester_id,
-            semester__worksheet__user=self.request.user
+            worksheet_semester_id=worksheet_semester_id,
+            worksheet_semester__worksheet__user=self.request.user
         )

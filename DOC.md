@@ -18,7 +18,7 @@ This is to create and activate a virtual environment, on every time you close an
 
 > source .venv/bin/activate
 
-You will need a couple of environment variables (put them in a .env file)
+You will need a couple of environment variables (put them in a .env file in the backend/ folder)
 
 > DJANGO_SECRET_KEY="putarandomlongstringhere"
 >
@@ -33,6 +33,8 @@ You will need a couple of environment variables (put them in a .env file)
 > YALIES_URL="https://api.yalies.io/v2/"
 >
 > YALIES_API_KEY="get an api key from yalies"
+
+The API key from Yalies can be found here: "https://yalies.io/api"
 
 You can run the actual backend by doing
 
@@ -55,7 +57,7 @@ From root (do this in another shell)
 
 This installs all dependencies.
 
-You will need some environment variables, also in a .env
+You will need some environment variables, also in a .env (frontend/)
 
 > VITE_BACKEND_API_URL='https://localhost:8000/api'
 
@@ -66,3 +68,21 @@ Then run
 This then runs the development environment on https://localhost:5173
 
 If you want to make backend requests, there is currently an apiClient.ts file built in, where you can send requests from there.
+
+## The Admin Site
+
+Login to the frontend with the "Login with CAS" button, then while in the backend directory, do the following (you may do this in another shell, or cancel the running sslserver and do this there)
+
+> python manage.py shell
+> 
+> from authentication.models import CustomUser
+> 
+> user = CustomUser.objects.get(username='yournetid')
+> 
+> user.is_staff = True
+> 
+> user.is_superuser = True
+>
+> user.save()
+
+Now go to 'https://localhost:8000/admin' (you may need to restart the sslserver with python manage.py runsslserver if you previously cancelled it), and login in. You can interact with most of the things in the database and view things from here.
