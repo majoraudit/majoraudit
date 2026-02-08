@@ -7,6 +7,6 @@ class IsOwnerPermission(permissions.BasePermission):
             return obj.user == request.user
         elif hasattr(obj, 'worksheet'):
             return obj.worksheet.user == request.user
-        elif hasattr(obj, 'semester'):
-            return obj.semester.worksheet.user == request.user
+        elif hasattr(obj, 'worksheet_semester'):
+            return obj.worksheet_semester.worksheet.user == request.user
         return False
