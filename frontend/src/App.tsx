@@ -4,6 +4,7 @@ import CoursePlanning from "@/pages/CoursePlanning/CoursePlanning";
 import Dashboard from "@/pages/Dashboard/Dashboard";
 import Home from "@/pages/Home/Home";
 import Profile from "@/pages/Profile/Profile";
+import Onboarding from "@/pages/Onboarding/Onboarding";
 import Programs from "@/pages/Programs/Programs";
 import About from "@/pages/About/About";
 import PrivacyTerms from "./pages/PrivacyTerms/PrivacyTerms";
@@ -25,6 +26,10 @@ function App() {
               <Route
                 path="/"
                 element={<NavigateIfAuthenticatedRoute element={<Home />} />}
+              />
+              <Route
+                path="/onboarding"
+                element={<ProtectedRoute element={<Onboarding />} />}
               />
               <Route
                 path="/dashboard"

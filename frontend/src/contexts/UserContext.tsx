@@ -29,7 +29,12 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
 
   useEffect(() => {
     const init = async () => {
-      // Reset mock data (dev only)
+
+      const stored = localStorage.getItem("mockUserData");
+      const alreadyOnboarded = stored
+        ? (JSON.parse(stored) as { onboard?: boolean })?.onboard === true
+        : false;
+
       setUserData(initialUserData);
 
       const profile = await fetchProfile();
@@ -40,7 +45,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
         first_name: profile.first_name,
         last_name: profile.last_name,
         netID: profile.email.split("@")[0],
-        onboard: true,
+        onboard: alreadyOnboarded,
       }));
     };
 
