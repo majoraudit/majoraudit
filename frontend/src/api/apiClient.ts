@@ -1,13 +1,23 @@
 // import { apiUrl } from "../constants";
+function getCSRFToken(): string {
+  const match = document.cookie.match(/csrftoken=([^;]+)/);
+  return match ? match[1] : "";
+}
 
 class ApiClient {
   private async request(
     endpoint: string,
     options: RequestInit = {}
   ): Promise<Response> {
-    const url = `/api${endpoint}`;
+    const BASE_URL = "https://localhost:8000";; // Maybe should be this but idk: import.meta.env.VITE_BACKEND_API_URL || "https://localhost:8000";
+
+    const url = `${BASE_URL}/api${endpoint}`;
     const config: RequestInit = {
-      headers: { "Content-Type": "application/json", ...options.headers },
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": getCSRFToken(),
+        ...options.headers,
+      },
       credentials: "include",
       ...options,
     };
