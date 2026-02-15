@@ -1,4 +1,4 @@
-import { type StudentSemester, type Course } from "@/types/type-user";
+import { type StudentSemester, type Course, type StudentCourse } from "@/types/type-user";
 
 import CourseOutput from "./components/CourseOutput";
 import SemesterOutput from "./components/SemesterOutput";
@@ -85,7 +85,7 @@ function CoursePlanning() {
     resetWorksheetInlineState,
   } = useWorksheetManager();
 
-  const { addSemester, removeCourse } = useWorksheetActions();
+  const { addSemester, addCourse, removeCourse } = useWorksheetActions();
 
   const removeDropRef = useRef<HTMLDivElement>(null);
   const [{ isOver: isRemoveOver, canDrop: canRemoveDrop }, removeDrop] =
@@ -126,11 +126,24 @@ function CoursePlanning() {
   };
 
   const handleCreateCustomCourse = (
-    _semester: StudentSemester,
-    _data: { title: string; code: string; notes: string },
+    semester: StudentSemester,
+    data: { title: string; code: string; notes: string; distribution: string },
   ) => {
-    // TODO: adjust to match your actual StudentCourse type / helper
-    // This is a *generic example* of pushing a new custom course
+    const course: Course = {
+      id: Date.now(),
+      codes: [data.code || "CUSTOM"],
+      title: data.title,
+      credit: 1,
+      dist: data.distribution ? [data.distribution] : [],
+    };
+
+    const newStudentCourse: StudentCourse = {
+      course,
+      term: semester.season,
+      status: "DA_COMPLETE",
+    };
+
+    addCourse(semester.season, newStudentCourse);
   };
 
   // ---------- Search ----------
