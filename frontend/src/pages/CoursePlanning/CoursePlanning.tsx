@@ -1,18 +1,17 @@
 import { type StudentSemester } from "@/types/type-user";
-import { addSemester } from "@/utils/userDataHelpers";
 
 import CourseOutput from "./components/CourseOutput";
 import SemesterOutput from "./components/SemesterOutput";
 
-import { useUser } from "@/contexts/UserContext";
 import { useApp } from "@/contexts/AppContext";
 
-import { useWorksheetManager } from "./hooks/useWorksheetManager";
+import { useWorksheetManager } from "@/hooks/useWorksheetManager";
+import { useWorksheetActions } from "@/hooks/useWorksheetActions";
 
 import pencilIcon from "./assets/pencil.svg";
 import addSemesterIcon from "./assets/addSemester.svg";
 
-import React, { useMemo, useState } from "react";
+import React, { useState } from "react";
 
 import SidebarLayout from "@/components/shared-components/SidebarLayout";
 import CustomCourseModal from "./components/CustomCourseModal";
@@ -29,7 +28,6 @@ import {
 import { Pencil, Trash2 } from "lucide-react";
 
 function CoursePlanning() {
-  const { userData, setUserData } = useUser();
   const { appData } = useApp();
 
   // term/year now strings so they work nicely with labels + custom dropdowns
@@ -52,9 +50,6 @@ function CoursePlanning() {
 
     isMainId,
     setActiveWorksheet,
-    createWorksheet,
-    renameWorksheet,
-    deleteWorksheet,
 
     // inline UI
     isRenaming,
@@ -83,6 +78,8 @@ function CoursePlanning() {
     resetWorksheetInlineState,
   } = useWorksheetManager();
 
+  const { addSemester } = useWorksheetActions();
+
   if (!appData) return <div>Loading courses and majors...</div>;
 
   const openCustomCourseModal = (semester: StudentSemester) => {
@@ -99,8 +96,6 @@ function CoursePlanning() {
     semester: StudentSemester,
     data: { title: string; code: string; notes: string },
   ) => {
-    if (!userData) return;
-
     // TODO: adjust to match your actual StudentCourse type / helper
     // This is a *generic example* of pushing a new custom course
     const newCourse: any = {
@@ -137,8 +132,6 @@ function CoursePlanning() {
   };
 
   const handleInputSubmit = () => {
-    if (!userData) return;
-
     if (!(formData.term && formData.year && formData.title)) {
       return;
     }
@@ -161,7 +154,10 @@ function CoursePlanning() {
       isCompleted: false,
     };
 
-    setUserData(addSemester(userData, newSemester));
+    const res = addSemester(newSemester);
+    if (!res.ok) {
+      return;
+    }
 
     // Clear form + error after success
     setFormData({ term: "", year: "", title: "" });
@@ -363,7 +359,6 @@ function CoursePlanning() {
                 </DropdownMenuContent>
               </DropdownMenu>
 
-              {/* Worksheets dropdown */}
               {/* Worksheets dropdown */}
               <DropdownMenu
                 onOpenChange={(open) => {

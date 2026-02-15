@@ -6,7 +6,7 @@ import {
   formatDistributions,
 } from "@/utils/formatHelpers";
 
-import { useUser } from "@/contexts/UserContext";
+import { useWorksheetActions } from "@/hooks/useWorksheetActions";
 
 import cancel from "../assets/cancel.svg";
 
@@ -29,7 +29,7 @@ function CourseOutput({
   semesterSeasonCode = -1,
   semesterCompleted = false,
 }: CourseOutputProps) {
-  const { userData, setUserData } = useUser();
+  const { removeCourse } = useWorksheetActions();
   const ref = useRef<HTMLDivElement>(null);
   const [{ isDragging }, drag] = useDrag(
     () => ({
@@ -39,7 +39,7 @@ function CourseOutput({
         isDragging: !!monitor.isDragging(),
       }),
     }),
-    [course]
+    [course],
   );
 
   const [isDraggable, setIsDraggable] = useState(draggable);
@@ -49,8 +49,10 @@ function CourseOutput({
   }
 
   const handleCourseRemove = () => {
-    if (userData)
-      setUserData(removeCourse(userData, course, semesterSeasonCode));
+    const res = removeCourse(semesterSeasonCode, course);
+    if (!res.ok) {
+      return;
+    }
   };
 
   return (
@@ -61,8 +63,8 @@ function CourseOutput({
           isDragging
             ? "border-4 border-blue-200 cursor-grabbing"
             : isDraggable
-            ? "cursor-grab"
-            : ""
+              ? "cursor-grab"
+              : "",
         )}
         ref={ref}
       >
