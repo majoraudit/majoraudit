@@ -1,0 +1,24 @@
+{
+    "name": "Environmental Studies",
+    "id": "environmental_studies",
+    "abbr": "EVST",
+    "degreeTypes": [
+        ["ba"],
+        ["bs"]
+    ],
+    "courses": -1,
+    "rating": -1,
+    "workload": -1,
+    "discipline": "Interdisciplinary",
+    "students": -1,
+    "about": "Environmental Studies is an interdisciplinary major that draws on the natural sciences, social sciences, and humanities to examine the complex relationships between human societies and the natural environment. Students explore topics such as climate change, biodiversity, conservation, environmental justice, natural resource management, and sustainability. The program encourages students to integrate knowledge from multiple disciplines and to develop the analytical and communication skills needed to address environmental problems. The B.A. track emphasizes the social science and humanities dimensions, while the B.S. track provides a stronger foundation in the natural sciences.",
+    "dus": [
+        ["TBD", "TBD"]
+    ],
+    "catalogLink": "https://catalog.yale.edu/ycps/subjects-of-instruction/environmental-studies/",
+    "websiteLink": "https://environment.yale.edu/",
+    "specializations": [
+        "environmental_studies_ba.mql",
+        "environmental_studies_bs.mql"
+    ]
+}

@@ -1,0 +1,26 @@
+{
+    "name": "Earth and Planetary Sciences",
+    "id": "earth_planetary_sciences",
+    "abbr": "EPS",
+    "degreeTypes": [
+        ["ba", "bs"]
+    ],
+    "courses": -1,
+    "rating": -1,
+    "workload": -1,
+    "discipline": "STEM",
+    "students": -1,
+    "about": "The Department of Earth and Planetary Sciences offers programs of study that explore the physical, chemical, and biological processes that shape our planet and others. Students examine the Earth's atmosphere, oceans, surface, and interior, as well as the planets, moons, and other bodies in our solar system. The B.A. program provides a broad introduction to the earth and planetary sciences, while the B.S. program offers four concentrations for more specialized study: Atmosphere, Ocean, and Climate; Environmental and Energy Geoscience; Paleontology and Geobiology; and Solid Earth Science. The major prepares students for careers in environmental science, energy, policy, education, and graduate study in the geosciences.",
+    "dus": [
+        ["TBD", "TBD"]
+    ],
+    "catalogLink": "https://catalog.yale.edu/ycps/subjects-of-instruction/earth-planetary-sciences/",
+    "websiteLink": "https://earth.yale.edu/",
+    "specializations": [
+        "eps_ba.mql",
+        "eps_bs_atmosphere_ocean_climate.mql",
+        "eps_bs_environmental_energy_geoscience.mql",
+        "eps_bs_paleontology_geobiology.mql",
+        "eps_bs_solid_earth_science.mql"
+    ]
+}

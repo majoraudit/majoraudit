@@ -1,0 +1,22 @@
+{
+    "name": "French",
+    "id": "french",
+    "abbr": "FREN",
+    "degreeTypes": [
+        ["ba"]
+    ],
+    "courses": -1,
+    "rating": -1,
+    "workload": -1,
+    "discipline": "Languages",
+    "students": -1,
+    "about": "The Department of French offers a major that provides students with a thorough grounding in French and francophone literatures, cultures, and critical thought from the medieval period to the present. The major develops advanced skills in the French language and trains students in the close reading and analysis of literary and cultural texts. Students explore the rich traditions of French literature, philosophy, and intellectual history, as well as the diverse cultural production of the francophone world. The program encourages interdisciplinary approaches and prepares students for graduate study, teaching, translation, international careers, and other fields that benefit from deep engagement with French-language cultures.",
+    "dus": [
+        ["TBD", "TBD"]
+    ],
+    "catalogLink": "https://catalog.yale.edu/ycps/subjects-of-instruction/french/",
+    "websiteLink": "https://french.yale.edu/",
+    "specializations": [
+        "french.mql"
+    ]
+}

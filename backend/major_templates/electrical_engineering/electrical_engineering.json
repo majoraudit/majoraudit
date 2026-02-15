@@ -1,0 +1,25 @@
+{
+    "name": "Electrical Engineering",
+    "id": "electrical_engineering",
+    "abbr": "EENG",
+    "degreeTypes": [
+        ["ba", "bs"]
+    ],
+    "courses": -1,
+    "rating": -1,
+    "workload": -1,
+    "discipline": "Engineering",
+    "students": -1,
+    "about": "Electrical engineering is a broad discipline that encompasses the study of electrical systems, electronics, signal processing, communications, control systems, and computer engineering. The Department of Electrical Engineering offers B.A. and B.S. degree programs as well as an ABET-accredited B.S. program. The B.A. program provides a broad introduction to electrical engineering within the context of a liberal arts education. The B.S. program offers a more intensive technical curriculum. The ABET-accredited B.S. program meets the standards of the Accreditation Board for Engineering and Technology and is designed for students who wish to practice as professional engineers.",
+    "dus": [
+        ["TBD", "TBD"]
+    ],
+    "catalogLink": "https://catalog.yale.edu/ycps/subjects-of-instruction/electrical-engineering/",
+    "websiteLink": "https://engineering.yale.edu/academic-study/departments/electrical-engineering",
+    "specializations": [
+        "electrical_engineering.mql",
+        "electrical_engineering_ba.mql",
+        "electrical_engineering_bs.mql",
+        "electrical_engineering_bs_abet.mql"
+    ]
+}

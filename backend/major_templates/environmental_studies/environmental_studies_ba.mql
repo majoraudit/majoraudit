@@ -1,0 +1,26 @@
+SELECT 1 FROM [
+  DIST("QR")
+] : "Core QR Course" : 2;
+
+SELECT 2 FROM [
+  DIST("HU"),
+  DIST("SO")
+] : "Core HU or SO Courses" : 3;
+
+SELECT 3 FROM [
+  DIST("SC")
+] : "Core Science Courses" : 4;
+
+SELECT 6 FROM [
+  DEPT("EVST"),
+  TAG("YC EVST Core Human/Social Sci"),
+  TAG("YC EVST Core BA Natural Scie")
+] : "Concentration Courses" : 5;
+
+SELECT 1 FROM [
+  CLASS(EVST 4960)
+] : "Senior Essay" : 1;
+
+SELECT 1 FROM [
+  TAG_DEPT("YC EVST Advanced Seminar", "EVST")
+] : "Advanced Environmental Seminar" : 6;
