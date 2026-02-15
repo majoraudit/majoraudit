@@ -22,6 +22,11 @@ interface SemesterOutputProps {
   onAddCustomCourse?: () => void;
 }
 
+interface CourseDragItem {
+  selectedCourse: Course;
+  sourceSemesterSeasonCode?: number;
+}
+
 function codeToYear(code: number): number {
   let year = Math.floor(code / 100);
   if (code % 100 == 2 || code % 100 == 1) {
@@ -33,7 +38,7 @@ function codeToYear(code: number): number {
 
 // semester prop, mainly to specify the season code
 function SemesterOutput({ semester, onAddCustomCourse }: SemesterOutputProps) {
-  const { removeSemester, addCourse, setSemesterCompleted } =
+  const { removeSemester, addCourse, removeCourse, setSemesterCompleted } =
     useWorksheetActions();
   const { activeSemesters } = useWorksheetManager();
   const { getSemesterCredits } = useWorksheetData();
@@ -79,13 +84,21 @@ function SemesterOutput({ semester, onAddCustomCourse }: SemesterOutputProps) {
   // useDrop hook --> only accepts courses, handles drop functionality by adding the course,
   //                  recreates hook when userData or semester.season changes
   const [{ isOver }, drop] = useDrop<
-    { selectedCourse: Course },
+    CourseDragItem,
     void,
     { isOver: boolean }
   >(
     () => ({
       accept: "course",
       drop: (item) => {
+        if (isCompleted) {
+          return;
+        }
+
+        if (item.sourceSemesterSeasonCode === semester.season) {
+          return;
+        }
+
         const newStudentCourse: StudentCourse = {
           course: item.selectedCourse,
           term: semester.season,
@@ -96,13 +109,18 @@ function SemesterOutput({ semester, onAddCustomCourse }: SemesterOutputProps) {
         if (!res.ok) {
           return;
         }
+
+        if (typeof item.sourceSemesterSeasonCode === "number") {
+          removeCourse(item.sourceSemesterSeasonCode, item.selectedCourse);
+        }
       },
-      canDrop: () => !isCompleted,
+      canDrop: (item) =>
+        !isCompleted && item.sourceSemesterSeasonCode !== semester.season,
       collect: (monitor) => ({
         isOver: !!monitor.isOver(),
       }),
     }),
-    [addCourse, updatedSemester.season, isCompleted],
+    [addCourse, removeCourse, updatedSemester.season, isCompleted],
   );
 
   // connects useDrop to DOM element
@@ -157,7 +175,7 @@ function SemesterOutput({ semester, onAddCustomCourse }: SemesterOutputProps) {
               <div className="w-54">
                 <CourseOutput
                   course={studentCourse.course}
-                  draggable={false}
+                  draggable={!isCompleted}
                   removable={true}
                   semesterSeasonCode={updatedSemester.season}
                   semesterCompleted={isCompleted}
