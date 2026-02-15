@@ -1,4 +1,4 @@
-import { type StudentSemester } from "@/types/type-user";
+import { type Course, type StudentSemester } from "@/types/type-user";
 
 import CourseOutput from "./components/CourseOutput";
 import SemesterOutput from "./components/SemesterOutput";
@@ -15,6 +15,7 @@ import React, { useState } from "react";
 
 import SidebarLayout from "@/components/shared-components/SidebarLayout";
 import CustomCourseModal from "./components/CustomCourseModal";
+import CourseDetailsModal from "./components/CourseDetailsModal";
 
 import {
   DropdownMenu,
@@ -41,6 +42,7 @@ function CoursePlanning() {
   const [selectedSemester, setSelectedSemester] =
     useState<StudentSemester | null>(null);
   const [isCustomCourseModalOpen, setIsCustomCourseModalOpen] = useState(false);
+  const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
 
   const {
     worksheets,
@@ -92,19 +94,16 @@ function CoursePlanning() {
     setSelectedSemester(null);
   };
 
-  const handleCreateCustomCourse = (
-    semester: StudentSemester,
-    data: { title: string; code: string; notes: string },
-  ) => {
-    // TODO: adjust to match your actual StudentCourse type / helper
-    // This is a *generic example* of pushing a new custom course
-    const newCourse: any = {
-      id: `custom_${Date.now()}`,
-      title: data.title,
-      code: data.code || "CUSTOM",
-      notes: data.notes,
-      isCustom: true,
-    };
+  const openCourseDetailsModal = (course: Course) => {
+    setSelectedCourse(course);
+  };
+
+  const closeCourseDetailsModal = () => {
+    setSelectedCourse(null);
+  };
+
+  const handleCreateCustomCourse = () => {
+    // TODO: wire custom course creation into worksheet state.
   };
 
   // ---------- Search ----------
@@ -191,7 +190,11 @@ function CoursePlanning() {
             <ul className="flex flex-col p-2 w-full gap-4">
               {slicedCourses.map((course, index) => (
                 <li key={index}>
-                  <CourseOutput course={course} draggable={true} />
+                  <CourseOutput
+                    course={course}
+                    draggable={true}
+                    onCourseClick={openCourseDetailsModal}
+                  />
                 </li>
               ))}
             </ul>
@@ -598,6 +601,7 @@ function CoursePlanning() {
             key={index}
             semester={semester}
             onAddCustomCourse={() => openCustomCourseModal(semester)}
+            onCourseClick={openCourseDetailsModal}
           />
         ))}
       </div>
@@ -607,6 +611,11 @@ function CoursePlanning() {
         onClose={closeCustomCourseModal}
         semester={selectedSemester}
         onCreate={handleCreateCustomCourse}
+      />
+      <CourseDetailsModal
+        open={selectedCourse !== null}
+        course={selectedCourse}
+        onClose={closeCourseDetailsModal}
       />
     </SidebarLayout>
   );

@@ -20,6 +20,7 @@ import type { LottieRefCurrentProps } from "lottie-react";
 interface SemesterOutputProps {
   semester: StudentSemester;
   onAddCustomCourse?: () => void;
+  onCourseClick?: (course: Course) => void;
 }
 
 function codeToYear(code: number): number {
@@ -32,7 +33,11 @@ function codeToYear(code: number): number {
 }
 
 // semester prop, mainly to specify the season code
-function SemesterOutput({ semester, onAddCustomCourse }: SemesterOutputProps) {
+function SemesterOutput({
+  semester,
+  onAddCustomCourse,
+  onCourseClick,
+}: SemesterOutputProps) {
   const { removeSemester, addCourse, setSemesterCompleted } =
     useWorksheetActions();
   const { activeSemesters } = useWorksheetManager();
@@ -161,6 +166,7 @@ function SemesterOutput({ semester, onAddCustomCourse }: SemesterOutputProps) {
                   removable={true}
                   semesterSeasonCode={updatedSemester.season}
                   semesterCompleted={isCompleted}
+                  onCourseClick={onCourseClick}
                 />
               </div>
             </li>
