@@ -29,9 +29,6 @@ function Dashboard() {
   const { userData, setUserData } = useUser();
   const { appData } = useApp();
 
-  if (userData && !userData.onboard) {
-    return <Navigate to="/onboarding" replace />;
-  }
   const { worksheets, activeWorksheetId, setActiveWorksheet } =
     useWorksheetManager();
   const { removeProgram } = useWorksheetActions();

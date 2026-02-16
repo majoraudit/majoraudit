@@ -6,6 +6,7 @@ import { fetchProfile } from "@/api/authApi";
 type UserContextType = {
   userData: User | undefined;
   setUserData: React.Dispatch<React.SetStateAction<User | undefined>>;
+  onboarded: boolean;
 };
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -29,11 +30,11 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
 
   useEffect(() => {
     const init = async () => {
-
       const stored = localStorage.getItem("mockUserData");
-      const alreadyOnboarded = stored
+      const alreadyOnboarded = false;
+      /*stored
         ? (JSON.parse(stored) as { onboard?: boolean })?.onboard === true
-        : false;
+        : false;*/
 
       setUserData(initialUserData);
 
@@ -59,8 +60,10 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   }, [userData]);
 
+  const onboarded = !!userData?.onboard;
+
   return (
-    <UserContext.Provider value={{ userData, setUserData }}>
+    <UserContext.Provider value={{ userData, setUserData, onboarded }}>
       {children}
     </UserContext.Provider>
   );

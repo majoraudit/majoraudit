@@ -13,6 +13,7 @@ import Footer from "@/components/shared-components/Footer";
 import {
   ProtectedRoute,
   NavigateIfAuthenticatedRoute,
+  OnboardingRoute,
 } from "./components/shared-components/RedirectionRoutes";
 
 function App() {
@@ -29,7 +30,7 @@ function App() {
               />
               <Route
                 path="/onboarding"
-                element={<ProtectedRoute element={<Onboarding />} />}
+                element={<OnboardingRoute element={<Onboarding />} />}
               />
               <Route
                 path="/dashboard"
