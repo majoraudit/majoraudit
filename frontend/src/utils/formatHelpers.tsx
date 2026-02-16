@@ -53,7 +53,6 @@ export function formatCourseItemTypes(group: GroupItemProgress) {
       case "single-choice":
         return `${item.courseCode}`;
       case "multi-choice":
-      case "multi-choice":
         const codes = item.courseCodes;
         if (codes.length === 2) {
           return `${codes[0]} or ${codes[1]}`;

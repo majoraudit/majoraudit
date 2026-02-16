@@ -1,17 +1,12 @@
 import { type Course } from "@/types/type-user";
-import { removeCourse } from "@/utils/userDataHelpers";
-import {
-  formatSeason,
-  formatCredits,
-  formatDistributions,
-} from "@/utils/formatHelpers";
+import { formatCredits, formatDistributions } from "@/utils/formatHelpers";
 
 import { useWorksheetActions } from "@/hooks/useWorksheetActions";
 
 import cancel from "../assets/cancel.svg";
 
 import { useDrag } from "react-dnd";
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import clsx from "clsx";
 
 interface CourseOutputProps {
@@ -34,19 +29,20 @@ function CourseOutput({
   const [{ isDragging }, drag] = useDrag(
     () => ({
       type: "course",
-      item: { selectedCourse: course },
+      item: {
+        selectedCourse: course,
+        sourceSemesterSeasonCode:
+          semesterSeasonCode > 0 ? semesterSeasonCode : undefined,
+      },
+      canDrag: draggable && !semesterCompleted,
       collect: (monitor) => ({
         isDragging: !!monitor.isDragging(),
       }),
     }),
-    [course],
+    [course, draggable, semesterCompleted, semesterSeasonCode],
   );
 
-  const [isDraggable, setIsDraggable] = useState(draggable);
-
-  if (draggable) {
-    drag(ref);
-  }
+  drag(ref);
 
   const handleCourseRemove = () => {
     const res = removeCourse(semesterSeasonCode, course);
@@ -62,7 +58,7 @@ function CourseOutput({
           "flex flex-col justify-between p-2 bg-gray-200 w-full h-24 rounded-md relative",
           isDragging
             ? "border-4 border-blue-200 cursor-grabbing"
-            : isDraggable
+            : draggable && !semesterCompleted
               ? "cursor-grab"
               : "",
         )}

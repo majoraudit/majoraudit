@@ -1,4 +1,4 @@
-import { type StudentSemester } from "@/types/type-user";
+import { type StudentSemester, type Course } from "@/types/type-user";
 
 import CourseOutput from "./components/CourseOutput";
 import SemesterOutput from "./components/SemesterOutput";
@@ -11,7 +11,9 @@ import { useWorksheetActions } from "@/hooks/useWorksheetActions";
 import pencilIcon from "./assets/pencil.svg";
 import addSemesterIcon from "./assets/addSemester.svg";
 
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
+import { useDrop } from "react-dnd";
+import clsx from "clsx";
 
 import SidebarLayout from "@/components/shared-components/SidebarLayout";
 import CustomCourseModal from "./components/CustomCourseModal";
@@ -26,6 +28,11 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 import { Pencil, Trash2 } from "lucide-react";
+
+interface CourseDragItem {
+  selectedCourse: Course;
+  sourceSemesterSeasonCode?: number;
+}
 
 function CoursePlanning() {
   const { appData } = useApp();
@@ -78,7 +85,33 @@ function CoursePlanning() {
     resetWorksheetInlineState,
   } = useWorksheetManager();
 
-  const { addSemester } = useWorksheetActions();
+  const { addSemester, removeCourse } = useWorksheetActions();
+
+  const removeDropRef = useRef<HTMLDivElement>(null);
+  const [{ isOver: isRemoveOver, canDrop: canRemoveDrop }, removeDrop] =
+    useDrop<CourseDragItem, void, { isOver: boolean; canDrop: boolean }>(
+      () => ({
+        accept: "course",
+        drop: (item, monitor) => {
+          if (monitor.didDrop()) {
+            return;
+          }
+
+          if (typeof item.sourceSemesterSeasonCode !== "number") {
+            return;
+          }
+
+          removeCourse(item.sourceSemesterSeasonCode, item.selectedCourse);
+        },
+        canDrop: (item) => typeof item.sourceSemesterSeasonCode === "number",
+        collect: (monitor) => ({
+          isOver: monitor.isOver({ shallow: true }),
+          canDrop: monitor.canDrop(),
+        }),
+      }),
+      [removeCourse],
+    );
+  removeDrop(removeDropRef);
 
   if (!appData) return <div>Loading courses and majors...</div>;
 
@@ -93,18 +126,11 @@ function CoursePlanning() {
   };
 
   const handleCreateCustomCourse = (
-    semester: StudentSemester,
-    data: { title: string; code: string; notes: string },
+    _semester: StudentSemester,
+    _data: { title: string; code: string; notes: string },
   ) => {
     // TODO: adjust to match your actual StudentCourse type / helper
     // This is a *generic example* of pushing a new custom course
-    const newCourse: any = {
-      id: `custom_${Date.now()}`,
-      title: data.title,
-      code: data.code || "CUSTOM",
-      notes: data.notes,
-      isCustom: true,
-    };
   };
 
   // ---------- Search ----------
@@ -180,13 +206,33 @@ function CoursePlanning() {
   return (
     <SidebarLayout
       sidebar={
-        <div className="flex flex-col h-full">
+        <div
+          ref={removeDropRef}
+          className={clsx(
+            "flex flex-col h-full transition",
+            isRemoveOver && canRemoveDrop ? "bg-red-50" : "",
+          )}
+        >
           <input
             type="text"
             placeholder="Search by course code, title, prof..."
             className="px-4 py-2 border-b-4 border-gray-200 bg-blue-100 placeholder-shown:bg-white w-full focus:outline-none focus:bg-gray-100 transition-colors duration-200 ease-in-out border-t-2"
             onChange={(search) => setSearchTerm(search.target.value)}
           />
+          {canRemoveDrop && (
+            <div
+              className={clsx(
+                "mx-2 mt-2 rounded-md border border-dashed px-3 py-2 text-xs transition",
+                isRemoveOver
+                  ? "border-red-300 text-red-600 bg-red-100"
+                  : "border-red-200 text-red-500 bg-red-50",
+              )}
+            >
+              {isRemoveOver
+                ? "Release to remove course"
+                : "Drag a planned course here to remove"}
+            </div>
+          )}
           <div className="flex-1 overflow-y-auto pb-2">
             <ul className="flex flex-col p-2 w-full gap-4">
               {slicedCourses.map((course, index) => (
@@ -600,6 +646,7 @@ function CoursePlanning() {
             onAddCustomCourse={() => openCustomCourseModal(semester)}
           />
         ))}
+
       </div>
 
       <CustomCourseModal
