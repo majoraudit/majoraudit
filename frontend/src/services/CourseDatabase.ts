@@ -44,6 +44,7 @@ export class CourseDatabase {
                 title: course.title,
                 credit: course.credits,
                 dist: course.distributionals || [],
+                tags: course.tags || []
                 //seasons: course.seasons || [],
                 //season_codes: course.season_codes || []
             };
