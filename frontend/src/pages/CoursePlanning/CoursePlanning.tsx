@@ -127,13 +127,18 @@ function CoursePlanning() {
 
   const handleCreateCustomCourse = (
     semester: StudentSemester,
-    data: { title: string; code: string; notes: string; distribution: string },
+    data: {
+      title: string;
+      code: string;
+      distribution: string;
+      credits: number;
+    },
   ) => {
     const course: Course = {
       id: Date.now(),
       codes: [data.code || "CUSTOM"],
       title: data.title,
-      credit: 1,
+      credit: data.credits,
       dist: data.distribution ? [data.distribution] : [],
     };
 
