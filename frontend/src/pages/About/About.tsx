@@ -42,12 +42,28 @@ const CURRENT_TEAM_MEMBERS = [
     portfolio: "",
   },
   {
-    name: "Stephanie Wan",
+    name: "Nate Ly",
     role: "Software Engineer",
-    imageUrl: "/about/Stephanie_Wan.jpg",
-    github: "https://github.com/swan-07",
-    linkedin: "https://www.linkedin.com/in/stephaniewan07/",
-    portfolio: " https://swan-07.github.io/",
+    imageUrl: "/about/Nate_Ly.jpeg",
+    github: "https://github.com/natejly",
+    linkedin: "https://www.linkedin.com/in/natejly/",
+    portfolio: "https://www.natejly.com/",
+  },
+  {
+    name: "Tim Li",
+    role: "Software Engineer",
+    imageUrl: "/about/Tim_Li.jpg",
+    github: "https://github.com/TimLi1250",
+    linkedin: "https://www.linkedin.com/in/tim-li1250/",
+    portfolio: "",
+  },
+  {
+    name: "Iulian Arsenoiu",
+    role: "Software Engineer",
+    imageUrl: "/about/Iulian_Arsenoiu.jpeg",
+    github: "http://www.github.com/giulian02",
+    linkedin: "http://www.linkedin.com/in/iulianarsenoiu",
+    portfolio: "",
   },
 ];
 
@@ -59,6 +75,14 @@ const PAST_TEAM_MEMBERS = [
     github: "https://github.com/ryanggum",
     linkedin: "https://www.linkedin.com/in/ryangumlia/",
     portfolio: "https://www.ryangumlia.com/",
+  },
+  {
+    name: "Stephanie Wan",
+    role: "Software Engineer",
+    imageUrl: "/about/Stephanie_Wan.jpg",
+    github: "https://github.com/swan-07",
+    linkedin: "https://www.linkedin.com/in/stephaniewan07/",
+    portfolio: " https://swan-07.github.io/",
   },
 ];
 
