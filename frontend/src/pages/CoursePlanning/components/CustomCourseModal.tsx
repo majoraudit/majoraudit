@@ -11,7 +11,8 @@ interface CustomCourseModalProps {
     data: {
       title: string;
       code: string;
-      notes: string;
+      distribution: string;
+      credits: number;
     }
   ) => void;
 }
@@ -55,7 +56,8 @@ const CustomCourseModal: React.FC<CustomCourseModalProps> = ({
 }) => {
   const [courseTitle, setCourseTitle] = useState("");
   const [courseCode, setCourseCode] = useState("");
-  const [notes, setNotes] = useState("");
+  const [distribution, setDistribution] = useState("");
+  const [credits, setCredits] = useState("1");
   const [error, setError] = useState("");
 
   // reset form when opening / switching semester
@@ -63,7 +65,8 @@ const CustomCourseModal: React.FC<CustomCourseModalProps> = ({
     if (open) {
       setCourseTitle("");
       setCourseCode("");
-      setNotes("");
+      setDistribution("");
+      setCredits("1");
       setError("");
     }
   }, [open, semester]);
@@ -78,11 +81,23 @@ const CustomCourseModal: React.FC<CustomCourseModalProps> = ({
       return;
     }
 
+    if (!distribution) {
+      setError("Please select a distributional requirement.");
+      return;
+    }
+
+    const parsedCredits = Number(credits);
+    if (!Number.isFinite(parsedCredits) || parsedCredits <= 0) {
+      setError("Credits must be a number greater than 0.");
+      return;
+    }
+
     if (onCreate) {
       onCreate(semester, {
         title: courseTitle.trim(),
         code: courseCode.trim(),
-        notes: notes.trim(),
+        distribution,
+        credits: parsedCredits,
       });
     }
 
@@ -146,13 +161,45 @@ const CustomCourseModal: React.FC<CustomCourseModalProps> = ({
           </div>
 
           <div className="flex flex-col gap-1">
-            <label className="font-medium text-gray-700">Notes</label>
-            <textarea
-              className="border rounded-md px-3 py-2 text-sm bg-white min-h-[80px] resize-y focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Optional: requirements this should count toward, advisor notes, etc."
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
+            <label className="font-medium text-gray-700">
+              Credits <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="number"
+              min="0.5"
+              step="0.5"
+              className="border rounded-md px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="e.g. 1"
+              value={credits}
+              onChange={(e) => {
+                setCredits(e.target.value);
+                setError("");
+              }}
             />
+          </div>
+
+          <div className="flex flex-col gap-1">
+            <label className="font-medium text-gray-700">
+              Distribution <span className="text-red-500">*</span>
+            </label>
+            <select
+              className="border rounded-md px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={distribution}
+              onChange={(e) => {
+                setDistribution(e.target.value);
+                setError("");
+              }}
+            >
+              <option value="" disabled>
+                Select a distribution
+              </option>
+              <option value="Hu">Humanity</option>
+              <option value="Sc">Science</option>
+              <option value="So">Social Science</option>
+              <option value="QR">Quant. Reasoning</option>
+              <option value="WR">Writing</option>
+              <option value="L1">Language</option>
+            </select>
           </div>
 
           {error && <p className="text-xs text-red-600">{error}</p>}
