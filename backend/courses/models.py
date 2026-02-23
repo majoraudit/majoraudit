@@ -47,7 +47,7 @@ class Course(models.Model):
     description = models.TextField()
     credits = models.DecimalField(decimal_places=1, max_digits=2)
     distributionals = models.ManyToManyField(CourseDistribution, blank=True)
-    course_tag = models.ManyToManyField(CourseTag)
+    course_tags = models.ManyToManyField(CourseTag)
 
     def __str__(self):
         return self.title

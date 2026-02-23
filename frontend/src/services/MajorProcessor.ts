@@ -21,7 +21,6 @@ export async function loadMajorTemplates(json_file : string)
        }));
 
         console.log(`Succesfully loaded ${major_templates.length} major templates`)
-        console.log(major_templates_normalized);
         return major_templates_normalized;
 
     } catch (error) {
@@ -382,7 +381,6 @@ export class MajorProcessor {
 
   updateMajorProgress(majorProgress: MajorProgress, ws: Worksheet): MajorProgress
   {
-    console.log("RUNNING UPDATE MAJOR PROGRESS");
     // Turn majorProgress into a MajorTemplate and re-process
     const template: MajorTemplate = {
       id: majorProgress.id,
@@ -400,9 +398,6 @@ export class MajorProcessor {
       })),
       info: majorProgress.info,
     };
-
-    console.log("Major Progress: ", majorProgress);
-    console.log("Major Template: ", template);
 
     return this.processMajorTemplate(template, ws);
   }

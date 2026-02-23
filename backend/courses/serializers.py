@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Course, CourseInstance, CourseProfessor, CourseCode
+from .models import Course, CourseInstance, CourseProfessor, CourseCode, CourseTag
 
 
 class CourseProfessorSerializer(serializers.ModelSerializer):
@@ -12,6 +12,11 @@ class CourseCodeSerializer(serializers.ModelSerializer):
     class Meta:
         model = CourseCode
         fields = ['department', 'number']
+
+class CourseTagSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CourseTag
+        fields = ['name']
 
 
 class CourseInstanceSerializer(serializers.ModelSerializer):
@@ -33,6 +38,7 @@ class CourseInstanceSerializer(serializers.ModelSerializer):
 class CourseSerializer(serializers.ModelSerializer):
     distributionals = serializers.StringRelatedField(many=True, read_only=True)
     course_codes = serializers.SerializerMethodField()
+    course_tags = CourseTagSerializer(many=True, read_only=True)
 
     class Meta:
         model = Course
@@ -43,6 +49,7 @@ class CourseSerializer(serializers.ModelSerializer):
             'credits',
             'distributionals',
             'course_codes',
+            'course_tags',
         ]
 
     def get_course_codes(self, obj):
