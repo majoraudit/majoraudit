@@ -34,16 +34,24 @@ class Seasons(models.TextChoices):
     FA = "FA", "Fall"
 
 
+class CourseTag(models.Model):
+    name = models.CharField(max_length=200)
+
+    def __str__(self):
+        return self.name
+
+
 class Course(models.Model):
     external_id = models.PositiveIntegerField(unique=True)
     title = models.CharField(max_length=200)
     description = models.TextField()
     credits = models.DecimalField(decimal_places=1, max_digits=2)
     distributionals = models.ManyToManyField(CourseDistribution, blank=True)
+    course_tags = models.ManyToManyField(CourseTag)
 
     def __str__(self):
         return self.title
-
+    
 
 class CourseCode(models.Model):
     department = models.CharField(max_length=10)
