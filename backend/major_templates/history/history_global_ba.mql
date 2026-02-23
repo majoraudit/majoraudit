@@ -1,0 +1,31 @@
+SELECT 2 FROM [
+    RANGE(HIST 0000, HIST 4999)
+] : "Prerequisites" : 1;
+
+SELECT 5 FROM [
+    TAG("YC HIST Africa"),
+    TAG("YC HIST Asia"),
+    TAG("YC HIST Europe"),
+    TAG("YC HIST Latin America"),
+    TAG("YC HIST Middle East"),
+    TAG("YC HIST United States")
+] : "Regional Distribution (Global)" : 2;
+
+SELECT 2 FROM [
+    TAG("YC HIST Preindustrial")
+] : "Preindustrial History" : 3;
+
+SELECT 2 FROM [
+    TAG("YC HIST Departmental Seminars")
+] : "Departmental Seminars" : 4;
+
+SELECT 3 FROM [
+    RANGE(HIST 0000, HIST 4999),
+    RANGE(HIST 0000, HIST 4999),
+    RANGE(HIST 0000, HIST 4999)
+] : "Additional History Electives" : 5;
+
+SELECT 1 FROM [
+    SELECT 1 FROM [CLASS(HIST 4997)],
+    SELECT 2 FROM [CLASS(HIST 4995), CLASS(HIST 4996)]
+] : "Senior Requirement" : 6;

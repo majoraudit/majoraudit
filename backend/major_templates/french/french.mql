@@ -1,0 +1,99 @@
+SELECT 1 FROM [CLASS(FREN 1500), PLACEMENT("Equivalent prerequisite approved by DUS")] : "Prerequisite" : 1;
+
+SELECT 1 FROM [
+    SELECT 10 FROM [
+        SELECT 1 FROM [CLASS(FREN 1700), PLACEMENT("Equivalent to FREN 1700 approved by DUS")],
+        SELECT 4 FROM [
+            TAG("YC FREN Group B 2000 Plus"),
+            TAG("YC FREN Group B 2000 Plus"),
+            TAG("YC FREN Group B 2000 Plus"),
+            TAG("YC FREN Group B 2000 Plus")
+        ],
+        SELECT 1 FROM [TAG("YC FREN Pre 1800 Course")],
+        SELECT 3 FROM [
+            RANGE(FREN 1600 , FREN 9999),
+            RANGE(FREN 1600 , FREN 9999),
+            RANGE(FREN 1600 , FREN 9999)
+        ],
+        SELECT 1 FROM [CLASS(FREN 4910)]
+    ],
+    SELECT 10 FROM [
+        SELECT 1 FROM [CLASS(FREN 1700), PLACEMENT("Equivalent to FREN 1700 approved by DUS")],
+        SELECT 4 FROM [
+            TAG("YC FREN Group B 2000 Plus"),
+            TAG("YC FREN Group B 2000 Plus"),
+            TAG("YC FREN Group B 2000 Plus"),
+            TAG("YC FREN Group B 2000 Plus")
+        ],
+        SELECT 1 FROM [TAG("YC FREN Pre 1800 Course")],
+        SELECT 2 FROM [TAG("YC FREN Translation Course"), TAG("YC FREN Translation Course")],
+        SELECT 1 FROM [RANGE(FREN 1600 , FREN 9999)],
+        SELECT 1 FROM [CLASS(FREN 4920)]
+    ],
+    SELECT 12 FROM [
+        SELECT 1 FROM [CLASS(FREN 1700), PLACEMENT("Equivalent to FREN 1700 approved by DUS")],
+        SELECT 5 FROM [
+            TAG("YC FREN Group B 2000 Plus"),
+            TAG("YC FREN Group B 2000 Plus"),
+            TAG("YC FREN Group B 2000 Plus"),
+            TAG("YC FREN Group B 2000 Plus"),
+            TAG("YC FREN Group B 2000 Plus")
+        ],
+        SELECT 1 FROM [TAG("YC FREN Pre 1800 Course")],
+        SELECT 4 FROM [
+            RANGE(FREN 1600 , FREN 9999),
+            RANGE(FREN 1600 , FREN 9999),
+            RANGE(FREN 1600 , FREN 9999),
+            RANGE(FREN 1600 , FREN 9999)
+        ],
+        SELECT 1 FROM [CLASS(FREN 4910)]
+    ],
+    SELECT 12 FROM [
+        SELECT 1 FROM [CLASS(FREN 1700), PLACEMENT("Equivalent to FREN 1700 approved by DUS")],
+        SELECT 5 FROM [
+            TAG("YC FREN Group B 2000 Plus"),
+            TAG("YC FREN Group B 2000 Plus"),
+            TAG("YC FREN Group B 2000 Plus"),
+            TAG("YC FREN Group B 2000 Plus"),
+            TAG("YC FREN Group B 2000 Plus")
+        ],
+        SELECT 1 FROM [TAG("YC FREN Pre 1800 Course")],
+        SELECT 3 FROM [
+            RANGE(FREN 1600 , FREN 9999),
+            RANGE(FREN 1600 , FREN 9999),
+            RANGE(FREN 1600 , FREN 9999)
+        ],
+        SELECT 2 FROM [CLASS(FREN 4930), CLASS(FREN 4940)]
+    ],
+    SELECT 12 FROM [
+        SELECT 1 FROM [CLASS(FREN 1700), PLACEMENT("Equivalent to FREN 1700 approved by DUS")],
+        SELECT 5 FROM [
+            TAG("YC FREN Group B 2000 Plus"),
+            TAG("YC FREN Group B 2000 Plus"),
+            TAG("YC FREN Group B 2000 Plus"),
+            TAG("YC FREN Group B 2000 Plus"),
+            TAG("YC FREN Group B 2000 Plus")
+        ],
+        SELECT 1 FROM [TAG("YC FREN Pre 1800 Course")],
+        SELECT 2 FROM [TAG("YC FREN Translation Course"), TAG("YC FREN Translation Course")],
+        SELECT 2 FROM [RANGE(FREN 1600 , FREN 9999), RANGE(FREN 1600 , FREN 9999)],
+        SELECT 1 FROM [CLASS(FREN 4920)]
+    ],
+    SELECT 12 FROM [
+        SELECT 1 FROM [CLASS(FREN 1700), PLACEMENT("Equivalent to FREN 1700 approved by DUS")],
+        SELECT 5 FROM [
+            TAG("YC FREN Group B 2000 Plus"),
+            TAG("YC FREN Group B 2000 Plus"),
+            TAG("YC FREN Group B 2000 Plus"),
+            TAG("YC FREN Group B 2000 Plus"),
+            TAG("YC FREN Group B 2000 Plus")
+        ],
+        SELECT 1 FROM [TAG("YC FREN Pre 1800 Course")],
+        SELECT 3 FROM [
+            RANGE(FREN 1600 , FREN 9999),
+            RANGE(FREN 1600 , FREN 9999),
+            RANGE(FREN 1600 , FREN 9999)
+        ],
+        SELECT 2 FROM [CLASS(FREN 4950), CLASS(FREN 4960)]
+    ]
+] : "French Major Plan" : 1;

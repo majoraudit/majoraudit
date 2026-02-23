@@ -1,0 +1,20 @@
+SELECT 3 FROM [
+  CLASS(ENVE 1200),
+  CLASS(ENVE 3600),
+  SELECT 1 FROM [CLASS(ENVE 3730), CLASS(ENVE 3770)]
+] : "Core Courses" : 2;
+
+SELECT 5 FROM [
+  DEPT("ENVE"),
+  DEPT("CENG"),
+  DEPT("MENG"),
+  DEPT("ECE"),
+  DEPT("BENG"),
+  DEPT("EVST"),
+  DEPT("ENAS")
+] : "Approved Electives" : 3;
+
+SELECT 1 FROM [
+  CLASS(ENVE 4160),
+  CLASS(ENVE 4900)
+] : "Senior Requirement" : 1;

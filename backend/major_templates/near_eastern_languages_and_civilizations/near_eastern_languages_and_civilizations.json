@@ -1,0 +1,23 @@
+{
+    "name": "Near Eastern Languages and Civilizations",
+    "id":"near_eastern_languages_and_civilizations",
+    "abbr": "NELC",
+    "degreeTypes": [
+        ["depth", "breadth"]
+    ],
+    "courses": -1,
+    "rating": -1,
+    "workload": -1,
+    "discipline": "Humanities & the Arts",
+    "students": -1,
+    "about": "The major in Near Eastern Languages and Civilizations (NELC) explores the history and cultural traditions of the ancient, classical, and modern Middle East, including northeast Africa. Students acquire proficiency in languages and skills for interpreting literature, art, and material culture from ancient Egypt and Mesopotamia; late antiquity and Classical Islam; or the contemporary moment, explored through the modern languages of Arabic, Hebrew, Persian, and Turkish. Inherently interdisciplinary, the program emphasizes analytic and reflective learning. While the Near East is studied for its own intrinsic literary, historic, and artistic interest, as well as its cultural and historical legacies, study of a world distant in time and space also can open new ways of understanding our own. NELC majors go on to careers in government, foreign service, international finance, law, education, and even medicine and public health. The major also provides a strong foundation for graduate study and academic research.",
+    "dus": [
+        ["Shiri Goren", "shiri.goren@yale.edu"]
+    ],
+    "catalogLink": "https://catalog.yale.edu/ycps/subjects-of-instruction/near-eastern-languages-civilizations/",
+    "websiteLink": "https://nelc.yale.edu/",
+    "specializations": [
+        "near_eastern_languages_and_civilizations_depth.mql",
+        "near_eastern_languages_and_civilizations_breadth.mql"
+    ]
+}

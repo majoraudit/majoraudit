@@ -1,0 +1,39 @@
+
+SELECT 7 FROM [
+  CLASS(BIOL 1010),
+  CLASS(BIOL 1020),
+  CLASS(CHEM 1610),
+  CLASS(CHEM 1650),
+  CLASS(CHEM 2200),
+  CLASS(CHEM 2220L),
+  CLASS(MATH 1120),
+  CLASS(MATH 1150)
+] : "Prerequisites" : 7;
+
+SELECT 6 FROM [
+  CLASS(PHYS 1700),
+  CLASS(PHYS 1710),
+  CLASS(MB&B 2750),
+  CLASS(MB&B 3000),
+  CLASS(MB&B 3010),
+  CLASS(CHEM 1750),
+  TAG("Medicine Concentration"),
+  TAG("YC CHEM Intermediate Courses"),
+  TAG("YC MB&B Practical Skills"),
+  TAG("YC MB&B Science & Society")
+] : "Core Classes" : 6;
+
+SELECT 2 FROM [
+  TAG("YC MB&B Elective"),
+  TAG("YC MB&B Practical Skills"),
+  RANGE(MB&B 2000 , MB&B 9999),
+  RANGE(CHEM 2000 , CHEM 9999),
+  RANGE(PHYS 2000 , PHYS 9999),
+  RANGE(S&DS 2000 , S&DS 9999),
+  RANGE(CPSC 2000 , CPSC 9999)
+] : "Electives" : 2;
+
+SELECT 1 FROM [
+  CLASS(MB&B 4900),
+  CLASS(MB&B 4910)
+] : "Senior Requirement" : 1;

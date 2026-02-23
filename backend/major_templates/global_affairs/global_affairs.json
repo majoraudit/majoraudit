@@ -1,0 +1,22 @@
+{
+    "name": "Urban Studies",
+    "id":"urban_studies",
+    "abbr": "URBN",
+    "degreeTypes": [
+        ["ba"]
+    ],
+    "courses": -1,
+    "rating": -1,
+    "workload": -1,
+    "discipline": "Interdisciplinary",
+    "students": -1,
+    "about" : "Urban Studies is an interdisciplinary field grounded in the physical and social spaces of the city and the larger built environment. The Urban Studies major is situated within Yale’s liberal arts framework and draws on the broader academic context and expertise of the Yale School of Architecture, including the areas of urban design and development, urban and architectural history, urban theory and representation, globalization and infrastructure, transportation and mobility, heritage and preservation, and community-based planning. Students have the ability to chart their own course through this interdisciplinary field, but the major emphasizes the following bodies of knowledge: history, theory, and analysis of urban form; the political economy of society and space; conceptual tools and descriptive-analytical methods to understand urban environments; and the theory and practice of urban planning and design.\nThe major prepares undergraduates for a variety of future careers and fields of graduate study related to urban planning, design, and development. These include professional and practice-oriented fields such as urban planning, landscape architecture, law, nonprofit management, public policy, real estate, and architecture; as well as research-oriented fields such as geography, sociology, anthropology, history and theory of urban planning, and urban and architectural history. ",
+    "dus": [
+        ["Elihu Rubin", "elihu.rubin@yale.edu"]
+    ],
+    "catalogLink": "https://catalog.yale.edu/ycps/subjects-of-instruction/urban-studies/",
+    "websiteLink": "https://urbanstudies.yale.edu/",
+    "specializations": [
+        "african_american_studies_ba.mql"
+    ]
+}

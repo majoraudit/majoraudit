@@ -1,0 +1,27 @@
+SELECT 1 FROM [CLASS(GREK 4995)] : "Required Course" : 2;
+
+SELECT 3 FROM [
+    RANGE(GREK 3000 , GREK 4999),
+    RANGE(GREK 3000 , GREK 4999),
+    RANGE(GREK 3000 , GREK 4999)
+] : "Additional Ancient Greek Language Courses" : 3;
+
+SELECT 4 FROM [
+    SELECT 1 FROM [TAG("YC CLCV Greece 1000 or 2000")],
+    SELECT 1 FROM [TAG("YC CLCV Rome 1000 or 2000")],
+    SELECT 1 FROM [TAG("YC Ancient Greek History Course")],
+    SELECT 1 FROM [TAG("YC Greek Balkans or Diaspora Medieval Ottoman Modern Course")]
+] : "Greek and Roman History and Literature" : 3;
+
+SELECT 2 FROM [
+    TAG("YC HELN Intermediate Plus"),
+    TAG("YC HELN Intermediate Plus")
+] : "Modern Greek Language Courses" : 3;
+
+SELECT 1 FROM [
+    SELECT 2 FROM [CLASS(CLSS 4998), CLASS(CLSS 4999)],
+    SELECT 2 FROM [
+        SELECT 1 FROM [CLASS(CLSS 4998), CLASS(CLSS 4999)],
+        PLACEMENT("Approved additional course for senior requirement")
+    ]
+] : "Senior Requirement" : 1;

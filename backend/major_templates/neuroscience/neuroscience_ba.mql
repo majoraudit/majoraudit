@@ -1,0 +1,9 @@
+SELECT 2 FROM [CLASS(NSCI 1600), CLASS(NSCI 3200)] : "Core Classes" : 1;
+SELECT 1 FROM [CLASS(NSCI 2280L), CLASS(NSCI 2290L), CLASS(NSCI 2400), CLASS(NSCI 2580), CLASS(NSCI 2600), CLASS(NSCI 2700), CLASS(NSCI 3210L), CLASS(PSYC 2538)] : "Labs" : 2;
+SELECT 2 FROM TAG("YC NSCI Systems/Circuit/Behav") : "Tag 1 Elective" : 3;
+SELECT 2 FROM TAG("YC NSCI Molecular/Cell/Biol") : "Tag 2 Elective" : 4;
+SELECT 1 FROM TAG("YC NSCI Quantitative") : "Tag 3 Elective" : 5;
+SELECT 1 FROM TAG("YC NSCI NSCI Computational") : "Tag 4 Elective" : 6;
+SELECT 1 FROM TAG("YC NSCI Basic Allied Core") : "Tag 5 Elective" : 7;
+SELECT 2 FROM TAG("YC NSCI Other Allied") : "Tag 6 Elective" : 8;
+SELECT 2 FROM [CLASS(NSCI 4900), CLASS(NSCI 4910), CLASS(NSCI 4800), CLASS(NSCI 4810)] : "Senior Requirement" : 9;

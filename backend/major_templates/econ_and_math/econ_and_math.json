@@ -1,0 +1,22 @@
+{
+    "name": "Economics and Mathematics",
+    "id": "econ_and_math",
+    "abbr": "ECMA",
+    "degreeTypes": [
+        ["ba"]
+    ],
+    "courses": -1,
+    "rating": -1,
+    "workload": -1,
+    "discipline": "Interdisciplinary",
+    "students": -1,
+    "about": "The joint major in Economics and Mathematics is designed for students who wish to pursue a mathematically rigorous study of economics. The major combines foundational courses in economics with advanced work in mathematics, providing the analytical tools needed for modern economic analysis. The program is especially well suited for students considering graduate study in economics, finance, or related quantitative fields. Students in this major take core courses in both economics and mathematics, including microeconomic theory, macroeconomic theory, econometrics, real analysis, and linear algebra. The major offers a rigorous alternative to the standard Economics B.A. and is one of the strongest preparations available for Ph.D. programs in economics.",
+    "dus": [
+        ["TBD", "TBD"]
+    ],
+    "catalogLink": "https://catalog.yale.edu/ycps/subjects-of-instruction/economics-mathematics/",
+    "websiteLink": "https://economics.yale.edu/undergraduate/economics-mathematics-joint-major",
+    "specializations": [
+        "econ_and_math.mql"
+    ]
+}

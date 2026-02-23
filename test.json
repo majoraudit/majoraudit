@@ -1,0 +1,29 @@
+// Globalist
+{
+    "title": "History Globalist",
+    "requirements": 
+    [
+
+    "SELECT 2 FROM [RANGE(HIST 0000, HIST 9999), RANGE(HIST 0000, HIST 9999)]", // prereqs
+    "SELECT 5 FROM [TAG(YC HIST Africa), TAG(YC HIST Asia), TAG(YC HIST Europe), TAG(YC HIST Latin America), TAG(YC Middle East), TAG(YC HIST United States)]", // geographic region
+    "SELECT 2 FROM [TAG(YC HIST Preindustrial)], TAG(YC HIST Preindustrial)" , // preindustrial
+    "SELECT 2 FROM [RANGE(HIST 3000, HIST 9999)]", // 3000-level departmental seminars
+    "SELECT 1 FROM [SELECT 2 FROM [COURSE(HIST 4995), COURSE(HIST 4996)], COURSE(HIST 4997)]" // Senior requirements
+
+    SELECT 2 FROM [CLASS, RANGE], 5 --> prereq
+    SELECT 2 FROM [CLASS, RANGE], 5
+    SELECT 1 FROM [CLASS, RANGE, RANGE, CLASS, CLASS], 5 --> electives
+
+    SELECT 2 FROM [] : "name" : 1
+
+    
+
+    # 1 
+
+    ]
+}
+
+// Specialist 
+{
+
+}
