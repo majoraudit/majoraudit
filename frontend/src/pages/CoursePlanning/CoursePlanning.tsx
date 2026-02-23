@@ -1,4 +1,8 @@
-import { type StudentSemester, type Course, type StudentCourse } from "@/types/type-user";
+import {
+  type StudentSemester,
+  type Course,
+  type StudentCourse,
+} from "@/types/type-user";
 
 import CourseOutput from "./components/CourseOutput";
 import SemesterOutput from "./components/SemesterOutput";
@@ -140,6 +144,7 @@ function CoursePlanning() {
       title: data.title,
       credit: data.credits,
       dist: data.distribution ? [data.distribution] : [],
+      tags: [],
     };
 
     const newStudentCourse: StudentCourse = {
@@ -664,7 +669,6 @@ function CoursePlanning() {
             onAddCustomCourse={() => openCustomCourseModal(semester)}
           />
         ))}
-
       </div>
 
       <CustomCourseModal
