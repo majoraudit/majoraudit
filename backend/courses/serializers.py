@@ -48,6 +48,7 @@ class CourseSerializer(serializers.ModelSerializer):
             'description',
             'credits',
             'distributionals',
+            'course_tag',
             'course_codes',
             'course_tags',
         ]
