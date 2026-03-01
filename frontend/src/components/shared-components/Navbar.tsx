@@ -4,7 +4,7 @@ import { useApp } from "@/contexts/AppContext";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 
-import { Info, MessageSquareWarning, LogOut, LogIn } from "lucide-react";
+import { Info, MessageSquareWarning, LogOut, LogIn, User } from "lucide-react";
 
 import {
   DropdownMenu,
@@ -77,6 +77,13 @@ function Navbar() {
             </DropdownMenuTrigger>
 
             <DropdownMenuContent className="w-48" align="end" sideOffset={10}>
+              {isAuthenticated && (
+                <Link to="/profile">
+                  <DropdownMenuItem className="text-md cursor-pointer">
+                    <User size={10} /> Profile
+                  </DropdownMenuItem>
+                </Link>
+              )}
               <Link to="/about">
                 <DropdownMenuItem className="text-md cursor-pointer">
                   <Info size={10} /> About Us
