@@ -1,8 +1,4 @@
-import {
-  type StudentSemester,
-  type Course,
-  type StudentCourse,
-} from "@/types/type-user";
+import { type StudentSemester, type Course, type StudentSemester } from "@/types/type-user";
 
 import CourseOutput from "./components/CourseOutput";
 import SemesterOutput from "./components/SemesterOutput";
@@ -21,6 +17,7 @@ import clsx from "clsx";
 
 import SidebarLayout from "@/components/shared-components/SidebarLayout";
 import CustomCourseModal from "./components/CustomCourseModal";
+import CourseDetailsModal from "./components/CourseDetailsModal";
 
 import {
   DropdownMenu,
@@ -52,6 +49,7 @@ function CoursePlanning() {
   const [selectedSemester, setSelectedSemester] =
     useState<StudentSemester | null>(null);
   const [isCustomCourseModalOpen, setIsCustomCourseModalOpen] = useState(false);
+  const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
 
   const {
     worksheets,
@@ -260,7 +258,11 @@ function CoursePlanning() {
             <ul className="flex flex-col p-2 w-full gap-4">
               {slicedCourses.map((course, index) => (
                 <li key={index}>
-                  <CourseOutput course={course} draggable={true} />
+                  <CourseOutput
+                    course={course}
+                    draggable={true}
+                    onCourseClick={openCourseDetailsModal}
+                  />
                 </li>
               ))}
             </ul>
@@ -667,6 +669,7 @@ function CoursePlanning() {
             key={index}
             semester={semester}
             onAddCustomCourse={() => openCustomCourseModal(semester)}
+            onCourseClick={openCourseDetailsModal}
           />
         ))}
       </div>
@@ -676,6 +679,11 @@ function CoursePlanning() {
         onClose={closeCustomCourseModal}
         semester={selectedSemester}
         onCreate={handleCreateCustomCourse}
+      />
+      <CourseDetailsModal
+        open={selectedCourse !== null}
+        course={selectedCourse}
+        onClose={closeCourseDetailsModal}
       />
     </SidebarLayout>
   );

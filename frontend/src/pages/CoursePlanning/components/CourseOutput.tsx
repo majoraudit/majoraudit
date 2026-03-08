@@ -15,6 +15,7 @@ interface CourseOutputProps {
   removable?: boolean;
   semesterSeasonCode?: number;
   semesterCompleted?: boolean;
+  onCourseClick?: (course: Course) => void;
 }
 
 function CourseOutput({
@@ -23,6 +24,7 @@ function CourseOutput({
   removable = false,
   semesterSeasonCode = -1,
   semesterCompleted = false,
+  onCourseClick,
 }: CourseOutputProps) {
   const { removeCourse } = useWorksheetActions();
   const ref = useRef<HTMLDivElement>(null);
@@ -51,6 +53,17 @@ function CourseOutput({
     }
   };
 
+  const handleCourseClick = () => {
+    if (!onCourseClick || isDragging) return;
+    onCourseClick(course);
+  };
+
+  const handleCourseKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
+    if (e.key !== "Enter" && e.key !== " ") return;
+    e.preventDefault();
+    handleCourseClick();
+  };
+
   return (
     <>
       <div
@@ -60,14 +73,23 @@ function CourseOutput({
             ? "border-4 border-blue-200 cursor-grabbing"
             : draggable && !semesterCompleted
               ? "cursor-grab"
+              : onCourseClick
+                ? "cursor-pointer"
               : "",
         )}
         ref={ref}
+        onClick={handleCourseClick}
+        onKeyDown={handleCourseKeyDown}
+        role={onCourseClick ? "button" : undefined}
+        tabIndex={onCourseClick ? 0 : undefined}
       >
         {removable && !semesterCompleted && (
           <button
             className="absolute top-0 right-0 h-5 w-5 m-1 active:scale-125 transition duration-300 ease-in-out cursor-pointer"
-            onClick={handleCourseRemove}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleCourseRemove();
+            }}
           >
             <img src={cancel} alt="cancel button"></img>
           </button>

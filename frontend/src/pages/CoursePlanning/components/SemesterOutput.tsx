@@ -20,6 +20,7 @@ import type { LottieRefCurrentProps } from "lottie-react";
 interface SemesterOutputProps {
   semester: StudentSemester;
   onAddCustomCourse?: () => void;
+  onCourseClick?: (course: Course) => void;
 }
 
 interface CourseDragItem {
@@ -179,6 +180,7 @@ function SemesterOutput({ semester, onAddCustomCourse }: SemesterOutputProps) {
                   removable={true}
                   semesterSeasonCode={updatedSemester.season}
                   semesterCompleted={isCompleted}
+                  onCourseClick={onCourseClick}
                 />
               </div>
             </li>
