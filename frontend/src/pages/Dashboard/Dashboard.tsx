@@ -116,14 +116,6 @@ function Dashboard() {
   return (
     <>
       <div className=" h-[calc(100vh-5rem)] w-full flex flex-col bg-gray-50 p-6 gap-4 overflow-y-auto">
-        {/* Header */}
-        <header className="ml-2 flex gap-3 items-center">
-          <h1 className="text-3xl font-bold text-gray-800">
-            {userData?.first_name}'s Dashboard {/* get first name*/}
-          </h1>
-          <img src={checkIcon} alt="check icon" className="w-9 h-9" />
-        </header>
-
         {/* Requirements Progress */}
         <section className="grid lg:grid-cols-2 md:grid-cols-1 sm:grid-cols-1 w-full gap-4">
           <div className="bg-white rounded-lg shadow p-6">
