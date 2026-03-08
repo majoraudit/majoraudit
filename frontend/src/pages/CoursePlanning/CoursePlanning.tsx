@@ -1,4 +1,8 @@
-import { type StudentSemester, type Course, type StudentSemester } from "@/types/type-user";
+import {
+  type StudentCourse,
+  type Course,
+  type StudentSemester,
+} from "@/types/type-user";
 
 import CourseOutput from "./components/CourseOutput";
 import SemesterOutput from "./components/SemesterOutput";
@@ -152,6 +156,14 @@ function CoursePlanning() {
     };
 
     addCourse(semester.season, newStudentCourse);
+  };
+
+  const openCourseDetailsModal = (course: Course) => {
+    setSelectedCourse(course);
+  };
+
+  const closeCourseDetailsModal = () => {
+    setSelectedCourse(null);
   };
 
   // ---------- Search ----------

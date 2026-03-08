@@ -38,7 +38,11 @@ function codeToYear(code: number): number {
 }
 
 // semester prop, mainly to specify the season code
-function SemesterOutput({ semester, onAddCustomCourse }: SemesterOutputProps) {
+function SemesterOutput({
+  semester,
+  onAddCustomCourse,
+  onCourseClick,
+}: SemesterOutputProps) {
   const { removeSemester, addCourse, removeCourse, setSemesterCompleted } =
     useWorksheetActions();
   const { activeSemesters } = useWorksheetManager();
@@ -84,11 +88,7 @@ function SemesterOutput({ semester, onAddCustomCourse }: SemesterOutputProps) {
 
   // useDrop hook --> only accepts courses, handles drop functionality by adding the course,
   //                  recreates hook when userData or semester.season changes
-  const [{ isOver }, drop] = useDrop<
-    CourseDragItem,
-    void,
-    { isOver: boolean }
-  >(
+  const [{ isOver }, drop] = useDrop<CourseDragItem, void, { isOver: boolean }>(
     () => ({
       accept: "course",
       drop: (item) => {
