@@ -1,0 +1,25 @@
+{
+    "name": "Mathematics and Physics",
+    "id": "mathematics_and_physics",
+    "abbr": "MATH&PHYS",
+    "degreeTypes": [
+        ["bs"]
+    ],
+    "courses": -1,
+    "rating": -1,
+    "workload": -1,
+    "discipline": "STEM",
+    "students": 0,
+    "about": "The Mathematics and Physics major allows students to explore the deep and productive relationship between the two disciplines, emphasizing their mutual insights and shared mathematical foundations. Students develop strong analytical and quantitative skills while studying advanced topics in both pure and applied mathematics, mechanics, and physical theory. The major prepares students for graduate study in mathematics, physics, or related quantitative fields, as well as careers requiring rigorous reasoning and problem-solving.",
+    "dus": [
+        ["Sebastian Hurtado-Salazar", "sebastian.hurtado-salazar@yale.edu"],
+        ["Miki Havlickova", "miki.havlickova@yale.edu"],
+        ["David Poland", "david.poland@yale.edu"]
+    ],
+    "majorEmail": "math.dus@yale.edu",
+    "catalogLink": "https://catalog.yale.edu/ycps/subjects-of-instruction/mathematics-and-physics/",
+    "websiteLink": "https://math.yale.edu/undergraduate/combined-majors/mathematics-and-physics",
+    "specializations": [
+        "mathematics_and_physics_bs.mql"
+    ]
+}

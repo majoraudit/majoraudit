@@ -1,0 +1,4 @@
+SELECT 5 FROM [] : "Prerequisites - Physics" : 2
+SELECT 3 FROM [] : "Core Courses" : 2
+SELECT 3 FROM [] : "Area of Focus"
+SELECT 2 FROM [] : "Senior Requirement" : 2

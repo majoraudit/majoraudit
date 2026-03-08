@@ -1,0 +1,30 @@
+{
+    "name": "Mathematics",
+    "id": "mathematics",
+    "abbr": "MATH",
+    "degreeTypes": [
+        ["ba"],
+        ["bs"]
+    ],
+    "courses": -1,
+    "rating": -1,
+    "workload": -1,
+    "discipline": "Science",
+    "students": 0,
+    "about": "Mathematics is both the language of the sciences and a cornerstone of abstract reasoning and culture. The major offers students a broad education across diverse areas of mathematics while providing flexibility to pursue individual interests in pure, applied, or interdisciplinary fields. The program emphasizes understanding of core areas such as algebra, analysis, topology, and geometry, while fostering analytical and problem-solving skills applicable to research, teaching, technology, and quantitative disciplines. Students may pursue either the B.A. or B.S. degree, as well as intensive or combined B.S./M.S. options for advanced preparation.",
+    "dus": [
+        ["Sebastian Hurtado-Salazar", "sebastian.hurtado-salazar@yale.edu"],
+        ["Miki Havlickova", "miki.havlickova@yale.edu"]
+    ],
+    "majorEmail": "math.dus@yale.edu",
+    "catalogLink": "https://catalog.yale.edu/ycps/subjects-of-instruction/mathematics/",
+    "websiteLink": "https://math.yale.edu/undergraduate",
+    "specializations": [
+        "mathematics_ba.mql",
+        "mathematics_bs.mql",
+        "mathematics_intensive.mql",
+        "mathematics_ba_distinction.mql",
+        "mathematics_bs_distinction.mql",
+        "mathematics_intensive_distinction.mql"
+    ]
+}

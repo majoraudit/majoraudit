@@ -1,0 +1,51 @@
+{
+    "name": "Molecular Biophysics and Biochemistry",
+    "id": "molecular_biophysics_and_biochemistry",
+    "abbr": "MB&B",
+    "degreeTypes": [
+        ["ba"],
+        ["bs"],
+        ["bsms"]
+    ],
+    "courses": -1,
+    "rating": -1,
+    "workload": -1,
+    "discipline": "STEM",
+    "students": 0,
+    "about": "The Department of Molecular Biophysics and Biochemistry (MB&B) at Yale integrates molecular, chemical, and physical approaches to the study of life. Students learn the principles of biochemistry, biophysics, and structural biology while engaging with research across computation, spectroscopy, and molecular medicine. The program offers B.A., B.S., and B.S./M.S. degree options, with optional concentrations in Biochemistry, Biophysics and Structural Biology, Chemical Biology, Computational Biology and Bioinformatics, Environment and Climate Change, and Medicine.",
+    "dus": [
+        ["Christian Schlieker", "christian.schlieker@yale.edu"]
+    ],
+    "majorEmail": "mbbundergrad@yale.edu",
+    "catalogLink": "https://catalog.yale.edu/ycps/subjects-of-instruction/molecular-biophysics-and-biochemistry/",
+    "websiteLink": "https://mbb.yale.edu",
+    "specializations": [
+        "molecular_biophysics_and_biochemistry_ba.mql",
+        "molecular_biophysics_and_biochemistry_bs.mql",
+        "molecular_biophysics_and_biochemistry_bsms.mql",
+
+        "molecular_biophysics_and_biochemistry_biochemistry_ba.mql",
+        "molecular_biophysics_and_biochemistry_biochemistry_bs.mql",
+        "molecular_biophysics_and_biochemistry_biochemistry_bsms.mql",
+
+        "molecular_biophysics_and_biochemistry_biophysics_structural_biology_ba.mql",
+        "molecular_biophysics_and_biochemistry_biophysics_structural_biology_bs.mql",
+        "molecular_biophysics_and_biochemistry_biophysics_structural_biology_bsms.mql",
+
+        "molecular_biophysics_and_biochemistry_chemical_biology_ba.mql",
+        "molecular_biophysics_and_biochemistry_chemical_biology_bs.mql",
+        "molecular_biophysics_and_biochemistry_chemical_biology_bsms.mql",
+
+        "molecular_biophysics_and_biochemistry_computational_biology_bioinformatics_ba.mql",
+        "molecular_biophysics_and_biochemistry_computational_biology_bioinformatics_bs.mql",
+        "molecular_biophysics_and_biochemistry_computational_biology_bioinformatics_bsms.mql",
+
+        "molecular_biophysics_and_biochemistry_environment_climate_change_ba.mql",
+        "molecular_biophysics_and_biochemistry_environment_climate_change_bs.mql",
+        "molecular_biophysics_and_biochemistry_environment_climate_change_bsms.mql",
+
+        "molecular_biophysics_and_biochemistry_medicine_ba.mql",
+        "molecular_biophysics_and_biochemistry_medicine_bs.mql",
+        "molecular_biophysics_and_biochemistry_medicine_bsms.mql"
+    ]
+}

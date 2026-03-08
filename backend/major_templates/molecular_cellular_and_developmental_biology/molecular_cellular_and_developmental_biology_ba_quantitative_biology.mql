@@ -1,0 +1,7 @@
+SELECT 2 FROM [CLASS(MCDB 2000), CLASS(MCDB 2020), CLASS(MCDB 2050), CLASS(MCDB 2100), CLASS(MCDB 2900), CLASS(MCDB 3000), CLASS(MB&B 3000)] : "Core Classes" : 1
+SELECT 1 FROM [CLASS(MCDB 3310)] : "Quantitative Biology Concentration Required Course" : 2
+SELECT 1 FROM [TAG("YC MCDB Quantitative Biology Concentration Elective"), RANGE(MCDB 2500, MCDB 4999)] : "Concentration Elective" : 3
+SELECT 1 FROM [RANGE(MCDB 3500, MCDB 4999)] : "Special Electives" : 4
+SELECT 1 FROM [RANGE(MCDB 3000, MCDB 3999), RANGE(MB&B 3000, MB&B 3999), RANGE(BENG 3000, BENG 3999), RANGE(ANTH 3000, ANTH 3999), RANGE(E&EB 3000, E&EB 3999)] : "Biology Lab" : 5
+SELECT 1 FROM [CLASS(MCDB 4750), TAG("MCDB Senior Essay")] : "Senior Requirement" : 6
+

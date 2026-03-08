@@ -11,6 +11,7 @@ import checkIcon from "./assets/check.svg";
 import trashcan from "./assets/trashcan.svg";
 
 import { useMemo, useEffect } from "react";
+import { Navigate } from "react-router-dom";
 
 import { useWorksheetManager } from "@/hooks/useWorksheetManager";
 import { useWorksheetActions } from "@/hooks/useWorksheetActions";
@@ -27,6 +28,7 @@ import {
 function Dashboard() {
   const { userData, setUserData } = useUser();
   const { appData } = useApp();
+
   const { worksheets, activeWorksheetId, setActiveWorksheet } =
     useWorksheetManager();
   const { removeProgram } = useWorksheetActions();

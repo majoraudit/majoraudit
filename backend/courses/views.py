@@ -25,6 +25,7 @@ class CourseListView(generics.ListAPIView):
             # queryset=CourseInstance.objects.select_related('course')
             # .prefetch_related('course_professors', 'course_codes')
             # ),
+            'course_tags',
             'distributionals'
         ).all()
 
@@ -35,7 +36,8 @@ class CourseDetailView(generics.RetrieveAPIView):
 
     queryset = Course.objects.prefetch_related(
         'courseinstance_set__course_professors',
-        'distributionals'
+        'distributionals',
+        'course_tags',
     )
 
 

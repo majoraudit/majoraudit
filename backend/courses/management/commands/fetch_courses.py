@@ -1,14 +1,11 @@
 import requests
 from django.core.management.base import BaseCommand
 from django.db import transaction
-from courses.models import Course, CourseCode, CourseProfessor, CourseInstance, CourseDistribution, Seasons
-
+from courses.models import Course, CourseCode, CourseProfessor, CourseInstance, CourseDistribution, CourseTag, Seasons
 
 API_URL = "https://api.coursetable.com/api/catalog/public/"
 
-
 class Command(BaseCommand):
-
     def add_arguments(self, parser):
         parser.add_argument(
             "semester",
@@ -28,7 +25,6 @@ class Command(BaseCommand):
             return
 
         payload = resp.json()
-
         for item in payload:
             course, _ = Course.objects.update_or_create(
                 external_id=item["same_course_id"],
@@ -36,11 +32,20 @@ class Command(BaseCommand):
                     "title": item["title"],
                     "description": item["description"],
                     "credits": item["credits"],
-                },)
+                },
+            )
 
             codes = [c.upper() for c in item["skills"]]
             dists = CourseDistribution.objects.filter(code__in=codes)
             course.distributionals.set(dists)
+    
+            course_flags = item.get("course_flags", [])
+            course_tags = []
+            for flag_item in course_flags:
+                flag_text = flag_item["flag"]["flag_text"]
+                tag, _ = CourseTag.objects.get_or_create(name=flag_text)
+                course_tags.append(tag)
+            course.course_tag.set(course_tags)
 
             listings = item["listings"]
             course_codes = []
@@ -64,7 +69,6 @@ class Command(BaseCommand):
 
             parsed_year = item["season_code"][:4]
             season_number = item["season_code"][-2:]
-
             if season_number == "01":
                 parsed_season = Seasons.SP
             elif season_number == "02":
@@ -81,7 +85,6 @@ class Command(BaseCommand):
                     "section_num": item["section"],
                 },
             )
-
             course_instance.course_codes.set(course_codes)
             course_instance.course_professors.set(course_professors)
 

@@ -1,0 +1,24 @@
+{
+    "name": "Neuroscience",
+    "id":"neuroscience",
+    "abbr": "NSCI",
+    "degreeTypes": [
+        ["ba", "bs"]
+    ],
+    "courses": -1,
+    "rating": -1,
+    "workload": -1,
+    "discipline": "Physical Sciences",
+    "students": -1,
+    "about": "Neuroscience aims to understand how the brain produces the mind and behavior, with the goal of advancing human understanding, improving physical and mental health, and optimizing performance. This entails a broad, interdisciplinary effort that spans from molecules to minds. At one end, biology, chemistry, and physics are improving our understanding of the molecular and cellular mechanisms of neuronal signaling and development. At the other end, psychology, psychiatry, and computer science link neural processes and systems to the mind and behavior. At all levels, the rich array of methods and data analysis depends on a strong foundation in the basic sciences, mathematics, statistics, and computer science.  ",
+    "dus": [
+        ["Steve Chang", "steve.chang@yale.edu"],
+        ["Damon Clark", "damon.clark@yale.edu"]
+    ],
+    "catalogLink": "https://catalog.yale.edu/ycps/subjects-of-instruction/neuroscience/",
+    "websiteLink": "https://neuroscience.yale.edu/",
+    "specializations": [
+        "neuroscience_ba.mql",
+        "neuroscience_bs.mql"
+    ]
+}

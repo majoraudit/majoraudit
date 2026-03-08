@@ -1,0 +1,22 @@
+{
+    "name": "Engineering Sciences (Chemical)",
+    "id": "engineering_sciences_chemical",
+    "abbr": "ENAS",
+    "degreeTypes": [
+        ["bs"]
+    ],
+    "courses": -1,
+    "rating": -1,
+    "workload": -1,
+    "discipline": "Engineering",
+    "students": -1,
+    "about": "The Engineering Sciences (Chemical) major provides a rigorous foundation in chemical engineering principles within the context of a liberal arts education. Students study the transformation of matter and energy at the molecular and macroscopic levels, including thermodynamics, transport phenomena, reaction engineering, and process design. The program prepares students for careers in chemical and related industries, as well as for graduate study in chemical engineering, chemistry, materials science, and related fields.",
+    "dus": [
+        ["TBD", "TBD"]
+    ],
+    "catalogLink": "https://catalog.yale.edu/ycps/subjects-of-instruction/chemical-engineering/",
+    "websiteLink": "https://engineering.yale.edu/academic-study/departments/chemical-and-environmental-engineering",
+    "specializations": [
+        "engineering_sciences_chemical.mql"
+    ]
+}

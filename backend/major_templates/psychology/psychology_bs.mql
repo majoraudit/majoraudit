@@ -1,0 +1,36 @@
+SELECT 1 FROM [
+    CLASS(PSYC 1100)
+] : "Prerequisite" : 1;
+
+SELECT 1 FROM [
+    CLASS(S&DS 1000),
+    CLASS(S&DS 2300)
+] : "Statistics Requirement" : 2;
+
+SELECT 2 FROM [
+    SELECT 1 FROM [CLASS(PSYC 1400), CLASS(PSYC 1500), CLASS(PSYC 1700)],
+    RANGE(PSYC 1000 , PSYC 1999)
+] : "Social Science Courses (2 total, ≥1 Core)" : 3;
+
+SELECT 2 FROM [
+    SELECT 1 FROM [CLASS(PSYC 1300), CLASS(PSYC 1600)],
+    RANGE(PSYC 1000 , PSYC 1999)
+] : "Natural Science Courses (2 total, ≥1 Core)" : 4;
+
+SELECT 1 FROM [
+    RANGE(PSYC 2100 , PSYC 2999)
+] : "Research Methods (PSYC 2100–2999)" : 5;
+
+SELECT 6 FROM [
+    RANGE(PSYC 2000 , PSYC 4999),
+    RANGE(PSYC 2000 , PSYC 4999),
+    RANGE(PSYC 2000 , PSYC 4999),
+    RANGE(PSYC 2000 , PSYC 4999),
+    RANGE(PSYC 2000 , PSYC 4999),
+    RANGE(PSYC 2000 , PSYC 4999)
+] : "Psychology Electives" : 6;
+
+SELECT 2 FROM [
+    CLASS(PSYC 4990),
+    RANGE(PSYC 4000 , PSYC 4999)
+] : "Senior Requirement (BS; PSYC 4990 + 1 additional advanced course)" : 7;

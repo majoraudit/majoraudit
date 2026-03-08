@@ -1,0 +1,37 @@
+{
+    "name": "Molecular, Cellular, and Developmental Biology",
+    "id":"molecular_cellular_and_developmental_biology",
+    "abbr": "MCDB",
+    "degreeTypes": [
+        ["ba", "bs", "bs_intensive", "bs_ms"], ["", "biotechnology", "neurobiology", "quantitative_biology"]
+    ],
+    "courses": -1,
+    "rating": -1,
+    "workload": -1,
+    "discipline": "Biological Sciences",
+    "students": -1,
+    "about": "The science of biology is extremely broad, ranging across the domains of molecules, cells, tissues and organs, organisms, and ecosystems. Moreover, biology explores questions of evolutionary history and the processes of evolutionary change, as well as the mechanisms by which cells, organisms, and ecosystems function. Students majoring in Molecular, Cellular, and Developmental Biology receive a thorough yet varied liberal education and preparation for professional careers in a diverse array of fields. Practical applications of biology include the development of biologicals and pharmaceuticals, the practice of medicine, and the pursuit of the scientific bases for understanding the development and function of biological systems. Molecular, Cellular, and Developmental Biology (MCDB) offers programs for students wishing to concentrate on molecular and cellular biology and genetics, with applications to problems in cell and developmental biology, neurobiology, and various aspects of quantitative biology. Interdisciplinary opportunities are available within the major in the Biotechnology, Neurobiology, and Quantitative Biology concentrations (previously tracks). The MCDB major offers many opportunities for independent laboratory research. With approval, research can be conducted under the supervision of faculty members in any Yale department. ",
+    "dus": [
+        ["Stephen Dellaporta", "stephen.dellaporta@yale.edu"]
+    ],
+    "catalogLink": "https://catalog.yale.edu/ycps/subjects-of-instruction/molecular-cellular-developmental-biology/",
+    "websiteLink": "https://mcdb.yale.edu/",
+    "specializations": [
+        "molecular_cellular_and_developmental_biology_ba.mql",
+        "molecular_cellular_and_developmental_biology_ba_biotechnology.mql",
+        "molecular_cellular_and_developmental_biology_ba_neurobiology.mql",
+        "molecular_cellular_and_developmental_biology_ba_quantitative_biology.mql",
+        "molecular_cellular_and_developmental_biology_bs.mql",
+        "molecular_cellular_and_developmental_biology_bs_biotechnology.mql",
+        "molecular_cellular_and_developmental_biology_bs_neurobiology.mql",
+        "molecular_cellular_and_developmental_biology_bs_quantitative_biology.mql",
+        "molecular_cellular_and_developmental_biology_bs_intensive.mql",
+        "molecular_cellular_and_developmental_biology_bs_intensive_biotechnology.mql",
+        "molecular_cellular_and_developmental_biology_bs_intensive_neurobiology.mql",
+        "molecular_cellular_and_developmental_biology_bs_intensive_quantitative_biology.mql",
+        "molecular_cellular_and_developmental_biology_bs_ms.mql",
+        "molecular_cellular_and_developmental_biology_bs_ms_biotechnology.mql",
+        "molecular_cellular_and_developmental_biology_bs_ms_neurobiology.mql",
+        "molecular_cellular_and_developmental_biology_bs_ms_quantitative_biology.mql"
+    ]
+}

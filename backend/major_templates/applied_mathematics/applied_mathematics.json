@@ -1,0 +1,23 @@
+{
+    "name": "Applied Mathematics",
+    "id":"applied_mathematics",
+    "abbr": "AMTH",
+    "degreeTypes": [
+        ["ba", "bs"]
+    ],
+    "courses": -1,
+    "rating": -1,
+    "workload": -1,
+    "discipline": "Engineering",
+    "students": -1,
+    "about" : "Mathematical models are widely used throughout natural science, social science, and engineering in fields as diverse as physics, bioinformatics, robotics, image processing, and economics. Despite the broad range of mathematical settings and applications, there exists a core of essential concepts and techniques used in addressing most problems. The Applied Mathematics major provides a foundation in these mathematical techniques and prepares the student to use them in a substantive field of application.\nThe interdisciplinary major permits a great deal of flexibility in design. It is intended to appeal to students who wish to study the more mathematical aspects of science or engineering, as well as those whose primary interest is in mathematics and statistics and who wish to become acquainted with applications. Core courses are drawn from Computer Science, Mathematics, Statistics and Data Science, and Engineering and Applied Science. Courses applying mathematics may be drawn from participating programs in Applied Physics; Astronomy & Astrophysics; the biological sciences, including Ecology and Evolutionary Biology, Molecular Biophysics and Biochemistry, and Molecular, Cellular, and Developmental Biology; Chemistry; Economics; the various programs in engineering, including Biomedical Engineering, Chemical Engineering, Electrical Engineering, Environmental Engineering, and Mechanical Engineering; Earth and Planetary Sciences; Physics; and even Linguistics and Political Science. The Applied Mathematics degree program requires a three-course concentration in a field in which mathematics is used.\nStudents in the major are often sought after by graduate programs in either Applied Mathematics or in the disciplines in which they choose their concentration, as well as by industries and startup companies in which their breadth of quantitative skills are essential and often unique.\nStudents may pursue a major in Applied Mathematics as one of two majors and can thereby equip themselves with mathematical modeling skills while being fully engaged in a field of application. In this case, the concentration requirement of the Applied Mathematics program is flexible in order to recognize the contribution of the other major. A two-course overlap is permitted to satisfy the requirements of the two majors.",
+    "dus": [
+        ["John Wettlaufer", "john.wettlaufer@yale.edu"],
+        ["Ian Adelstein", "ian.adelstein@yale.edu"]
+    ],
+    "catalogLink": "https://catalog.yale.edu/ycps/subjects-of-instruction/applied-mathematics/",
+    "websiteLink": "https://applied.math.yale.edu/",
+    "specializations": [
+        "applied_mathematics_ba.mql", "applied_mathematics_bs.mql"
+    ]
+}

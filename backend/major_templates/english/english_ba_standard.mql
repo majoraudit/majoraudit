@@ -1,0 +1,36 @@
+SELECT 3 FROM [
+  CLASS(ENGL 1025),
+  CLASS(ENGL 1026),
+  CLASS(ENGL 1027),
+  CLASS(ENGL 1028)
+] : "Core Courses" : 2;
+
+SELECT 1 FROM [
+  TAG_DEPT("YC ENGL Medieval", "ENGL")
+] : "Historical Period Medieval" : 3;
+
+SELECT 1 FROM [
+  TAG_DEPT("YC ENGL Renaissance", "ENGL")
+] : "Historical Period Renaissance" : 4;
+
+SELECT 1 FROM [
+  TAG_DEPT("YC ENGL 18th/19th Century", "ENGL")
+] : "Historical Period Eighteenth and Nineteenth Century" : 5;
+
+SELECT 1 FROM [
+  TAG_DEPT("YC ENGL 20th/21st Century", "ENGL")
+] : "Historical Period Twentieth and Twenty First Century" : 6;
+
+SELECT 1 FROM [
+  TAG_DEPT("YC ENGL Junior Seminar", "ENGL")
+] : "Junior Seminar" : 7;
+
+SELECT 4 FROM [
+  DEPT("ENGL")
+] : "English Electives" : 8;
+
+SELECT 2 FROM [
+  TAG_DEPT("YC ENGL Senior Seminar", "ENGL"),
+  CLASS(ENGL 4100),
+  CLASS(ENGL 4101)
+] : "Senior Requirement" : 1;

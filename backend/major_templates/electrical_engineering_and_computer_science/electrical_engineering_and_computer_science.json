@@ -1,0 +1,22 @@
+{
+    "name": "Electrical Engineering and Computer Science",
+    "id": "electrical_engineering_and_computer_science",
+    "abbr": "EECS",
+    "degreeTypes": [
+        ["bs"]
+    ],
+    "courses": -1,
+    "rating": -1,
+    "workload": -1,
+    "discipline": "Engineering",
+    "students": -1,
+    "about": "The Electrical Engineering and Computer Science (EECS) combined B.S. degree program provides a rigorous interdisciplinary education spanning both electrical engineering and computer science. Students develop expertise in areas such as computer architecture, embedded systems, digital and analog electronics, signal processing, communications, algorithms, data structures, and systems programming. The program is designed for students who seek a deep understanding of the interplay between hardware and software systems. The combined major requires core courses from both the Electrical Engineering and Computer Science departments, supplemented by electives that allow students to tailor their studies to their interests.",
+    "dus": [
+        ["TBD", "TBD"]
+    ],
+    "catalogLink": "https://catalog.yale.edu/ycps/subjects-of-instruction/electrical-engineering/",
+    "websiteLink": "https://engineering.yale.edu/academic-study/departments/electrical-engineering",
+    "specializations": [
+        "electrical_engineering_and_computer_science_bs.mql"
+    ]
+}

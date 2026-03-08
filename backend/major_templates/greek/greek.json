@@ -1,0 +1,22 @@
+{
+    "name": "Greek, Ancient and Modern",
+    "id": "greek",
+    "abbr": "GREK",
+    "degreeTypes": [
+        ["ba"]
+    ],
+    "courses": -1,
+    "rating": -1,
+    "workload": -1,
+    "discipline": "Languages",
+    "students": -1,
+    "about": "The major in Greek, Ancient and Modern, provides students with a comprehensive study of the Greek language, literature, and culture from antiquity to the present day. Students develop proficiency in ancient Greek and have the opportunity to study modern Greek as well. The curriculum encompasses the reading and analysis of major works of Greek literature, including epic, lyric, tragedy, comedy, historiography, and philosophy. The program also explores the continuity and transformation of Greek culture across the centuries, connecting ancient traditions with Byzantine, modern, and contemporary Greek literary and intellectual life. The major prepares students for graduate study in classics, comparative literature, and related fields.",
+    "dus": [
+        ["TBD", "TBD"]
+    ],
+    "catalogLink": "https://catalog.yale.edu/ycps/subjects-of-instruction/greek/",
+    "websiteLink": "https://classics.yale.edu/",
+    "specializations": [
+        "greek.mql"
+    ]
+}

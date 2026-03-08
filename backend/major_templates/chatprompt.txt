@@ -1,0 +1,715 @@
+I want you to create major requirement templates in our custom query language MQL.
+
+This id the documentation for MQL: 
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+# Major Template + Processing System
+
+This repository defines how Major Templates are stored and processed using MQL (Major Query Language) — a custom domain-specific language designed to describe academic requirements in a structured, visual, and auditable way.
+
+MQL enables developers or administrators to define complex course requirements (including ranges, tags, and nested logic) using a lightweight, SQL-inspired syntax.
+
+## Overview
+
+Each major has a folder that includes a main json and mql files. The json includes basic information about the major, the format of which can be seen in computer_science.json. Within are links to .mql templates (for various specialties such as ba/bs or globliast/specialist or geographical locations). These templates are parsed into JSON stuctures and then eventually processed by the MajorAudit rules engine.
+
+An example of a completed MajorTemplate can be seen with the computer_science major (bs_ms not yet implemented).
+
+## MQL Syntax
+Basic format for a group requirement is: `SELECT <count> FROM [<queries>] : "<requirement name>" : <priority>;`
+* `SELECT <count>` → Number of courses required for that requirement.
+  * Another option is `SELECT <start>-<end>` → Ranged number of courses allowed to fulfill a requirement (start <= end, start != 0 at the requirement level). 
+* `FROM [ ... ]` → Valid courses (defined using queries CLASS, RANGE, TAG, or nested SELECT).
+* `"<requirement name>"` → Human-readable name (used in UI).
+* `<priority> [default=1]` → Numeric order used to determine which rules are audited first, not display order (requirements are displayed from top to bottom)
+
+### MQL Primitives
+
+Primitives are used as arguments to [Queries](#Queries). There are only two primitives.
+
+#### Class
+Not a String. It is a construct built from a department id (four ASCII symbols) and course number (four ASCII digits). Classes will be validated during parsing.
+
+Format: `<DEPARTMENT-ID> <COURSE-NUMBER>`  
+Examples:
+```MATH 2250```
+```CPSC 2010```
+```S&DS 1230```
+
+#### String
+Arbitrary text. Escaping `"` can be done by prepending another `"`: `""""` -> ".
+
+Format: `"<ASCII>"`  
+Examples:
+```"Lorem Ipsum"```
+```"Shakespeare said, ""I love writing,"" and the world was happy"```
+
+### Queries
+Queries are like filter functions.  
+  
+Format: `<QUERY-NAME>(arg1: <primitive>, arg2: <primitive>, ...)`  
+Examples:
+```CLASS(MATH 2250)```
+```RANGE(MATH 2251, MATH 4699)```
+```TAG("YC MATH Distribution")```
+
+| Query | Description |
+| - | - |
+| `CLASS(course: <CLASS primitive>)` | a single course |
+| `RANGE(start: <CLASS primitive>, end: <CLASS primitive>)` | inclusive course range |
+| `TAG(<STRING primitive>)` | departmental attributes label (https://catalog.yale.edu/ycps/attributes/) |
+| `TAG_DEPT(<STRING primitive>, <string primitive>)` | departmental attributes label (https://catalog.yale.edu/ycps/attributes/) and department code |
+| `SELECT n FROM [...]` |  nested requirement group (n != 0), filtered output will be flattened to parent selection |
+| `SELECT n-k FROM [...]` |  nested ranged requirement group (n <= k), filtered output will be flattened to parent selection |
+| `DIST(<STRING primitive>)` | yale college distribution designation attributes 
+| `DIST_DEPT(<STRING primitive>, <string primitive>)` | yale college distribution designation attributes and department code |
+| `DEPT(<STRING primitive>)` | choose a class from this department code... for example, CPSC | 
+| `PLACEMENT(<STRING primitive>)` | there is no requirement here that can be auto-filled, here is text explaining what needs to be done (maybe checked with DUS) |
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Here are the Yale College Distribution Designation Attributes and the Deparmental Attributes: 
+
+Yale College Distribution Designation Attributes:
+--------------------------
+Humanities (HU)
+Language, Level 5 (L5)
+Quantitative Reasoning (QR)
+Science (SC)
+Social Sciences (SO)
+Writing (WR)
+Writing in a Discipline (WD)
+First-Year Seminar
+Sophomore Seminar
+--------------------------
+
+Departmental Attributes: 
+
+American Studies (AMST)
+--------------------------
+YC AMST Cultural Hist/Studies
+YC AMST Early Americas
+YC AMST First-Year Sem
+YC AMST Gateway Courses
+YC AMST Junior Seminars
+YC AMST Senior Seminars
+YC AMST Special&Sr Projects
+YC AMST Survey of Am Lit
+--------------------------
+
+Anthropology (ANTH)
+--------------------------
+YC ANTH Adv Lab/Data Analysis
+YC ANTH Archaeology
+YC ANTH Biological
+YC ANTH Linguistic
+YC ANTH Medical
+YC ANTH Sociocultural
+YC ANTH Theory
+--------------------------
+
+Archaeological Studies (ARCG)
+--------------------------
+YC ARCG Advanced Lab
+YC ARCG Intro Survey
+YC ARCG Theory--------------------------
+
+Architecture (ARCH)
+--------------------------
+YC ARCH History & Theory
+YC ARCH Materials & Design
+YC ARCH Structures & Computation
+YC ARCH Urbanism & Landscape
+--------------------------
+
+Biomedical Engineering (BENG)
+--------------------------
+YC BENG Bioimaging
+YC BENG Biomchncs&Mchnbiology
+YC BENG Biomolecular Engrng
+YC BENG Systems Biology
+--------------------------
+
+Chemistry (CHEM)
+--------------------------
+YC CHEM Advanced Courses
+YC CHEM GR of Interest to UG
+YC CHEM Intermediate Courses
+YC CHEM Introductory Courses
+YC CHEM Nonmajor w/o Prereq
+--------------------------
+
+Classics (CLSS)
+--------------------------
+YC CLSS Ancient Hist Rome
+YC CLSS Ancient Hist Greece
+YC CLSS Lit/Cult Anc Greece
+YC CLSS Lit/Cult Anc Rome
+YC CLSS Hist, Phil, Art, Arcg
+--------------------------
+
+Climate Science and Solutions Certificate
+--------------------------
+YC Climate Anthropogenic
+YC Climate Basic Climate Sci
+YC Climate Non-science
+YC Climate Sci/Eng/Tech
+YC Climate Sci/Solutions Sem
+YC Climate Solutions
+--------------------------
+
+Cognitive Science (CGSC)
+--------------------------
+YC CGSC Skills
+--------------------------
+
+Collections: Objects, Research, Society Certificate
+--------------------------
+YC Collections Research
+YC Collections Society
+YC Collections Engagement
+--------------------------
+
+Comparative Literature (CPLT)
+--------------------------
+YC CPLT 17th-18th centuries
+YC CPLT 19th Century
+YC CPLT 20th & 21st Centuries
+YC CPLT Antiquity
+YC CPLT Early Modern
+YC CPLT Film
+YC CPLT Medieval
+YC CPLT Modern (1800-present)
+YC CPLT Theory
+YC CPLT Translation Studies
+--------------------------
+
+Computer Science (CPSC)
+--------------------------
+YC CPSC Elective
+--------------------------
+
+Computer Science and Economics (CSEC)
+--------------------------
+YC CSEC Elective not CS or EC
+YC CSEC Electv intrsctn CS/EC
+--------------------------
+
+Computer Science and Math 
+--------------------------
+YC CPSC&MATH Adv CS Elective
+--------------------------
+
+Computing and the Arts (CPAR)
+--------------------------
+YC CPAR ARCH CS Elective
+YC CPAR ART CS Elective
+YC CPAR HSAR CS Elective
+YC CPAR MUSI CS Elective
+YC CPAR THST CS Elective
+YC CPAR MUSI Addl Course
+--------------------------
+
+Computing and Linguistics (CPLI)
+--------------------------
+YC CPLI Elective in CP & Ling
+--------------------------
+
+Ecology and Evolutionary Biology (EEB)
+--------------------------
+YC E&EB BS Elective
+YC E&EB Intermediate/Advanced
+YC E&EB Introductory Courses
+YC E&EB Organismal Lec/Labs
+YC E&EB Prereq Option
+YC E&EB Biodiversity Elective
+YC E&EB Organismal Elective
+--------------------------
+
+Economics (ECON)
+--------------------------
+YC ECON Core
+YC ECON Development
+YC ECON EconData
+YC ECON Education
+YC ECON Environment
+YC ECON Finance
+YC ECON Health
+YC ECON History
+YC ECON Industrial Orgnztion
+YC ECON International
+YC ECON Introductory
+YC ECON Labor
+YC ECON Law
+YC ECON Macroeconomics
+YC ECON Methodology
+YC ECON Microtheory
+YC ECON Neuro
+YC ECON Political Economy
+YC ECON Poverty
+YC ECON Public
+YC ECON Theory Seminar
+--------------------------
+
+Education Studies Certificate (EDST)
+--------------------------
+YC EDST Social Context
+YC EDST Individuals in Society
+YC EDST Theory & Research
+YC EDST Policy
+YC EDST Pedagogy
+--------------------------
+
+Energy Studies Certificate (ENRG) 
+--------------------------
+YC ENRG Energy & Environment
+YC ENRG Energy & Soc
+YC ENRG Energy Science & Tech
+--------------------------
+
+English (ENGL)
+--------------------------
+YC ENGL 18th/19th Century
+YC ENGL 20th/21st Century
+YC ENGL Creative Writing
+YC ENGL Junior Seminar
+YC ENGL Medieval
+YC ENGL Renaissance
+YC ENGL Senior Seminar
+YC ENGL Pre-1800 Lit
+YC ENGL Pre-1900 Lit
+YC ENGL American Lit
+--------------------------
+
+Environmental Studies (EVST)
+--------------------------
+YC EVST Core Human/Social Sci
+YC EVST Core BA Natural Scie
+YC EVST BS Natural Sci Lab
+YC EVST Advanced Seminar
+YC EVST Core BS Natural Sci
+--------------------------
+
+Ethics, Politics, and Economics (EP&E)
+--------------------------
+YC EP&E Advanced Seminar
+YC EP&E Economics Core
+YC EP&E Ethics Core
+YC EP&E Intro Econometrics
+YC EP&E Intro Ethics
+YC EP&E Intro Game Theory
+YC EP&E Intro Microeconomics
+YC EP&E Intro Political Phil
+YC EP&E Intro Statistics
+YC EP&E Politics Core
+--------------------------
+
+Ethnicity, Race & Migration (ER&M)
+--------------------------
+YC ER&M Elec Within the Major
+YC ER&M Methods Course
+YC ER&M Required Courses
+YC ER&M Research & Sr Essay
+--------------------------
+
+Ethnography Certificate
+--------------------------
+YC Ethnography Elective
+YC Ethnography Methods
+--------------------------
+
+Film and Media Studies (FILM)
+--------------------------
+YC FILM Critical Studies
+YC FILM World Cinema
+YC FILM Production
+--------------------------
+
+Food, Agriculture, and Climate Change Certificate
+--------------------------
+YC Food Consumption
+YC Food Environment
+YC Food Production
+--------------------------
+
+French (FREN)
+--------------------------
+YC FREN Pre-1800
+YC FREN Taught in English
+YC FREN Taught in French
+--------------------------
+
+German (GMAN)
+--------------------------
+YC GMAN Aesthetics & Arts
+YC GMAN Critical Thought
+YC GMAN History & Politics
+YC GMAN Literature
+YC GMAN Media & Media Theory
+--------------------------
+
+Global Affairs (GLBL)
+--------------------------
+YC GLBL Elective
+YC GLBL 121 Alternative Course
+YC GLBL Addtl Methods Course
+YC GLBL Qualitative Methods
+YC GLBL History
+--------------------------
+
+ Global Health Studies Certificate
+--------------------------
+YC Glbl Hlth Bio & Env Infl
+YC Glbl Hlth Health & Soc
+YC Glbl Hlth Hist Approaches
+YC Glbl Hlth Perf Rep & Hlth
+YC Glbl Hlth Polit Econ & Gov
+YC Glbl Hlth Quantitative Data
+--------------------------
+
+History (HIST)
+--------------------------
+YC HIST Africa
+YC HIST Asia
+YC HIST Cultural History
+YC HIST Departmental Seminars
+YC HIST Empires & Colonialism
+YC HIST Environmental History
+YC HIST Europe
+YC HIST First-Year Seminars
+YC HIST Ideas & Intellectuals
+YC HIST Intl & Diplomat Hist
+YC HIST Latin America
+YC HIST Lecture Courses
+YC HIST Middle East
+YC HIST Pltcs, Law & Govt
+YC HIST Preindustrial
+YC HIST Race Gender&Sexuality
+YC HIST Religion in Context
+YC HIST Sci, Tech, & Medicine
+YC HIST Senior Essay
+YC HIST Soc Chng&Social Mvmnt
+YC HIST The World Economy
+YC HIST United States
+YC HIST War & Society
+YC HIST World
+--------------------------
+
+History of Art (HSAR)
+--------------------------
+YC HSAR 1500-1800
+YC HSAR 800-1500
+YC HSAR Africa & Pacific
+YC HSAR Asia & Near East
+YC HSAR Europe
+YC HSAR Post-1800
+YC HSAR Pre-800
+YC HSAR The Americas
+YC HSAR Transchronological
+YC HSAR Transregional
+--------------------------
+
+History of Science, Medicine and Public Health (HSHM)
+--------------------------
+YC HSHM Colonial Know & Power
+YC HSHM Environ & Society
+YC HSHM Gender, Reprod & Body
+YC HSHM Med & Public Health
+YC HSHM Media Info & Public
+YC HSHM Minds and Brains
+YC HSHM Sci, Tech & Society
+--------------------------
+
+Human Rights Studies Certificate
+--------------------------
+YC Human Rights Domestic
+YC Human Rights International
+--------------------------
+
+Humanities (HUMS)
+--------------------------
+YC HUMS CoreSem Interpretations
+YC HUMS CoreSem Modernities
+YC HUMS CoreSem Traditions
+YC HUMS Area Arts
+YC HUMS Area History
+YC HUMS Area Literature
+YC HUMS Area Science
+YC HUMS Foundtns Any Tradition
+YC HUMS Foundtns WesternEurope
+--------------------------
+
+Islamic Studies Certificate
+--------------------------
+YC Islamic Stud Art Arch Lit
+YC Islamic Stud History
+YC Islamic Stud Religion
+YC Islamic Stud Society
+--------------------------
+
+Italian (ITAL)
+--------------------------
+YC ITAL Taught in English
+YC ITAL Taught in Italian
+--------------------------
+
+Linguistics (LING)
+--------------------------
+YC LING American Sign Courses
+YC LING Adv Courses/Seminars
+YC LING Breadth
+YC LING Depth
+YC LING Depth Comp Linguistic
+YC LING Depth Historical Ling
+YC LING Depth Lang&Mind/Brain
+YC LING Depth Morphology
+YC LING Brdth Phonetics
+YC LING Brdth Morphology
+YC LING Brdth Semntcs/Pragmat
+YC LING Brdth Comp Ling
+YC LING Brdth Lang&Mind/Brain
+YC LING Brdth Historical Ling
+YC LING Depth Phonetics
+YC LING Depth Phonology
+YC LING Depth Semntcs/Pragmat
+YC LING Depth Syntax
+YC LING Elective
+YC LING Intermediate Courses
+YC LING Introductory Courses
+YC LING Res Courses/Sr Essay
+--------------------------
+
+Mathematics (MATH)
+--------------------------
+YC MATH Algebra/Number Theory
+YC MATH Analysis
+YC MATH Core Algebra
+YC MATH Core Complex Analysis
+YC MATH Core Real Analysis
+YC MATH Distribution
+YC MATH Geometry/Topology
+YC MATH Logic/Foundations
+YC MATH Stat/Applied Math
+YC MATH&PHIL Logic Component
+--------------------------
+
+Mechanical Engineering (MENG)
+--------------------------
+YC MENG BS Technical Elective
+YC MENG Eng Sci-Mech Crse
+--------------------------
+
+Medieval Studies Certificate (MDVL)
+--------------------------
+YC MDVL East & SE Asia
+YC MDVL Eur Russ & N Atlantic
+YC MDVL Nr East & N Africa
+YC MDVL S & Central Asia
+--------------------------
+
+Modern Middle East Studies (MMES)
+--------------------------
+YC MMES Adv Seminar
+YC MMES Distribution Course
+YC MMES Survey Course
+--------------------------
+
+Music (MUSI)
+--------------------------
+YC MUSI Advanced Grp I
+YC MUSI Advanced Grp II
+YC MUSI Advanced Grp III
+YC MUSI Advanced Grp IV
+YC MUSI Intermediate Grp I
+YC MUSI Intermediate Grp II
+YC MUSI Intermediate Grp III
+YC MUSI Intermediate Grp IV
+--------------------------
+
+Near Eastern Languages and Civilizations (NELC)
+--------------------------
+YC NELC Foundations Course
+--------------------------
+
+Neuroscience (NSCI)
+--------------------------
+YC NSCI Basic Allied Core
+YC NSCI Computational
+YC NSCI Molecular/Cell/Biol
+YC NSCI Neuroscience Lab
+YC NSCI Other Allied
+YC NSCI Quantitative
+YC NSCI Statistics Prereq
+YC NSCI Systems/Circuit/Behav
+YC NSCI RC
+--------------------------
+
+Persian & Iranian Studies Certificate
+--------------------------
+YC Persia & Iran Content
+--------------------------
+
+Philosophy (PHIL)
+--------------------------
+YC PHIL Ethics & Value Theory
+YC PHIL History of Philosophy
+YC PHIL Intersctn PSYC/PHIL
+YC PHIL Logic
+YC PHIL Metaphysics&Epistemol
+--------------------------
+
+Political Science (PLSC)
+--------------------------
+YC PLSC American Govt
+YC PLSC Analyt Pol Theory
+YC PLSC Comparative Govt
+YC PLSC Internatl Relations
+YC PLSC Intro Courses
+YC PLSC Method &Formal Theory
+YC PLSC Political Philosophy
+--------------------------
+
+Programming Certificate
+--------------------------
+YC Prog Advanced Programming
+YC Prog Applctions/Algorithms
+YC Prog Data Structures
+YC Prog Programming
+YC Prog Programming Elective
+--------------------------
+
+Psychology (PSYC)
+--------------------------
+YC PSYC Natural Science
+YC PSYC Natural Science Core
+YC PSYC NSCI Track Adv Scie
+YC PSYC NSCI Track RsrchMthds
+YC PSYC NSCI Track Senior Sem
+YC PSYC Social Science
+YC PSYC Social Science Core
+--------------------------
+
+Quantum Physics Certificate
+--------------------------
+YC Quantum Elective
+--------------------------
+
+Sociology (SOCY)
+--------------------------
+YC SOCY Economy & Sociology
+YC SOCY Health & Society
+YC SOCY InequalityRaceSociety
+YC SOCY Sociological Methods
+--------------------------
+
+South Asian Studies (SAST)
+--------------------------
+YC SAST Premodern South Asia
+--------------------------
+
+Spanish (SPAN)
+--------------------------
+YC SPAN Taught in Spanish
+--------------------------
+
+Statistics & Data Science (S&DS)
+--------------------------
+YC S&DS DataAnalyDiscArea
+YC S&DS Methods Data Science
+--------------------------
+
+Theater, Dance, and Performance Studies (TDPS)
+--------------------------
+YC TDPS Artistic Practice    
+YC TDPS Elective
+YC TDPS Histories
+YC TDPS Interarts
+YC TDPS Performance Theory
+--------------------------
+
+Urban Studies (URBN)
+--------------------------
+YC URBN Elective
+YC URBN Methods Course
+YC URBN Survey Course
+YC URBN Urban Lab
+--------------------------
+
+After this prompt, I will copy and paste requirements from a website about the major and you will form my major requirement template in this MQL form for a specific route... for example computer_science_ba or computer_science_bs.
+
+Here is an example of a finisied major requirement template:
+
+This is the major page copy pasted: Director of undergraduate studies: Tyler Brooke-Wilson; assistant director of undergraduate studies: Marlene Berke; 102 C, 432-1699; www.yale.edu/cogsci
+
+Cognitive science explores the nature of cognitive processes such as perception, reasoning, memory, attention, language, decision making, imagery, motor control, and problem solving. The goal of cognitive science, stated simply, is to understand how the mind works. Cognitive science is an inherently interdisciplinary endeavor, drawing on tools and ideas from fields such as psychology, computer science, linguistics, philosophy, economics, and neuroscience. Approaches include empirical studies of the ontogenetic and phylogenetic development of cognitive abilities, experimental work on cognitive processing in adults, attempts to understand perception and cognition based on patterns of breakdown in pathology, computational and robotic research that strives to simulate aspects of cognition and behavior, neuroscientific investigations of the neural bases of cognition using neural recording and brain scanning, and the development of philosophical theories of the nature of mind.
+
+Prerequisite
+An introductory survey course, CGSC 1100, is normally taken by the end of the fall term of the sophomore year and prior to admission to the major.
+
+Requirements of the Major
+Students are held to the requirements that were in place when they declared their major. However, with approval from the DUS, the following requirements, updated for the academic year 2025-2026, may be fulfilled by students who declared the major in a prior term. 
+
+See Links to the attributes indicating courses approved for Cognitive Science major requirements.
+
+The requirements of the major for the B.S. and B.A. degrees are the same, except for the senior requirement. Fifteen term courses, for a total of thirteen and one half course credits, are required for the major, including the introductory course and the senior requirement. Each major program must include the elements described below. The particular selection of courses must be approved by the director of undergraduate studies (DUS) in order to assure overall coherence. No course may be used to fulfill more than one requirement for the major.
+
+Breadth requirement A breadth requirement introduces students to the subfields of cognitive science. Each major is required to take a course from four of the following six areas:
+
+1. Computer science: CPSC 2010
+
+2. Economics and decision making: ECON 2159
+
+3. Linguistics: LING 1100, LING 1160, 1300, 1179, 2320, 2530
+
+4. Neuroscience:MCDB 3200, NSCI 3400, PSYC 1600, 2670  
+
+5. Philosophy: PHIL 1126, 1182, 2269, 2270, 2271
+
+6. Psychology: PSYC 1100, S139E, 1400
+
+Depth requirement Students fulfill a depth requirement by completing six courses that focus on a specific topic or area in cognitive science. The depth courses must be chosen from at least two disciplines, and are typically drawn from the six cognitive science subfields. It may be possible to draw depth courses from other fields when necessary to explore the student's focal topic, in consultation with the DUS. All six depth courses must be intermediate or advanced; for most disciplines, courses numbered 3000 or above fulfill the requirement. With permission of the DUS, up to two directed reading or research courses may count toward the depth requirement.
+
+Skills requirement Because formal techniques are fundamental to cognitive science, one skills course is required, preferably before the senior year. Courses that fulfill the skills requirement include CPSC 1001, 2020, LING 2249, PSYC 2670, S&DS 1000, 2200,  2300, and S107E. Other courses may fulfill this requirement with the permission of the DUS. 
+
+Junior colloquium In the junior year, students are required to take CGSC 3950, a half-credit colloquium in which majors discuss current issues and research in cognitive science and select a senior essay topic.
+
+Repeat for credit Only one term of CGSC 4710, 4720, 4730, or 4740 may be offered toward the major. 
+
+Credit/D/Fail No course taken Credit/D/Fail may be applied toward the requirements of the major, except with permission of the DUS.
+
+Outside credit Courses taken at another institution or during an approved summer or term-time study abroad program may count toward the major requirements with DUS approval. 
+
+Senior Requirement 
+In the senior year, students take two half-credit capstone courses in which the senior essay is written. Students in the courses meet regularly with one another and with the faculty member to discuss current work in cognitive science and their own developing research projects. Students must take this course during their senior year.  
+
+B.S. degree program The B.S. degree requires two half-credit courses for one-course credit of empirical research, CGSC 4900 and 4910. These courses are only open to Cognitive Science seniors and receive a letter grade. This normally includes designing an experiment and collecting and analyzing data. 
+
+B.A. degree program The B.A. degree requires two half-credit courses for one-course credit of nonempirical research, CGSC 4800 and 4810. These courses are only open to Cognitive Science seniors and receive a letter grade. There are no restrictions on the research format.
+
+Advising and Application to the Major 
+Students may apply to enter the major at any point after the first year. Applications must be submitted online through Qualtrics. Applications must include (1) an official or unofficial transcript of work at Yale, (2) a brief statement of purpose, which indicates academic interests and expected focus within the areas of the Cognitive Science major, and (3) a list of the six upper-level courses that the student plans to take as part of the research focus. The application link and answers to frequently asked questions are available on the program website.
+
+SUMMARY OF MAJOR REQUIREMENTS
+Prerequisite CGSC 1100
+
+Number of courses 15 term courses, for a total of 13.5 course credits (incl prereq and senior req)
+
+Specific course required CGSC 3950
+
+Distribution of courses 1 course each in 4 of 6 subfields, as specified for breadth req; 6 courses in a specific topic or area, as specified for depth req; 1 skills course, as specified
+
+Senior requirement B.S.—CGSC 4900 and CGSC 4910; B.A.—CGSC 4800 and CGSC 4810
+
+And this is the returned correct MQL Major Requirement Template for computer_science_ba:
+
+SELECT 5 FROM [CLASS(CPSC 2010), SELECT 1 FROM [CLASS(CPSC 2020), CLASS(MATH 2440)], CLASS(CPSC 2230), CLASS(3230), SELECT 1 FROM [CLASS(CPSC 3650), CLASS(CPSC 3650)]] : "Core Classes" : 2;
+SELECT 4 FROM [RANGE(CPSC 2000 , CPSC 9999), RANGE(CPSC 2000 , CPSC 9999), RANGE(CPSC 2000 , CPSC 9999), RANGE(CPSC 2000 , CPSC 9999)] : "Electives" : 3;
+SELECT 1 FROM [CLASS(CPSC 4900)] : "Senior Requirement" : 1;
+
+And this is the returned correct MQL Major Requirement Template for computer_science_bs:
+
+SELECT 5 FROM [CLASS(CPSC 2010), SELECT 1 FROM [CLASS(CPSC 2020), CLASS(MATH 2440)], CLASS(CPSC 2230), CLASS(3230), SELECT 1 FROM [CLASS(CPSC 3650), CLASS(CPSC 3650)]] : "Core Classes" : 2
+SELECT 6 FROM [RANGE(CPSC 2000 , CPSC 9999), RANGE(CPSC 2000 , CPSC 9999), RANGE(CPSC 2000 , CPSC 9999), RANGE(CPSC 2000 , CPSC 9999), RANGE(CPSC 2000 , CPSC 9999), RANGE(CPSC 2000 , CPSC 9999)] : "Electives" : 3
+SELECT 1 FROM [CLASS(CPSC 4900)] : "Senior Requirement" : 1
+
+I will now start giving major page information and expect an MQL major requirement template in response.
+

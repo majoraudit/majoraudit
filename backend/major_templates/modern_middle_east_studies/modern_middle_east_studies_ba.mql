@@ -1,0 +1,43 @@
+SELECT 10 FROM [
+  TAG("YC MMES Survey Course"),
+  TAG("YC MMES Survey Course"),
+  SELECT 1 FROM [
+    DIST_DEPT("L5", "ARBC"),
+    DIST_DEPT("L5", "HEBR"),
+    DIST_DEPT("L5", "PERS"),
+    DIST_DEPT("L5", "TURK")
+  ],
+  TAG("YC HIST Middle East"),
+  TAG("YC HIST Preindustrial"),
+  TAG("YC MMES Adv Seminar"),
+  TAG("YC MMES Adv Seminar")
+] : "Core Classes" : 10;
+
+SELECT 2 FROM [
+  DIST_DEPT("L4", "ARBC"),
+  DIST_DEPT("L3", "ARBC"),
+  DIST_DEPT("L2", "ARBC"),
+  DIST_DEPT("L1", "ARBC"),
+
+  DIST_DEPT("L4", "HEBR"),
+  DIST_DEPT("L3", "HEBR"),
+  DIST_DEPT("L2", "HEBR"),
+  DIST_DEPT("L1", "HEBR"),
+  
+  DIST_DEPT("L4", "PERS"),
+  DIST_DEPT("L3", "PERS"),
+  DIST_DEPT("L2", "PERS"),
+  DIST_DEPT("L1", "PERS"),
+  
+  DIST_DEPT("L4", "TURK"),
+  DIST_DEPT("L3", "TURK"),
+  DIST_DEPT("L2", "TURK"),
+  DIST_DEPT("L1", "TURK")
+] : "Electives" : 2;
+
+SELECT 1 FROM [
+  CLASS(MMES 4491),
+  CLASS(MMES 4492),
+  CLASS(MMES 4493),
+  TAG("YC MMES Adv Seminar")
+] : "Senior Requirement" : 1;
