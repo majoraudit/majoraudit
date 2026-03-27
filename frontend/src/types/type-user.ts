@@ -21,6 +21,7 @@ export interface StudentCourse {
 
 // 01 - spring, 02 - summer, 03 - fall
 export interface StudentSemester {
+    id: number;
     season: number;
     title: string;
 	  studentCourses: StudentCourse[];
