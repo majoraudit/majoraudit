@@ -170,7 +170,7 @@ CORS_ALLOWED_ORIGINS = [
 ]
 
 CSRF_COOKIE_SECURE = True
-CSRF_COOKIE_HTTPONLY = True
+CSRF_COOKIE_HTTPONLY = False # changed this -----------
 CSRF_COOKIE_SAMESITE = 'None'
 CSRF_TRUSTED_ORIGINS = [
     "https://localhost:5173",

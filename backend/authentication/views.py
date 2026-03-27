@@ -5,7 +5,6 @@ from .models import CustomUser
 
 # Create your views here.
 
-
 class ProfileView(APIView):
     def get(self, request):
         u = request.user
