@@ -64,7 +64,7 @@ export interface User {
 	first_name: string;
   last_name: string;
 	netID: string;
-	onboard: boolean;
+	//onboard: boolean;
 	classYear?: string; 
 	intendedMajorId?: string;
 	intendedLanguageCode?: string;

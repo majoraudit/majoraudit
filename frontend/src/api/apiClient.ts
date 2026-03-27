@@ -1,5 +1,10 @@
 // import { apiUrl } from "../constants";
 
+function getCsrfToken(): string {
+  const match = document.cookie.match(/csrftoken=([^;]+)/);
+  return match ? match[1] : "";
+}
+
 class ApiClient {
   private async request(
     endpoint: string,
@@ -7,7 +12,7 @@ class ApiClient {
   ): Promise<Response> {
     const url = `/api${endpoint}`;
     const config: RequestInit = {
-      headers: { "Content-Type": "application/json", ...options.headers },
+      headers: { "Content-Type": "application/json", "X-CSRFToken": getCsrfToken(), ...options.headers },
       credentials: "include",
       ...options,
     };

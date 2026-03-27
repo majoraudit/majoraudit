@@ -1,7 +1,9 @@
 import { type User } from "../types/type-user";
 import React, { useState, createContext, useContext, useEffect } from "react";
 import { initialUserData } from "../data/mock_initial_user_data";
-import { fetchProfile } from "@/api/authApi";
+import { fetchProfile } from "@/api/auth";
+import { getWorksheets } from "@/api/worksheets";
+import { type Worksheet } from "../types/type-user";
 
 type UserContextType = {
   userData: User | undefined;
@@ -30,23 +32,35 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
 
   useEffect(() => {
     const init = async () => {
-      const stored = localStorage.getItem("mockUserData");
-      const alreadyOnboarded = false;
+      //const stored = localStorage.getItem("mockUserData");
+      //const alreadyOnboarded = false;
       /*stored
         ? (JSON.parse(stored) as { onboard?: boolean })?.onboard === true
         : false;*/
 
-      setUserData(initialUserData);
+      //setUserData(initialUserData);
 
       const profile = await fetchProfile();
       if (!profile) return;
+
+      const backendWorksheets = await getWorksheets();
+
+      // Map backend shape { id, name } into the frontend Worksheet shape
+      const worksheets: Worksheet[] = backendWorksheets.map((w) => ({
+        id: String(w.id),
+        name: w.name,
+        studentSemesters: [],
+      }));
 
       setUserData((prev) => ({
         ...(prev ?? initialUserData),
         first_name: profile.first_name,
         last_name: profile.last_name,
         netID: profile.email.split("@")[0],
-        onboard: alreadyOnboarded,
+        FYP: {
+          ...(prev ?? initialUserData).FYP,
+          worksheets,
+        },
       }));
     };
 
@@ -54,13 +68,13 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
   }, []);
 
   // save data to local storage on change
-  useEffect(() => {
+  /*useEffect(() => {
     if (userData) {
       localStorage.setItem("mockUserData", JSON.stringify(userData));
     }
-  }, [userData]);
+  }, [userData]);*/
 
-  const onboarded = !!userData?.onboard;
+  const onboarded = (userData?.FYP?.worksheets?.length ?? 0) > 0;
 
   return (
     <UserContext.Provider value={{ userData, setUserData, onboarded }}>

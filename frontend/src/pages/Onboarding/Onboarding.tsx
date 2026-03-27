@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "@/contexts/UserContext";
+import { createWorksheet } from "@/api/worksheets";
 import {
   CLASS_YEARS,
   UNDERGRAD_MAJORS,
@@ -15,18 +16,22 @@ function Onboarding() {
   const [last_name, setLast_name] = useState(userData?.last_name ?? "");
   const [classYear, setClassYear] = useState(userData?.classYear ?? "");
   const [intendedMajorId, setIntendedMajorId] = useState(
-    userData?.intendedMajorId ?? ""
+    userData?.intendedMajorId ?? "",
   );
   const [intendedLanguageCode, setIntendedLanguageCode] = useState(
-    userData?.intendedLanguageCode ?? ""
+    userData?.intendedLanguageCode ?? "",
   );
   const [languageLevel, setLanguageLevel] = useState(
-    userData?.FYP?.languageRequirement ?? "L1"
+    userData?.FYP?.languageRequirement ?? "L1",
   );
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!userData) return;
+
+    // Create the default worksheet on the backend
+    const newWorksheet = await createWorksheet({ name: "Main Worksheet" });
+
     setUserData({
       ...userData,
       first_name: first_name.trim() || userData.first_name,
@@ -34,12 +39,21 @@ function Onboarding() {
       classYear: classYear || undefined,
       intendedMajorId: intendedMajorId || undefined,
       intendedLanguageCode: intendedLanguageCode || undefined,
-      onboard: true,
       FYP: {
         ...userData.FYP,
         languageRequirement: languageLevel,
+        worksheets: [
+          ...userData.FYP.worksheets,
+          {
+            id: String(newWorksheet.id),
+            name: newWorksheet.name,
+            studentSemesters: [],
+          },
+        ],
+        activeWorksheetID: String(newWorksheet.id),
       },
     });
+
     navigate("/dashboard", { replace: true });
   };
 
