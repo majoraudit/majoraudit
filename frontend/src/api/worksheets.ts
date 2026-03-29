@@ -6,6 +6,7 @@ export interface BackendSemester {
   id: number;
   year: number;
   season: string;
+  title:string;
   classes: any[];
 }
 

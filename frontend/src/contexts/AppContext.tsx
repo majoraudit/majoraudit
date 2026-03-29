@@ -7,6 +7,9 @@ import { useAuth } from "../contexts/AuthContext";
 
 import Loading from "@/pages/Loading/Loading";
 
+import { useUser } from "./UserContext";
+import { type StudentCourse } from "@/types/type-user";
+
 type AppContextType = {
   appData: AppData | undefined;
   setAppData: React.Dispatch<React.SetStateAction<AppData | undefined>>;
@@ -36,6 +39,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const [appData, setAppData] = useState<AppData | undefined>(undefined);
   const { isAuthenticated } = useAuth();
+  const { userData, setUserData } = useUser();
 
   // init user data or retrieve from localStorage
   useEffect(() => {
@@ -91,6 +95,50 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
     initializeApp();
     //return () => ctrl.abort();
   }, []);
+
+  useEffect(() => {
+    if (!appData || !userData) return;
+
+    const needsHydration = userData.FYP.worksheets.some((w) =>
+      w.studentSemesters.some(
+        (s) =>
+          (s as any)._rawClasses?.length > 0 && s.studentCourses.length === 0,
+      ),
+    );
+
+    if (!needsHydration) return;
+
+    setUserData((prev) => {
+      if (!prev) return prev;
+
+      const worksheets = prev.FYP.worksheets.map((w) => ({
+        ...w,
+        studentSemesters: w.studentSemesters.map((s) => ({
+          ...s,
+          studentCourses:
+            s.studentCourses.length > 0
+              ? s.studentCourses // already hydrated, skip
+              : ((s as any)._rawClasses?.flatMap((c: any): StudentCourse[] => {
+                  const externalId = String(c.course ?? c.course_instance);
+                  const fullCourse = appData.course_database.getCourse(
+                    Number(externalId),
+                  );
+                  if (!fullCourse) return [];
+                  return [
+                    {
+                      worksheetClassId: c.id,
+                      course: fullCourse,
+                      term: s.season,
+                      status: "DA_COMPLETE",
+                    },
+                  ];
+                }) ?? []),
+        })),
+      }));
+
+      return { ...prev, FYP: { ...prev.FYP, worksheets } };
+    });
+  }, [appData, userData]);
 
   if (isAuthenticated && !appData) {
     // Show loading page while initializing

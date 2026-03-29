@@ -66,6 +66,7 @@ export function useWorksheetActions() {
       const created = await apiCreateSemester(parseInt(activeWorksheetId), {
         year: Math.floor(newSemester.season / 100),
         season: newSemester.season % 100 === 1 ? "SP" : "FA",
+        title: newSemester.title
       });
 
       const semesterWithId: StudentSemester = { ...newSemester, id: created.id };
@@ -127,7 +128,7 @@ export function useWorksheetActions() {
         course: newCourse.course.id,
       });
 
-      const courseWithId: StudentCourse = { ...newCourse, id: created.id };
+      const courseWithId: StudentCourse = { ...newCourse, worksheetClassId: created.id };
  
 
       updateActiveWorksheet((ws) => ({
@@ -135,7 +136,7 @@ export function useWorksheetActions() {
         studentSemesters: ws.studentSemesters.map((s: StudentSemester) =>
           s.season !== season
             ? s
-            : { ...s, studentCourses: [...s.studentCourses, newCourse] }
+            : { ...s, studentCourses: [...s.studentCourses, courseWithId] }
         ),
       }));
 
@@ -162,7 +163,7 @@ export function useWorksheetActions() {
       if (!studentCourse) return { ok: false, error: "Course not found in semester." };
 
       // Remove on the backend
-      await apiRemoveCourse(parseInt(activeWorksheetId), semester.id, studentCourse.course.id);
+      await apiRemoveCourse(parseInt(activeWorksheetId), semester.id, studentCourse.worksheetClassId!);
 
       updateActiveWorksheet((ws) => ({
         ...ws,

@@ -8,13 +8,11 @@ function Globals({ children }: { readonly children: React.ReactNode }) {
   return (
     <div>
       <AuthProvider>
-      <AppProvider>
         <UserProvider>
-          <DndProvider backend={HTML5Backend}>
-            {children}
-          </DndProvider>
+          <AppProvider>
+            <DndProvider backend={HTML5Backend}>{children}</DndProvider>
+          </AppProvider>
         </UserProvider>
-      </AppProvider>
       </AuthProvider>
     </div>
   );

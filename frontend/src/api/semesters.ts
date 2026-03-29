@@ -8,16 +8,19 @@ export interface Semester {
   id: number;
   year: number;
   season: Season;
+  title?: string;
 }
 
 export interface CreateSemesterPayload {
   year: number;
   season: Season;
+  title: string;
 }
 
 export interface UpdateSemesterPayload {
   year?: number;
   season?: Season;
+  title?: string;
 }
 
 // GET /worksheets/:worksheetId/semesters/

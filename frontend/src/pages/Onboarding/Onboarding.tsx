@@ -78,6 +78,7 @@ function Onboarding() {
         apiCreateSemester(parseInt(newWorksheet.id), {
           year: s.year,
           season: s.season,
+          title: `${toSeasonLabel(s.season)} ${s.year}`,
         }),
       ),
     );
