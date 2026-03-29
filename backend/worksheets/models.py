@@ -2,6 +2,7 @@ from django.db import models
 from django.core.exceptions import ValidationError
 from authentication.models import CustomUser
 from courses.models import Course, CourseInstance, Seasons
+from majors.models import MajorVersion, MajorVersionRequirements
 
 # Create your models here.
 
@@ -43,3 +44,18 @@ class UserWorksheetClass(models.Model):
                 name="usercourse_exactly_one_fk"
             )
         ]
+
+
+class UserWorksheetMajor(models.Model):
+    worksheet = models.ForeignKey(UserWorksheet, on_delete=models.CASCADE)
+    major = models.ForeignKey(MajorVersion, on_delete=models.CASCADE)
+
+
+class UserWorksheetMajorFulfillment(models.Model):
+    worksheet_major = models.ForeignKey(
+        UserWorksheetMajor, on_delete=models.CASCADE
+    )
+    requirement = models.ForeignKey(
+        MajorVersionRequirements, on_delete=models.CASCADE
+    )
+    worksheet_class = models.ForeignKey(UserWorksheetClass, on_delete=models.CASCADE)
