@@ -674,9 +674,9 @@ function CoursePlanning() {
 
         <hr className="border-gray-200 border-t-3" />
 
-        {activeSemesters.map((semester, index) => (
+        {activeSemesters.map((semester) => (
           <SemesterOutput
-            key={index}
+            key={semester.id}
             semester={semester}
             onAddCustomCourse={() => openCustomCourseModal(semester)}
             onCourseClick={openCourseDetailsModal}

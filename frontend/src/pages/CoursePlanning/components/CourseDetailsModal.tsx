@@ -102,13 +102,7 @@ function formatDaysOfWeek(daysMask: number): string {
     .join("");
 }
 
-function DataField({
-  label,
-  value,
-}: {
-  label: string;
-  value: string | null;
-}) {
+function DataField({ label, value }: { label: string; value: string | null }) {
   if (!value) return null;
 
   return (
@@ -123,7 +117,11 @@ function DataField({
   );
 }
 
-function CourseDetailsModal({ open, course, onClose }: CourseDetailsModalProps) {
+function CourseDetailsModal({
+  open,
+  course,
+  onClose,
+}: CourseDetailsModalProps) {
   const [courseTableListing, setCourseTableListing] =
     useState<CourseTableListing | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -166,11 +164,24 @@ function CourseDetailsModal({ open, course, onClose }: CourseDetailsModalProps) 
 
     async function fetchCourseTableData() {
       try {
-        setIsLoading(true);
-        setLoadError("");
-        setCourseTableListing(null);
+        if (!open || !course) {
+          setCourseTableListing(null);
+          setIsLoading(false);
+          setLoadError("");
+          return;
+        }
 
-        const query = new URLSearchParams({ course_code: courseCode });
+        const courseCode = course.codes.find(Boolean);
+        if (!courseCode) {
+          setCourseTableListing(null);
+          setIsLoading(false);
+          setLoadError("No valid course code found for CourseTable lookup.");
+          return;
+        }
+
+        const query = new URLSearchParams({
+          course_code: courseCode as string,
+        });
         const response = await fetch(`/api/courses/coursetable/?${query}`, {
           credentials: "include",
           signal: controller.signal,
@@ -202,18 +213,23 @@ function CourseDetailsModal({ open, course, onClose }: CourseDetailsModalProps) 
 
   const displayCodes = useMemo(() => {
     if (courseTableListing?.course.listings?.length) {
-      return courseTableListing.course.listings.map((listing) => listing.course_code);
+      return courseTableListing.course.listings.map(
+        (listing) => listing.course_code,
+      );
     }
     return course?.codes ?? [];
   }, [courseTableListing, course]);
 
-  const displayTitle = courseTableListing?.course.title ?? course?.title ?? "Course";
+  const displayTitle =
+    courseTableListing?.course.title ?? course?.title ?? "Course";
   const displaySeason = courseTableListing
     ? seasonCodeToLabel(courseTableListing.season_code)
     : null;
   const displayDescription =
-    courseTableListing?.course.description?.trim() || "No description available.";
-  const displayRequirements = courseTableListing?.course.requirements?.trim() || null;
+    courseTableListing?.course.description?.trim() ||
+    "No description available.";
+  const displayRequirements =
+    courseTableListing?.course.requirements?.trim() || null;
   const displayCredits =
     courseTableListing?.course.credits ?? Number(course?.credit ?? 0);
   const displayProfessors = courseTableListing?.course.course_professors
