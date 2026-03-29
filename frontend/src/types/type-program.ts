@@ -171,7 +171,7 @@ export interface MajorProgress extends MajorTemplate {
 
 export interface AppData {
 	courses: Course[];
-	major_templates: MajorTemplate[];
+	major_templates: string[]; // changed from MajorTemplate to string
 	course_database: CourseDatabase;
 	major_processor: MajorProcessor;
 }

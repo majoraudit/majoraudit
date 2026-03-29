@@ -10,6 +10,8 @@ import Loading from "@/pages/Loading/Loading";
 import { useUser } from "./UserContext";
 import { type StudentCourse } from "@/types/type-user";
 
+import { apiFetchMajorTemplatesList } from "@/api/majors";
+
 type AppContextType = {
   appData: AppData | undefined;
   setAppData: React.Dispatch<React.SetStateAction<AppData | undefined>>;
@@ -26,13 +28,13 @@ export async function fetchCourses() {
   return data.results ?? data;
 }
 
-export async function fetchTemplates() {
+/*export async function fetchTemplates() {
   const res = await fetch("/api/programs/templates", {
     credentials: "include",
   });
   if (!res.ok) throw new Error("Templates unavailable - getting json");
   return res.json();
-}
+}*/
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
@@ -47,31 +49,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
 
     async function initializeApp() {
       try {
-        const [course_results, template_results] = await Promise.allSettled([
-          fetchCourses(),
-          fetchTemplates(),
-        ]);
+        const [course_results, major_templates_result] =
+          await Promise.allSettled([
+            fetchCourses(),
+            apiFetchMajorTemplatesList(),
+          ]);
 
-        if (course_results.status === "rejected") {
-          console.warn(
-            "Course API failed, falling back to local JSON:",
-            course_results.reason,
-          );
-        }
-        if (template_results.status === "rejected") {
-          console.warn(
-            "Templates API failed, falling back to local JSON:",
-            template_results.reason,
-          );
-        }
-
-        const [courses_raw, templates] = await Promise.all([
+        const [courses_raw, major_templates] = await Promise.all([
           course_results.status === "fulfilled"
             ? course_results.value
             : loadCourses("/mock_courses_2025_26.json"),
-          template_results.status === "fulfilled"
-            ? template_results.value
-            : loadMajorTemplates("/mock_major_templates.json"),
+          major_templates_result.status === "fulfilled"
+            ? major_templates_result.value
+            : [],
         ]);
 
         const course_database = new CourseDatabase(courses_raw);
@@ -83,7 +73,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
 
         setAppData({
           courses,
-          major_templates: templates,
+          major_templates: major_templates,
           course_database,
           major_processor,
         });
