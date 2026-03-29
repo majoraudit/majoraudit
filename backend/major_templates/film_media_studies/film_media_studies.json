@@ -1,0 +1,22 @@
+{
+    "name": "Film and Media Studies",
+    "id": "film_media_studies",
+    "abbr": "FILM",
+    "degreeTypes": [
+        ["ba"]
+    ],
+    "courses": -1,
+    "rating": -1,
+    "workload": -1,
+    "discipline": "Humanities & The Arts",
+    "students": -1,
+    "about": "The Film and Media Studies program offers an interdisciplinary approach to the study of film, television, video, digital media, and other forms of visual and audio culture. The major combines historical, theoretical, critical, and practical approaches to the moving image. Students explore the aesthetics, history, and cultural significance of cinema and media, and may also engage in creative production. The curriculum emphasizes close analysis of media texts, the study of media institutions and industries, and critical engagement with questions of representation, spectatorship, and technology. The program prepares students for careers in media production, criticism, curation, education, and related fields.",
+    "dus": [
+        ["TBD", "TBD"]
+    ],
+    "catalogLink": "https://catalog.yale.edu/ycps/subjects-of-instruction/film-media-studies/",
+    "websiteLink": "https://filmstudies.yale.edu/",
+    "specializations": [
+        "film_media_studies.mql"
+    ]
+}

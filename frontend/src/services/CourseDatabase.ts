@@ -29,9 +29,13 @@ export class CourseDatabase {
     private courses = new Map<number, Course>();
 
     normalizeCodes(rawCodes: { department: string; number: string }[]): string[] {
+        if(rawCodes){
         if(rawCodes.length === 0) return [""];
         
         return rawCodes.map(c => `${c.department} ${c.number}`);
+        }
+
+        return [];
     }
 
     // maybe change to make same codes --> same courses
@@ -40,10 +44,11 @@ export class CourseDatabase {
         coursesArray.forEach(course => {
             const newCourse: Course = {
                 id: course.external_id,
-                codes: this.normalizeCodes(course.course_codes),
+                codes: this.normalizeCodes(course.course_codes) || [],
                 title: course.title,
                 credit: course.credits,
                 dist: course.distributionals || [],
+                tags: course.course_tags || []
                 //seasons: course.seasons || [],
                 //season_codes: course.season_codes || []
             };

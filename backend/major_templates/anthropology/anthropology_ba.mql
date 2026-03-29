@@ -1,0 +1,4 @@
+SELECT 4 FROM [] : "Gateway Courses" : 2
+SELECT 2 FROM [TAG(YC AMST Junior Seminars), TAG(YC AMST Junior Seminars)] : "Junior Seminars" : 3
+SELECT 5 FROM [] : "Area of Concentration" : 3
+SELECT 1 FROM [] : "Senior Requirement" : 1

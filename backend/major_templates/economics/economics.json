@@ -1,0 +1,22 @@
+{
+    "name": "Economics",
+    "id":"economics",
+    "abbr": "ECON",
+    "degreeTypes": [
+        ["ba"]
+    ],
+    "courses": -1,
+    "rating": -1,
+    "workload": -1,
+    "discipline": "Social Studies",
+    "students": -1,
+    "about": "Economics is much broader than the study of recessions and inflation or stocks and bonds. Economists study decision making and incentives, such as how taxes create incentives for labor market and savings behavior. Many current public policy debates concern questions of economics, including causes and consequences of inequality and gender and racial wage gaps; how to address poverty; the impact of immigration and trade on the well-being of a country’s citizens; the cause of the Great Recession; and how to predict future downturns. \n\nAt Yale, economics is regarded and taught as part of a liberal arts education, not as a preparation for any particular vocation. It can, however, provide a good background for several professions. The economics major strengthens critical reasoning skills and gives students experience analyzing data, skills that will serve students well on the job market both inside and outside academia. Recent majors have pursued careers in business, government, and nonprofits. Others have entered law, medical, or business school, or have gone on to graduate work in economics, often after working in related fields for two or three years.",
+    "dus": [
+        ["Giovanni Maggi", "theodore.kim@yale.edu"]
+    ],
+    "catalogLink": "https://catalog.yale.edu/ycps/subjects-of-instruction/economics",
+    "websiteLink": "http://economics.yale.edu/undergraduate-program",
+    "specializations": [
+        "economics_ba.mql"
+    ]
+}

@@ -1,0 +1,22 @@
+{
+    "name": "Biomedical Engineering",
+    "id":"biomedical_engineering",
+    "abbr": "BENG",
+    "degreeTypes": [
+        ["bs"]
+    ],
+    "courses": -1,
+    "rating": -1,
+    "workload": -1,
+    "discipline": "Engineering",
+    "students": -1,
+    "about" : "Engineering methods and strategies are used to address biomedical problems ranging from studies of physiological function using images to the development of novel drug delivery methods and new biomaterials. The B.S. degree in Biomedical Engineering is designed to provide students with an understanding of common fundamental methodologies in biomedical engineering and the ability to develop quantitative approaches to one of four biomedical engineering concentrations: Bioimaging, Biomechanics and Mechanobiology, Biomolecular Engineering, and Systems Biology. The course structure of the major permits students to bridge basic concepts in the life sciences and traditional areas of engineering, while gaining a comprehensive understanding of biomedical engineering as a field of study. The program provides graduates with an excellent background for graduate study in biomedical engineering and related areas, or in medicine and other health professions as well as for a diverse range of careers in industry, consulting, or government.",
+    "dus": [
+        ["Lawrence H. Staib", "lawrence.staib@yale.edu"]
+    ],
+    "catalogLink": "https://catalog.yale.edu/ycps/subjects-of-instruction/biomedical-engineering/",
+    "websiteLink": "https://engineering.yale.edu/academic-study/departments/biomedical-engineering",
+    "specializations": [
+        "african_american_studies_ba.mql"
+    ]
+}

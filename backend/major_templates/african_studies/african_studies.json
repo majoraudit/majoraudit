@@ -1,0 +1,23 @@
+{
+    "name": "African Studies",
+    "id":"african_studies",
+    "abbr": "AFST",
+    "degreeTypes": [
+        ["ba"]
+    ],
+    "courses": -1,
+    "rating": -1,
+    "workload": -1,
+    "discipline": "Interdisciplinary",
+    "students": -1,
+    "about" : "The program in African Studies enables students to undertake interdisciplinary study of the arts, history, cultures, politics, and development of Africa. As a foundation, students in the program gain cross-disciplinary exposure to Africa. In the junior and senior years, students develop analytical ability and focus their studies on research in a particular discipline such as anthropology, art history, history, languages and literature, political science, or sociology, or on topics such as global health, economic development, or human rights.\nAfrican Studies provides training of special interest to those considering admission to graduate or professional schools or careers in education, journalism, law, management, medicine, politics, psychology, international relations, creative writing, or social work. The interdisciplinary structure of the program offers students an opportunity to satisfy the increasingly rigorous expectations of admissions committees and prospective employers for a broad liberal arts perspective that complements specialized knowledge of a field.",
+    "dus": [
+        ["Veronica Waweru", "veronica.waweru@yale.edu"],
+        ["Kiarie Wa'Njogu", "john.wanjogu@yale.edu"]
+    ],
+    "catalogLink": "https://catalog.yale.edu/ycps/subjects-of-instruction/african-studies/",
+    "websiteLink": "https://macmillan.yale.edu/africa",
+    "specializations": [
+        "african_studies_ba.mql"
+    ]
+}

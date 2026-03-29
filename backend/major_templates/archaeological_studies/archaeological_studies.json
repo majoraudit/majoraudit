@@ -1,0 +1,22 @@
+{
+    "name": "Archaeological Studies",
+    "id":"archaeological_studies",
+    "abbr": "ARCG",
+    "degreeTypes": [
+        ["ba"]
+    ],
+    "courses": -1,
+    "rating": -1,
+    "workload": -1,
+    "discipline": "Interdisciplinary",
+    "students": -1,
+    "about" : "This interdisciplinary major is supervised by the University's Council on Archaeological Studies. Inquiries about the major may be addressed to the chair of the council, Richard Burger, Department of Anthropology, 10 Sachem St., or to the director of undergraduate studies (DUS).\nThe major in Archaeological Studies provides a program of interdepartmental offerings covering prehistoric, early historic, medieval, and other cultures and cultural developments in the Old and New Worlds and introduces students to the analytic tools that facilitate archaeological studies. The major is designed to expose students to a variety of archaeological research perspectives: anthropological, historical, art historical, and scientific. Also emphasized are substantive studies including (1) study of prehistoric–early historic transformations such as the origins of agriculture, cities and states, and early empires, and (2) study of the material culture, art, and architecture of prehistoric, early historic, and medieval cultures, including the iconography of ancient cultures, the relationship between art and society, ancient writing systems, and American historical archaeology.",
+    "dus": [
+        ["Oswaldo Chinchilla", "Oswaldo.chinchilla@yale.edu"]
+    ],
+    "catalogLink": "https://catalog.yale.edu/ycps/subjects-of-instruction/archaeological-studies/",
+    "websiteLink": "https://archaeology.yale.edu/",
+    "specializations": [
+        "archaeological_studies_ba.mql"
+    ]
+}

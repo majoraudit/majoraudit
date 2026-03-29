@@ -1,0 +1,24 @@
+{
+    "name": "Engineering Sciences (Mechanical)",
+    "id": "engineering_sciences_mechanical",
+    "abbr": "ENAS",
+    "degreeTypes": [
+        ["bs"],
+        ["ba"]
+    ],
+    "courses": -1,
+    "rating": -1,
+    "workload": -1,
+    "discipline": "Engineering",
+    "students": -1,
+    "about": "The Engineering Sciences (Mechanical) major provides students with a thorough grounding in mechanical engineering principles, including solid mechanics, dynamics, thermodynamics, fluid mechanics, heat transfer, and mechanical design. The program integrates fundamental science and mathematics with engineering analysis and design, preparing students for careers in a wide range of industries as well as for graduate study. The B.S. degree offers a more intensive technical curriculum, while the B.A. degree provides greater flexibility to combine mechanical engineering with other academic pursuits within Yale's liberal arts environment.",
+    "dus": [
+        ["TBD", "TBD"]
+    ],
+    "catalogLink": "https://catalog.yale.edu/ycps/subjects-of-instruction/mechanical-engineering/",
+    "websiteLink": "https://seas.yale.edu/departments/mechanical-engineering-and-materials-science",
+    "specializations": [
+        "engineering_sciences_mechanical_bs.mql",
+        "engineering_sciencies_mechanical_ba.mql"
+    ]
+}

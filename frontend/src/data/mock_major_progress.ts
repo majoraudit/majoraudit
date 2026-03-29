@@ -140,7 +140,7 @@ export const general_requirements_progress: MajorProgress = {
             completedNum: 1
         },
         {
-            description: "Quantitative Reasoning",
+            description: "Quant. Reasoning",
             requiredNum: 2,
             courseItems: [
                 {

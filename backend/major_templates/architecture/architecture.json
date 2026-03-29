@@ -1,0 +1,22 @@
+{
+    "name": "Architecture",
+    "id":"architecture",
+    "abbr": "ARCH",
+    "degreeTypes": [
+        ["ba"]
+    ],
+    "courses": -1,
+    "rating": -1,
+    "workload": -1,
+    "discipline": "Humanities & the Arts",
+    "students": -1,
+    "about" : "Architecture is a humanistic endeavor. The purpose of the undergraduate major is to include the study of architecture within a comprehensive liberal arts education, drawing from the broader academic and professional environment of the Yale School of Architecture. The curriculum includes work in design; in history, theory, and criticism of architecture; and in urbanism, and leads to a bachelor of arts degree with a major in Architecture. As a liberal arts major in Yale College, it is not an accredited professional degree program. For accredited professional degree programs, refer to the requirements of the National Architectural Accrediting Board (NAAB).",
+    "dus": [
+        ["Michael Schlabs", "michael.schlabs@yale.edu"]
+    ],
+    "catalogLink": "https://catalog.yale.edu/ycps/subjects-of-instruction/architecture/",
+    "websiteLink": "https://www.architecture.yale.edu/academics/undergraduate-studies",
+    "specializations": [
+        "architecture_ba.mql"
+    ]
+}

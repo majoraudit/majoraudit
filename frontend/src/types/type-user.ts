@@ -7,6 +7,7 @@ export interface Course {
   title: string; 			// "Proust Interpretations: Reading <i>Remembrance of Things Past</i>"
   credit: number; 		// 1
   dist: string[]; 		// ["Hu"]
+  tags: string[];
   //seasons: string[]; 	// ["Spring"]
   //season_codes: string[]; // ["202601", "202503"]
 }
@@ -64,5 +65,8 @@ export interface User {
   last_name: string;
 	netID: string;
 	onboard: boolean;
+	classYear?: string; 
+	intendedMajorId?: string;
+	intendedLanguageCode?: string;
 	FYP: FYP;
 }

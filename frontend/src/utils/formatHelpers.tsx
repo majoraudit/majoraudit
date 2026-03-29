@@ -1,4 +1,4 @@
-import DistributionOutput from "../components/DistributionOutput";
+import DistributionOutput from "../components/shared-components/DistributionOutput";
 import type { GroupItemProgress } from "../types/type-program";
 
 export function formatSeason(seasons: string[]) {
@@ -52,7 +52,6 @@ export function formatCourseItemTypes(group: GroupItemProgress) {
     switch (item.type) {
       case "single-choice":
         return `${item.courseCode}`;
-      case "multi-choice":
       case "multi-choice":
         const codes = item.courseCodes;
         if (codes.length === 2) {

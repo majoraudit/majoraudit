@@ -1,0 +1,24 @@
+{
+    "name": "Environmental Engineering",
+    "id": "environmental_engineering",
+    "abbr": "ENVE",
+    "degreeTypes": [
+        ["ba", "bs"]
+    ],
+    "courses": -1,
+    "rating": -1,
+    "workload": -1,
+    "discipline": "Engineering",
+    "students": -1,
+    "about": "The Environmental Engineering major at Yale integrates engineering, science, and policy to address pressing environmental challenges. Students study water and wastewater treatment, air pollution control, solid and hazardous waste management, and environmental remediation. The curriculum builds on a strong foundation in chemistry, biology, physics, and mathematics, and applies these to the design and analysis of engineered systems that protect human health and the environment. Both B.A. and B.S. degree options are available, allowing students to tailor their education to their career goals.",
+    "dus": [
+        ["TBD", "TBD"]
+    ],
+    "catalogLink": "https://catalog.yale.edu/ycps/subjects-of-instruction/environmental-engineering/",
+    "websiteLink": "https://engineering.yale.edu/academic-study/departments/chemical-and-environmental-engineering",
+    "specializations": [
+        "environmental_engineering.mql",
+        "environmental_engineering_ba.mql",
+        "environmental_engineering_bs.mql"
+    ]
+}

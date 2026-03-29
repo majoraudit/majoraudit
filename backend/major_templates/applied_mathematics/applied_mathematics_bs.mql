@@ -1,0 +1,8 @@
+SELECT 1 FROM [] : "Differential Equations" : 2
+SELECT 1 FROM [] : "Probability" : 2
+SELECT 1 FROM [] : "Data Analysis" : 2
+SELECT 1 FROM [] : "Discrete Mathematics" : 2
+SELECT 1 FROM [] : "Vector Analysis"
+SELECT 4 FROM [] : "Electives"
+SELECT 4 FROM [] : "Advanced Electives - Concentration"
+SELECT 1 FROM [] : "Senior Requirement"

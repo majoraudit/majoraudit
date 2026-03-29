@@ -1,0 +1,41 @@
+SELECT 1 FROM [
+  CLASS(MATH 1150),
+  TAG("Equivalent Placement or Credit")
+] : "Prerequisites" : 1;
+
+SELECT 3 FROM [
+  SELECT 1 FROM [CLASS(MATH 2250), CLASS(MATH 2260)],
+  SELECT 1 FROM [CLASS(MATH 2550), CLASS(MATH 2560)],
+  SELECT 1 FROM [CLASS(MATH 3020), CLASS(MATH 1200)]
+] : "Introductory Sequence" : 3;
+
+SELECT 6 FROM [
+  CLASS(MATH 3500),
+  SELECT 1 FROM [CLASS(MATH 3050), CLASS(MATH 3100)],
+  TAG("YC MATH Distribution"),
+  TAG("YC MATH Distribution"),
+  TAG("YC MATH Distribution"),
+  RANGE(MATH 2250 , MATH 9999)
+] : "Core Classes" : 6;
+
+SELECT 2 FROM [
+  CLASS(ASTR 4180),
+  CLASS(ASTR 4300),
+  CLASS(CHEM 3330),
+  CLASS(CHEM 4700),
+  CLASS(PHYS 4010),
+  CLASS(PHYS 4100),
+  CLASS(PHYS 4020),
+  CLASS(PHYS 4300),
+  CLASS(PHYS 4400),
+  CLASS(PHYS 4410),
+  CLASS(PHYS 4500)
+] : "Advanced Physical Sciences" : 2;
+
+SELECT 1 FROM [RANGE(MATH 4800 , MATH 4890), CLASS(MATH 4750)] : "Senior Requirement" : 1;
+
+SELECT 3 FROM [
+  CLASS(MATH 3050),
+  CLASS(MATH 3100),
+  CLASS(MATH 3500)
+] : "Courses Required for Distinction" : 3;

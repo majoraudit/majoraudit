@@ -1,0 +1,22 @@
+{
+    "name": "English Language and Literature",
+    "id":"english",
+    "abbr": "ENGL",
+    "degreeTypes": [
+        ["ba"]
+    ],
+    "courses": -1,
+    "rating": -1,
+    "workload": -1,
+    "discipline": "Humanities & The Arts",
+    "students": -1,
+    "about" : "The undergraduate program in English cultivates students' powers of argument and analysis while developing their understanding of important works of English, American, and world literatures in English. Courses offered by the department are designed to teach students foundational research and writing skills; to provide historical perspectives from which to read and analyze literary works; and to deepen students' insight into their own experience. For students interested in creative writing, the department offers an array of courses taught by renowned professional writers in all of the major genres, including fiction, poetry, play and film writing, nonfiction prose, and journalism.\n\nThe ability to write well remains a rare but prized skill in almost every domain of our world, and English majors go on to careers in many fields of endeavor. The analytic talents and the writing and speaking skills honed in the major can lead graduates to careers in fields such as advocacy, publishing, teaching, the arts, law, venture capital, medicine, and policy making.",
+    "dus": [
+        ["Feisal Mohamed", "feisal.mohamed@yale.edu"]
+    ],
+    "catalogLink": "https://catalog.yale.edu/ycps/subjects-of-instruction/english-language-literature/",
+    "websiteLink": "http://english.yale.edu/undergraduate-program",
+    "specializations": [
+        "global_affairs_ba.mql"
+    ]
+}

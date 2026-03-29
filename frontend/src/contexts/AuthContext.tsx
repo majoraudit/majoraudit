@@ -1,7 +1,7 @@
 import React, { createContext, useState, useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { apiUrl } from "../constants.ts";
-import { apiClient } from "../utils/apiClient.ts";
+import { apiClient } from "../api/apiClient.ts";
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -17,12 +17,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
+  // fix this --> api return for /auth/profile should be standard for if someone is logged in
   const checkAuthStatus = async () => {
     try {
-      const storedUser = localStorage.getItem("user");
+      /*const storedUser = localStorage.getItem("user");
       if (storedUser) {
         setIsAuthenticated(true);
-      }
+      }*/
 
       const response = await apiClient.get(`/auth/profile/`);
 
@@ -62,14 +63,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = async (): Promise<void> => {
     try {
-      await fetch(`/api/auth/logout/`, {
+      /*await fetch(`${apiUrl}/auth/logout/`, {
         method: "POST",
         credentials: "include",
-      });
+      });*/
+      window.location.href = `${apiUrl}/auth/logout/`;
     } catch (error) {
       console.warn("Logout request failed:", error);
     } finally {
       localStorage.removeItem("user");
+      setIsAuthenticated(false);
     }
   };
 

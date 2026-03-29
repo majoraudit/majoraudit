@@ -1,0 +1,64 @@
+SELECT 2 FROM [
+    RANGE(HIST 0000, HIST 4999)
+] : "Prerequisites" : 1;
+
+SELECT 5 FROM [
+    TAG("YC HIST Africa"),
+    TAG("YC HIST Asia"),
+    TAG("YC HIST Europe"),
+    TAG("YC HIST Latin America"),
+    TAG("YC HIST Middle East"),
+    TAG("YC HIST United States"),
+    TAG("YC HIST Cultural History"),
+    TAG("YC HIST Empires & Colonialism"),
+    TAG("YC HIST Environmental History"),
+    TAG("YC HIST Ideas & Intellectuals"),
+    TAG("YC HIST Intl & Diplomat Hist"),
+    TAG("YC HIST Politics, Law & Govt"),
+    TAG("YC HIST Race Gender&Sexuality"),
+    TAG("YC HIST Religion in Context"),
+    TAG("YC HIST Sci, Tech, & Medicine"),
+    TAG("YC HIST Social Chng&Social Mvmnt"),
+    TAG("YC HIST The World Economy"),
+    TAG("YC HIST War & Society"),
+    TAG("YC HIST World")
+] : "Specialist Area (Region or Pathway)" : 2;
+
+SELECT 2 FROM [
+    TAG("YC HIST Africa"),
+    TAG("YC HIST Asia"),
+    TAG("YC HIST Europe"),
+    TAG("YC HIST Latin America"),
+    TAG("YC HIST Middle East"),
+    TAG("YC HIST United States"),
+    TAG("YC HIST Cultural History"),
+    TAG("YC HIST Empires & Colonialism"),
+    TAG("YC HIST Environmental History"),
+    TAG("YC HIST Ideas & Intellectuals"),
+    TAG("YC HIST Intl & Diplomat Hist"),
+    TAG("YC HIST Politics, Law & Govt"),
+    TAG("YC HIST Race Gender&Sexuality"),
+    TAG("YC HIST Religion in Context"),
+    TAG("YC HIST Sci, Tech, & Medicine"),
+    TAG("YC HIST Social Chng&Social Mvmnt"),
+    TAG("YC HIST The World Economy"),
+    TAG("YC HIST War & Society"),
+    TAG("YC HIST World")
+] : "Outside Specialist Area" : 3;
+
+SELECT 2 FROM [
+    TAG("YC HIST Preindustrial")
+] : "Preindustrial History" : 4;
+
+SELECT 2 FROM [
+    TAG("YC HIST Departmental Seminars")
+] : "Departmental Seminars" : 5;
+
+SELECT 1 FROM [
+    RANGE(HIST 0000, HIST 4999)
+] : "Additional History Elective" : 6;
+
+SELECT 1 FROM [
+    SELECT 1 FROM [CLASS(HIST 4997)],
+    SELECT 2 FROM [CLASS(HIST 4995), CLASS(HIST 4996)]
+] : "Senior Requirement" : 7;
