@@ -207,6 +207,7 @@ function CoursePlanning() {
     }
 
     const newSemester: StudentSemester = {
+      id: 0,
       title: formData.title,
       season,
       studentCourses: [],
@@ -214,9 +215,6 @@ function CoursePlanning() {
     };
 
     const res = addSemester(newSemester);
-    if (!res.ok) {
-      return;
-    }
 
     // Clear form + error after success
     setFormData({ term: "", year: "", title: "" });

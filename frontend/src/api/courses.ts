@@ -11,7 +11,7 @@ export interface WorksheetCourse {
 
 // Exactly one of course or course_instance must be provided — mirrors the backend constraint
 export type CreateWorksheetCoursePayload =
-  | { course: number; course_instance?: never; creditdf?: boolean }
+  | { course: string; course_instance?: never; creditdf?: boolean }
   | { course_instance: number; course?: never; creditdf?: boolean };
 
 export type UpdateWorksheetCoursePayload =
@@ -33,7 +33,7 @@ export async function apiGetCourses(
 export async function apiGetCourse(
   worksheetId: number,
   semesterId: number,
-  courseId: number
+  courseId: string
 ): Promise<WorksheetCourse> {
   const res = await apiClient.get(
     `${BASE}/${worksheetId}/semesters/${semesterId}/classes/${courseId}/`
@@ -52,7 +52,12 @@ export async function apiAddCourse(
     `${BASE}/${worksheetId}/semesters/${semesterId}/classes/`,
     payload
   );
-  if (!res.ok) throw new Error(`Failed to add course to semester ${semesterId}`);
+  if (!res.ok) 
+    {
+      const errorText = await res.text();
+        console.log("addCourse error:", errorText);
+      throw new Error(`Failed to add course to semester ${semesterId}`);
+    }
   return res.json();
 }
 
@@ -60,7 +65,7 @@ export async function apiAddCourse(
 export async function apiUpdateCourse(
   worksheetId: number,
   semesterId: number,
-  courseId: number,
+  courseId: string,
   payload: UpdateWorksheetCoursePayload
 ): Promise<WorksheetCourse> {
   const res = await apiClient.put(
@@ -75,7 +80,7 @@ export async function apiUpdateCourse(
 export async function apiRemoveCourse(
   worksheetId: number,
   semesterId: number,
-  courseId: number
+  courseId: string
 ): Promise<void> {
   const res = await apiClient.delete(
     `${BASE}/${worksheetId}/semesters/${semesterId}/classes/${courseId}/`

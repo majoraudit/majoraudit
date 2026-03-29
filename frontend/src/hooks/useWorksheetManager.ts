@@ -42,6 +42,7 @@ type UseWorksheetManagerReturn = {
   commitCreate: () => void;
 
   resetWorksheetInlineState: () => void;
+  createWorksheet: (name?: string) => Promise<{ id: string; name: string; studentSemesters: never[] } | undefined>;
 };
 
 export function useWorksheetManager(): UseWorksheetManagerReturn {
@@ -141,6 +142,8 @@ export function useWorksheetManager(): UseWorksheetManagerReturn {
           ],
         },
       });
+
+      return frontendWs;
     },
     [userData, setUserData, worksheets, mainId]
   );
@@ -337,5 +340,6 @@ export function useWorksheetManager(): UseWorksheetManagerReturn {
     commitCreate,
 
     resetWorksheetInlineState,
+    createWorksheet,
   };
 }

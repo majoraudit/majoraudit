@@ -2,7 +2,7 @@ import { apiClient } from "./apiClient";
 
 const BASE = "/worksheets";
 
-export type Season = "Spring" | "Summer" | "Fall" | "Winter";
+export type Season = "SP" | "SU" | "FA";
 
 export interface Semester {
   id: number;
@@ -43,8 +43,13 @@ export async function apiCreateSemester(
   payload: CreateSemesterPayload
 ): Promise<Semester> {
   const res = await apiClient.post(`${BASE}/${worksheetId}/semesters/`, payload);
-  if (!res.ok) throw new Error(`Failed to create semester for worksheet ${worksheetId}`);
-  return res.json();
+  if (!res.ok) 
+    {
+        const errorText = await res.text();
+        console.log("createSemester error:", errorText);
+        throw new Error(`Failed to create semester for worksheet ${worksheetId}`);
+    }      
+    return res.json();
 }
 
 // PUT /worksheets/:worksheetId/semesters/:semesterId/

@@ -51,6 +51,7 @@ export function useWorksheetActions() {
 
   const addSemester = useCallback(
     async (newSemester: StudentSemester) => {
+
       if (!canMutate || !activeWorksheetId) return { ok: false, error: "No active worksheet." };
 
       const exists = worksheet.studentSemesters.some(
@@ -60,10 +61,11 @@ export function useWorksheetActions() {
         return { ok: false, error: "A semester with this term/year already exists." };
       }
 
+
       // Create on the backend first to get the real ID
       const created = await apiCreateSemester(parseInt(activeWorksheetId), {
         year: Math.floor(newSemester.season / 100),
-        season: newSemester.season % 100 === 1 ? "Spring" : "Fall",
+        season: newSemester.season % 100 === 1 ? "SP" : "FA",
       });
 
       const semesterWithId: StudentSemester = { ...newSemester, id: created.id };
@@ -121,9 +123,12 @@ export function useWorksheetActions() {
       if (courseAlreadyExists) return { ok: false, error: "Course already in semester." };
 
       // Add on the backend using the semester's backend ID
-      await apiAddCourse(parseInt(activeWorksheetId), semester.id, {
+      const created = await apiAddCourse(parseInt(activeWorksheetId), semester.id, {
         course: newCourse.course.id,
       });
+
+      const courseWithId: StudentCourse = { ...newCourse, id: created.id };
+ 
 
       updateActiveWorksheet((ws) => ({
         ...ws,
@@ -195,7 +200,7 @@ export function useWorksheetActions() {
       // Persist to backend — reuse year/season derived from season code
       await apiUpdateSemester(parseInt(activeWorksheetId), semester.id, {
         year: Math.floor(season / 100),
-        season: season % 100 === 1 ? "Spring" : "Fall",
+        season: season % 100 === 1 ? "SP" : "FA",
       });
 
       updateActiveWorksheet((ws) => ({

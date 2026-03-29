@@ -2,11 +2,18 @@ import { apiClient } from "./apiClient";
 
 const BASE = "/worksheets";
 
+export interface BackendSemester {
+  id: number;
+  year: number;
+  season: string;
+  classes: any[];
+}
+
 export interface Worksheet {
   id: number;
   name: string;
+  semesters: BackendSemester[];
 }
-
 export interface CreateWorksheetPayload {
   name: string;
 }
