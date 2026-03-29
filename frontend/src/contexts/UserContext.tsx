@@ -51,7 +51,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
             season: toSeasonCode(s.year, s.season),
             title: s.title || toSeasonTitle(s.year, s.season),
             studentCourses: [], // courses not mapped yet — extend later if needed
-            isCompleted: false,
+            isCompleted: s.is_completed,
             _rawClasses: s.classes,
           }))
           .sort((a, b) => a.season - b.season),

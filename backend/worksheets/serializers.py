@@ -28,7 +28,7 @@ class UserWorksheetSemesterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = UserWorksheetSemester
-        fields = ['id', 'year', 'season', 'title', 'classes']
+        fields = ['id', 'year', 'season', 'title', 'is_completed', 'classes']
 
 
 class UserWorksheetSerializer(serializers.ModelSerializer):

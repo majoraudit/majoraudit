@@ -202,6 +202,7 @@ export function useWorksheetActions() {
       await apiUpdateSemester(parseInt(activeWorksheetId), semester.id, {
         year: Math.floor(season / 100),
         season: season % 100 === 1 ? "SP" : "FA",
+        is_completed: isCompleted
       });
 
       updateActiveWorksheet((ws) => ({

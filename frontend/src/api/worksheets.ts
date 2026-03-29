@@ -7,6 +7,7 @@ export interface BackendSemester {
   year: number;
   season: string;
   title:string;
+  is_completed: boolean;
   classes: any[];
 }
 

@@ -21,6 +21,7 @@ export interface UpdateSemesterPayload {
   year?: number;
   season?: Season;
   title?: string;
+  is_completed?: boolean;
 }
 
 // GET /worksheets/:worksheetId/semesters/
