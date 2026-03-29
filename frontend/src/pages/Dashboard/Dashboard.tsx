@@ -6,6 +6,7 @@ import { useApp } from "@/contexts/AppContext";
 
 import MajorRequirementList from "./components/MajorRequirementList";
 import MajorRequirementGraph from "./components/MajorRequirementGraph";
+import DashboardInsightGrid from "./components/DashboardInsightGrid";
 
 import checkIcon from "./assets/check.svg";
 import trashcan from "./assets/trashcan.svg";
@@ -34,6 +35,8 @@ function Dashboard() {
     totalCredits,
     completedCredits,
     completedCourseCount,
+    allStudentCourses,
+    semesters,
     majorCount,
     certificateCount,
   } = useWorksheetData();
@@ -53,6 +56,10 @@ function Dashboard() {
   const totalPlannedCredits = totalCredits - completedCredits;
 
   const totalCompletedCourses = completedCourseCount;
+  const creditsRemaining = Math.max(
+    0,
+    graduationCreditsRequired - totalCompletedCredits - totalPlannedCredits,
+  );
 
   const nav = useProgramNavigation({ majorCount, certificateCount });
 
@@ -60,6 +67,23 @@ function Dashboard() {
     if (nav.activeTab === "degree") return activeMajorProgress[0];
     return activeMajorProgress[nav.activeIndex] ?? null;
   }, [nav.activeTab, nav.activeIndex, activeMajorProgress]);
+
+  const degreeProgram = useMemo(() => {
+    return activeMajorProgress[0] ?? null;
+  }, [activeMajorProgress]);
+
+  const activeProgramCompletedGroups =
+    activeProgram?.totalCompletedRequirementGroups ?? 0;
+  const activeProgramInProgressGroups =
+    activeProgram?.requirements.filter(
+      (group) => !group.isCompleted && group.completedNum > 0,
+    ).length ?? 0;
+  const activeProgramRemainingGroups = Math.max(
+    0,
+    (activeProgram?.totalRequirementGroups ?? 0) -
+      activeProgramCompletedGroups -
+      activeProgramInProgressGroups,
+  );
 
   const handleRemoveMajor = () => {
     console.log("Removing major/certificate...");
@@ -77,14 +101,16 @@ function Dashboard() {
   };
 
   useEffect(() => {
-    if (
-      userData?.FYP?.degreeProgress2 &&
-      userData?.FYP?.worksheets &&
-      appData?.major_processor
-    ) {
-      const updatedDegreeProgress2 = userData.FYP.degreeProgress2.map(
+    if (!appData?.major_processor) return;
+
+    setUserData((currentUserData) => {
+      if (!currentUserData?.FYP?.degreeProgress2 || !currentUserData?.FYP?.worksheets) {
+        return currentUserData;
+      }
+
+      const updatedDegreeProgress2 = currentUserData.FYP.degreeProgress2.map(
         (entry) => {
-          const worksheet = userData.FYP.worksheets.find(
+          const worksheet = currentUserData.FYP.worksheets.find(
             (ws) => ws.id === entry.worksheetID,
           );
           if (!worksheet) return entry;
@@ -101,15 +127,15 @@ function Dashboard() {
         },
       );
 
-      setUserData({
-        ...userData,
+      return {
+        ...currentUserData,
         FYP: {
-          ...userData.FYP,
+          ...currentUserData.FYP,
           degreeProgress2: updatedDegreeProgress2,
         },
-      });
-    }
-  }, [userData?.FYP?.worksheets, appData?.major_processor, activeWorksheetId]);
+      };
+    });
+  }, [userData?.FYP?.worksheets, appData?.major_processor, activeWorksheetId, setUserData]);
 
   return (
     <>
@@ -163,22 +189,22 @@ function Dashboard() {
             {formatC_P_UP(
               totalCompletedCredits,
               totalPlannedCredits,
-              graduationCreditsRequired -
-                totalCompletedCredits -
-                totalPlannedCredits,
+              creditsRemaining,
             )}
           </div>
 
           <div className="bg-white rounded-lg shadow p-6">
-            <h3 className="text-md font-semibold mb-2">
-              Major Progress (Courses)
-            </h3>
+            <h3 className="text-md font-semibold mb-2">Active Program Progress</h3>
 
             <div className="mb-4 h-3 w-full flex overflow-hidden">
               <div
                 style={{
                   width: `${
-                    (totalCompletedCredits / graduationCreditsRequired) * 100
+                    activeProgram && activeProgram.totalRequirementGroups > 0
+                      ? (activeProgramCompletedGroups /
+                          activeProgram.totalRequirementGroups) *
+                        100
+                      : 0
                   }%`,
                 }}
                 className="rounded-lg bg-green-700 transition-all duration-500 ease-out"
@@ -186,7 +212,11 @@ function Dashboard() {
               <div
                 style={{
                   width: `${
-                    (totalPlannedCredits / graduationCreditsRequired) * 100
+                    activeProgram && activeProgram.totalRequirementGroups > 0
+                      ? (activeProgramInProgressGroups /
+                          activeProgram.totalRequirementGroups) *
+                        100
+                      : 0
                   }%`,
                 }}
                 className="rounded-lg bg-yellow-500 transition-all duration-500 ease-out"
@@ -194,11 +224,11 @@ function Dashboard() {
               <div
                 style={{
                   width: `${
-                    ((graduationCreditsRequired -
-                      totalCompletedCredits -
-                      totalPlannedCredits) /
-                      graduationCreditsRequired) *
-                    100
+                    activeProgram && activeProgram.totalRequirementGroups > 0
+                      ? (activeProgramRemainingGroups /
+                          activeProgram.totalRequirementGroups) *
+                        100
+                      : 100
                   }%`,
                 }}
                 className="rounded-lg bg-gray-300 transition-all duration-500 ease-out"
@@ -206,34 +236,24 @@ function Dashboard() {
             </div>
 
             {formatC_P_UP(
-              totalCompletedCredits,
-              totalPlannedCredits,
-              graduationCreditsRequired -
-                totalCompletedCredits -
-                totalPlannedCredits,
+              activeProgramCompletedGroups,
+              activeProgramInProgressGroups,
+              activeProgramRemainingGroups,
             )}
           </div>
         </section>
 
-        {/* Summary Cards */}
-        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-gray-500">Courses Completed</h2>
-            <p className="text-3xl font-semibold">{totalCompletedCourses}</p>
-          </div>
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-gray-500">Credits Remaining</h2>
-            <p className="text-3xl font-semibold">30</p>
-          </div>
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-gray-500">Distributional Requirements</h2>
-            <p className="text-3xl font-semibold">5 / 7</p>
-          </div>
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-gray-500">Current GPA</h2>
-            <p className="text-3xl font-semibold">3.8</p>
-          </div>
-        </section>
+        <DashboardInsightGrid
+          activeWorksheetId={activeWorksheetId}
+          graduationCreditsRequired={graduationCreditsRequired}
+          totalCredits={totalCredits}
+          completedCredits={completedCredits}
+          completedCourseCount={totalCompletedCourses}
+          totalCourseCount={allStudentCourses.length}
+          semesters={semesters}
+          activeProgram={activeProgram}
+          degreeProgram={degreeProgram}
+        />
 
         {/* Major List and Major Graph container */}
         <section className="bg-white rounded-lg shadow p-4 w-full flex flex-col flex-1 min-h-[26rem]">
