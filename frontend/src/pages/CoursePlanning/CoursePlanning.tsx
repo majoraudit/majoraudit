@@ -6,7 +6,6 @@ import SemesterOutput from "./components/SemesterOutput";
 import { useApp } from "@/contexts/AppContext";
 
 import { useWorksheetManager } from "@/hooks/useWorksheetManager";
-import { useWorksheetActions } from "@/hooks/useWorksheetActions";
 
 import pencilIcon from "./assets/pencil.svg";
 import addSemesterIcon from "./assets/addSemester.svg";
@@ -50,6 +49,7 @@ function CoursePlanning() {
 
     isMainId,
     setActiveWorksheet,
+    addSemester,
 
     // inline UI
     isRenaming,
@@ -77,8 +77,6 @@ function CoursePlanning() {
 
     resetWorksheetInlineState,
   } = useWorksheetManager();
-
-  const { addSemester } = useWorksheetActions();
 
   if (!appData) return <div>Loading courses and majors...</div>;
 
@@ -131,35 +129,23 @@ function CoursePlanning() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleInputSubmit = () => {
-    if (!(formData.term && formData.year && formData.title)) {
-      return;
-    }
+  const TERM_TO_API_SEASON: Record<string, string> = { "01": "SP", "02": "SU", "03": "FA" };
+  const TERM_TO_NUM: Record<string, number> = { "01": 1, "02": 2, "03": 3 };
 
+  const handleInputSubmit = async () => {
+    if (!(formData.term && formData.year)) return;
+
+    // Yale convention: spring/summer belong to the next calendar year
     let year = Number(formData.year);
-    if (Number(formData.term) === 2 || Number(formData.term) === 1) year += 1;
+    if (formData.term === "01" || formData.term === "02") year += 1;
 
-    const season = Number(`${year}${formData.term}`);
+    const seasonNum = TERM_TO_NUM[formData.term] ?? 0;
+    const combinedSeason = year * 100 + seasonNum;
 
-    // Check for duplicate semester (same year + term) on this worksheet
-    const duplicateSemester = activeSemesters.some((s) => s.season === season);
-    if (duplicateSemester) {
-      return;
-    }
+    // Check for duplicate semester on this worksheet
+    if (activeSemesters.some((s) => s.season === combinedSeason)) return;
 
-    const newSemester: StudentSemester = {
-      title: formData.title,
-      season,
-      studentCourses: [],
-      isCompleted: false,
-    };
-
-    const res = addSemester(newSemester);
-    if (!res.ok) {
-      return;
-    }
-
-    // Clear form + error after success
+    await addSemester({ year, season: TERM_TO_API_SEASON[formData.term] });
     setFormData({ term: "", year: "", title: "" });
   };
 

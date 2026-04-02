@@ -1,9 +1,8 @@
-import { useMemo, useState, useCallback, useEffect } from "react";
+import { useMemo, useState, useCallback } from "react";
 import { useUser } from "@/contexts/UserContext";
 import { type StudentSemester } from "@/types/type-user";
 import { type Worksheet } from "@/types/type-user";
 import {
-  getWorksheets,
   createWorksheet as apiCreateWorksheet,
   renameWorksheet as apiRenameWorksheet,
   deleteWorksheet as apiDeleteWorksheet,
@@ -11,14 +10,18 @@ import {
   removeSemester as apiRemoveSemester,
 } from "@/api/coursePlanning";
 
+const API_SEASON_TO_NUM: Record<string, number> = { SP: 1, SU: 2, FA: 3 };
+const API_SEASON_TO_LABEL: Record<string, string> = { SP: "Spring", SU: "Summer", FA: "Fall" };
+
 function transformWorksheetFromApi(apiWs: any): Worksheet {
   return {
     id: String(apiWs.id),
     name: apiWs.name,
     studentSemesters: (apiWs.semesters ?? []).map((s: any) => ({
       id: String(s.id),
-      season: s.season,
-      title: `${s.year} ${s.season === 1 ? "Spring" : s.season === 3 ? "Fall" : "Other"}`,
+      // combine year + season into a single sortable number (e.g. 202503 for FA 2025)
+      season: s.year * 100 + (API_SEASON_TO_NUM[s.season] ?? 0),
+      title: `${s.year} ${API_SEASON_TO_LABEL[s.season] ?? s.season}`,
       studentCourses: (s.classes ?? []).map((c: any) => ({
         course: c.course,
         term: s.year,
@@ -32,14 +35,8 @@ function transformWorksheetFromApi(apiWs: any): Worksheet {
 function transformSemesterFromApi(apiSemester: any): StudentSemester {
   return {
     id: String(apiSemester.id),
-    season: apiSemester.season,
-    title: `${apiSemester.year} ${
-      apiSemester.season === 1
-        ? "Spring"
-        : apiSemester.season === 3
-        ? "Fall"
-        : "Other"
-    }`,
+    season: apiSemester.year * 100 + (API_SEASON_TO_NUM[apiSemester.season] ?? 0),
+    title: `${apiSemester.year} ${API_SEASON_TO_LABEL[apiSemester.season] ?? apiSemester.season}`,
     studentCourses: [],
     isCompleted: false,
   };
@@ -57,7 +54,7 @@ type UseWorksheetManagerReturn = {
   createWorksheet: (name?: string) => void;
   renameWorksheet: (id: string, newName: string) => Promise<boolean>; // returns success
   deleteWorksheet: (id: string) => void;
-  addSemester: (payload: { year: number; season: number }) => Promise<void>;
+  addSemester: (payload: { year: number; season: string }) => Promise<void>;
   removeSemester: (semesterId: string) => Promise<void>;  
 
   // inline UI state (rename/delete/create in dropdown)
@@ -90,8 +87,6 @@ type UseWorksheetManagerReturn = {
 export function useWorksheetManager(): UseWorksheetManagerReturn {
   const { userData, setUserData } = useUser();
 
-  console.log("useWorksheetManager userData: ", userData);
-
   const worksheets: Worksheet[] = userData?.FYP?.worksheets ?? [];
   const activeWorksheetId = userData?.FYP?.activeWorksheetID ?? null;
   const activeWorksheet: Worksheet | undefined =
@@ -107,42 +102,10 @@ export function useWorksheetManager(): UseWorksheetManagerReturn {
     (id: string | null | undefined) => {
       const ws = worksheets.find((w) => w.id === id);
       if (!ws) return false;
-      return ws.name === "Main Worksheet" || ws.id === "ws_main";
+      return ws.name === "Main Worksheet";
     },
     [worksheets]
   );
-// NOTE: This effect assumes authenticated user data.
-// It has not yet been fully tested against the live backend.
-
-  useEffect(() => {
-    if (!userData) return;
-    if (userData.FYP?.worksheets?.length) return; // already loaded
-
-    const loadWorksheets = async () => {
-      try {
-        const data = await getWorksheets();
-        const transformed: Worksheet[] = data.map(transformWorksheetFromApi);
-
-        setUserData(prev => {
-          if (!prev) return prev;
-
-          return {
-            ...prev,
-            FYP: {
-              ...prev.FYP,
-              worksheets: transformed,
-              activeWorksheetID:
-                transformed[0]?.id ?? null,
-            },
-          };
-        });
-      } catch (err) {
-        console.error("Failed to load worksheets", err);
-      }
-    };
-
-    loadWorksheets();
-  }, [userData, setUserData]);
 
   // ---------- Inline worksheet actions state ----------
   const [isRenaming, setIsRenaming] = useState(false);
@@ -177,7 +140,7 @@ export function useWorksheetManager(): UseWorksheetManagerReturn {
         ...userData,
         FYP: {
           ...userData.FYP,
-          activeWorksheetID: id ?? "ws_main",
+          activeWorksheetID: id ?? worksheets[0]?.id ?? "",
         },
       });
 
@@ -187,7 +150,7 @@ export function useWorksheetManager(): UseWorksheetManagerReturn {
   );
 
   const addSemester = useCallback(
-    async (payload: { year: number; season: number }) => {
+    async (payload: { year: number; season: string }) => {
       if (!userData || !activeWorksheetId) return;
 
       try {
@@ -284,8 +247,14 @@ export function useWorksheetManager(): UseWorksheetManagerReturn {
       if (!userData) return false;
 
       const trimmed = newName.trim();
+
       if (!trimmed) {
         setRenameError("Name cannot be empty.");
+        return false;
+      }
+
+      if (trimmed.length > 32) {
+        setRenameError("Name must be 32 characters or fewer.");
         return false;
       }
 
@@ -293,6 +262,7 @@ export function useWorksheetManager(): UseWorksheetManagerReturn {
         (w) =>
           w.id !== id && w.name.trim().toLowerCase() === trimmed.toLowerCase()
       );
+
       if (duplicate) {
         setRenameError("A worksheet with this name already exists.");
         return false;
@@ -330,7 +300,7 @@ export function useWorksheetManager(): UseWorksheetManagerReturn {
 
         const nextList = worksheets.filter((w) => w.id !== id);
         let nextActiveId = userData.FYP.activeWorksheetID;
-        if (nextActiveId === id) nextActiveId = "ws_main";
+        if (nextActiveId === id) nextActiveId = nextList[0]?.id ?? "";
 
         setUserData({
           ...userData,
@@ -426,17 +396,26 @@ export function useWorksheetManager(): UseWorksheetManagerReturn {
 
   const commitCreate = useCallback(() => {
     const trimmed = newWorksheetName.trim();
+
     if (!trimmed) {
       setNewWorksheetError("Name cannot be empty.");
       return;
     }
+
+    if (trimmed.length > 32) {
+      setNewWorksheetError("Name must be 32 characters or fewer.");
+      return;
+    }
+
     const duplicate = worksheets.some(
       (w) => w.name.trim().toLowerCase() === trimmed.toLowerCase()
     );
+
     if (duplicate) {
       setNewWorksheetError("A worksheet with this name already exists.");
       return;
     }
+
     createWorksheet(trimmed);
     cancelCreate();
   }, [newWorksheetName, worksheets, createWorksheet, cancelCreate]);

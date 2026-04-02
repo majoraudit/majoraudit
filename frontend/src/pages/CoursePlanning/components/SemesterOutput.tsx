@@ -10,6 +10,8 @@ import lockAnimation from "../assets/lockAnimation.json";
 import { useWorksheetManager } from "@/hooks/useWorksheetManager";
 import { useWorksheetActions } from "@/hooks/useWorksheetActions";
 import { useWorksheetData } from "@/hooks/useWorksheetData";
+import { addCourseToSemester } from "@/api/coursePlanning";
+import { useUser } from "@/contexts/UserContext";
 
 import { useDrop } from "react-dnd";
 import { useRef, useEffect } from "react";
@@ -33,9 +35,9 @@ function codeToYear(code: number): number {
 
 // semester prop, mainly to specify the season code
 function SemesterOutput({ semester, onAddCustomCourse }: SemesterOutputProps) {
-  const { removeSemester, addCourse, setSemesterCompleted } =
-    useWorksheetActions();
-  const { activeSemesters } = useWorksheetManager();
+  const { userData, setUserData } = useUser();
+  const { setSemesterCompleted } = useWorksheetActions();
+  const { activeSemesters, removeSemester, activeWorksheetId } = useWorksheetManager();
   const { getSemesterCredits } = useWorksheetData();
 
   const updatedSemester =
@@ -86,15 +88,47 @@ function SemesterOutput({ semester, onAddCustomCourse }: SemesterOutputProps) {
     () => ({
       accept: "course",
       drop: (item) => {
+        if (!userData) return;
+
         const newStudentCourse: StudentCourse = {
           course: item.selectedCourse,
           term: semester.season,
           status: "DA_COMPLETE",
         };
 
-        const res = addCourse(semester.season, newStudentCourse);
-        if (!res.ok) {
-          return;
+        // Write directly to userData to avoid stale closure issues with useWorksheetActions
+        setUserData((prev) => {
+          if (!prev) return prev;
+          return {
+            ...prev,
+            FYP: {
+              ...prev.FYP,
+              worksheets: prev.FYP.worksheets.map((ws) => {
+                if (ws.id !== activeWorksheetId) return ws;
+                return {
+                  ...ws,
+                  studentSemesters: ws.studentSemesters.map((s) => {
+                    if (s.id !== semester.id) return s;
+                    const alreadyExists = s.studentCourses.some(
+                      (sc) => sc.course.codes?.[0] === item.selectedCourse.codes?.[0]
+                    );
+                    if (alreadyExists) return s;
+                    return {
+                      ...s,
+                      studentCourses: [...s.studentCourses, newStudentCourse],
+                    };
+                  }),
+                };
+              }),
+            },
+          };
+        });
+
+        // Persist to backend
+        if (activeWorksheetId && semester.id) {
+          addCourseToSemester(activeWorksheetId, semester.id, {
+            course_id: item.selectedCourse.id,
+          }).catch(console.error);
         }
       },
       canDrop: () => !isCompleted,
@@ -102,17 +136,15 @@ function SemesterOutput({ semester, onAddCustomCourse }: SemesterOutputProps) {
         isOver: !!monitor.isOver(),
       }),
     }),
-    [addCourse, updatedSemester.season, isCompleted],
+    [userData, setUserData, isCompleted, activeWorksheetId, semester.id],
   );
 
   // connects useDrop to DOM element
   drop(ref);
 
   const handleSemesterRemove = () => {
-    const res = removeSemester(semester.season);
-    if (!res.ok) {
-      return;
-    }
+    // removeSemester from useWorksheetManager calls the API and updates local state
+    removeSemester(semester.id);
   };
 
   return (

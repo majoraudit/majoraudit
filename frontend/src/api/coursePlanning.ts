@@ -36,7 +36,7 @@ export async function addSemester(
   worksheetId: string,
   payload: {
     year: number;
-    season: number;
+    season: string; // "SP" | "SU" | "FA"
   }
 ) {
   const res = await apiClient.post(
@@ -59,7 +59,7 @@ export async function removeSemester(
 export async function addCourseToSemester(
   worksheetId: string,
   semesterId: string,
-  payload: { course_code: string; title: string; credits: number }
+  payload: { course_id: number } // maps to Course.external_id via SlugRelatedField
 ) {
   const res = await apiClient.post(
     `/worksheets/${worksheetId}/semesters/${semesterId}/classes/`,

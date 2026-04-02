@@ -143,7 +143,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Session Settings
 SESSION_ENGINE = "django.contrib.sessions.backends.cached_db"
-SESSION_COOKIE_SECURE = False
+SESSION_COOKIE_SECURE = True
 SESSION_COOKIE_SAMESITE = os.getenv('COOKIE_SAMESITE')
 SESSION_COOKIE_HTTPONLY = True
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False
@@ -169,9 +169,9 @@ CORS_ALLOWED_ORIGINS = [
     "https://127.0.0.1:5173",
 ]
 
-CSRF_COOKIE_SECURE = False
+CSRF_COOKIE_SECURE = True
 CSRF_COOKIE_HTTPONLY = False
-CSRF_COOKIE_SAMESITE = 'None'
+CSRF_COOKIE_SAMESITE = "None"
 CSRF_TRUSTED_ORIGINS = [
     "https://localhost:5173",
     "https://127.0.0.1:5173",

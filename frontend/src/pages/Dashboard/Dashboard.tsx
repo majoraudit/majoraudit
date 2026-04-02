@@ -331,7 +331,7 @@ function Dashboard() {
               {/* Program name */}
               <div>
                 <span className="font-bold text-2xl">
-                  {activeProgram?.name || "Loading..."}
+                  {activeProgram?.name ?? "No program added"}
                 </span>
               </div>
 
@@ -379,14 +379,14 @@ function Dashboard() {
               {activeProgram ? (
                 <MajorRequirementList major_progress={activeProgram} />
               ) : (
-                <div>Loading degree requirements...</div>
+                <div className="p-4 text-sm text-gray-500">No program added yet. Go to Programs to add a major or certificate.</div>
               )}
             </div>
             <div className="flex flex-col flex-1 h-full min-h-0 bg-white border-gray-200 border-2 p-2 shadow overflow-hidden min-w-0">
               {activeProgram ? (
                 <MajorRequirementGraph major_progress={activeProgram} />
               ) : (
-                <div>Loading degree requirements...</div>
+                <div className="p-4 text-sm text-gray-500">No program added yet. Go to Programs to add a major or certificate.</div>
               )}
             </div>
           </div>

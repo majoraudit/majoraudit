@@ -14,11 +14,12 @@ from .permissions import IsOwnerPermission
 
 class UserWorksheetListCreateView(generics.ListCreateAPIView):
     serializer_class = UserWorksheetSerializer
-    permission_classes = [permissions.IsAuthenticated, IsOwnerPermission]
+    permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
         return UserWorksheet.objects.filter(user=self.request.user).prefetch_related(
-            'userworksheetsemester_set__userworksheetclass_set'
+            'userworksheetsemester_set__userworksheetclass_set__course__courseinstance_set__course_codes',
+            'userworksheetsemester_set__userworksheetclass_set__course__distributionals',
         )
 
     def perform_create(self, serializer):
@@ -31,7 +32,8 @@ class UserWorksheetDetailView(generics.RetrieveUpdateDestroyAPIView):
 
     def get_queryset(self):
         return UserWorksheet.objects.filter(user=self.request.user).prefetch_related(
-            'userworksheetsemester_set__userworksheetclass_set'
+            'userworksheetsemester_set__userworksheetclass_set__course__courseinstance_set__course_codes',
+            'userworksheetsemester_set__userworksheetclass_set__course__distributionals',
         )
 
 
