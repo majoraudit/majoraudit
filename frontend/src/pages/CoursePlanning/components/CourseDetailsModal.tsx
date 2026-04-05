@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 
 import { type Course } from "@/types/type-user";
+import DistributionOutput from "@/components/shared-components/DistributionOutput";
 
 interface CourseTableProfessor {
   professor: {
@@ -277,12 +278,10 @@ function CourseDetailsModal({ open, course, onClose }: CourseDetailsModalProps) 
               </span>
             )}
             {(course.dist ?? []).map((distribution) => (
-              <span
+              <DistributionOutput
                 key={distribution}
-                className="rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-700"
-              >
-                {distribution}
-              </span>
+                distribution={distribution}
+              />
             ))}
             {tags.map((tag) => (
               <span
