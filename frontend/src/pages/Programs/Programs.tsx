@@ -14,7 +14,8 @@ import { useState, useEffect, useMemo, useCallback } from "react";
 import SidebarLayout from "@/components/shared-components/SidebarLayout";
 
 import { useAuth } from "@/contexts/AuthContext";
-import { apiFetchMajorTemplate } from "@/api/majors";
+import { apiFetchMajorTemplate, apiFetchMajorMQL } from "@/api/majors";
+import type { MQLQueryFile, Class, Selector, Quantity } from "@/types/schema/mql/mql";
 
 import {
   DropdownMenu,
@@ -24,6 +25,29 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 import { Plus } from "lucide-react";
+
+function formatClass(cls: Class): string {
+  return `${cls.department_id} ${cls.course_number}${cls.lab ? " (Lab)" : ""}`;
+}
+
+function formatQuantity(q: Quantity): string {
+  if ("Single" in q) return `${q.Single} course${q.Single !== 1 ? "s" : ""}`;
+  return `${q.Many.from}–${q.Many.to} courses`;
+}
+
+function formatSelector(sel: Selector): string {
+  if ("Class" in sel) return formatClass(sel.Class);
+  if ("Placement" in sel) return `Placement: ${sel.Placement}`;
+  if ("Tag" in sel) return `Tag: ${sel.Tag}`;
+  if ("TagCode" in sel) return `${sel.TagCode.tag}: ${sel.TagCode.code}`;
+  if ("Dist" in sel) return `Distribution: ${sel.Dist}`;
+  if ("DistCode" in sel) return `${sel.DistCode.dist}: ${sel.DistCode.code}`;
+  if ("Range" in sel) return `${formatClass(sel.Range.from)} – ${formatClass(sel.Range.to)}`;
+  if ("RangeDist" in sel) return `${formatClass(sel.RangeDist.from)} – ${formatClass(sel.RangeDist.to)} (${sel.RangeDist.dist})`;
+  if ("RangeTag" in sel) return `${formatClass(sel.RangeTag.from)} – ${formatClass(sel.RangeTag.to)} [${sel.RangeTag.tag}]`;
+  if ("Query" in sel) return "(nested query)";
+  return "";
+}
 
 // Converts a specialization filename into a display label
 // e.g. "computer_science_bs_ms.mql" with major id "computer_science" → "BS/MS"
@@ -77,6 +101,8 @@ function Programs() {
   );
   const [searchTerm, setSearchTerm] = useState("");
   const [isLoadingTemplate, setIsLoadingTemplate] = useState(false);
+  const [mqlData, setMqlData] = useState<MQLQueryFile | null>(null);
+  const [isLoadingMQL, setIsLoadingMQL] = useState(false);
 
   // major_templates is now { id: string; name: string }[]
   // Sort by name directly
@@ -120,6 +146,24 @@ function Programs() {
     },
     [appData, templateCache],
   );
+
+  useEffect(() => {
+    if (!selectedMajorInfo || !selectedSpecialization) {
+      setMqlData(null);
+      return;
+    }
+    setIsLoadingMQL(true);
+    apiFetchMajorMQL(selectedMajorInfo.id, selectedSpecialization.substring(0, selectedSpecialization.lastIndexOf(".")))
+      .then((d) => {
+        alert(d)
+        setMqlData(d)
+      })
+      .catch((e) => {
+        console.error("Failed to fetch MQL:", e);
+        setMqlData(null);
+      })
+      .finally(() => setIsLoadingMQL(false));
+  }, [selectedMajorInfo?.id, selectedSpecialization]);
 
   // Load the first major by default once appData is ready
   useEffect(() => {
@@ -183,6 +227,7 @@ function Programs() {
         <header className="m-6 mt-4 flex flex-col">
           <div className="flex flex-row gap-2 items-center">
             <h1 className="text-3xl font-bold text-gray-800">Program Viewer</h1>
+            
             <img src={bookIcon} alt="book icon" className="h-8 w-8 ml-1" />
           </div>
           <p className="text-gray-500 font-medium mt-2">
@@ -380,20 +425,45 @@ function Programs() {
                 </DropdownMenu>
               </div>
 
-              {/* TODO: render MajorProgress requirements once MQL specialization parsing is implemented */}
-              <div className="flex flex-col items-center justify-center flex-1 text-gray-400 gap-2">
-                <p className="text-sm">
-                  Requirements for{" "}
-                  <span className="font-medium text-gray-600">
-                    {selectedMajorInfo.name}
-                    {selectedSpecialization
-                      ? ` (${specializationLabel(selectedSpecialization, selectedMajorInfo.id)})`
-                      : ""}
-                  </span>{" "}
-                  will appear here.
-                </p>
-                <p className="text-xs text-gray-400">Coming soon.</p>
-              </div>
+              {isLoadingMQL ? (
+                <div className="flex items-center justify-center flex-1 text-gray-400 text-sm">
+                  Loading requirements...
+                </div>
+              ) : !mqlData ? (
+                <div className="flex items-center justify-center flex-1 text-gray-400 text-sm">
+                  No requirements available.
+                </div>
+              ) : (
+                <div className="flex flex-col gap-3 overflow-y-auto">
+                  {JSON.stringify(mqlData)}
+                  {false && mqlData.requirements.map((req, i) => (
+                    <div key={i} className="border border-gray-200 rounded-lg p-4 bg-gray-50">
+                      <div className="flex items-start justify-between gap-2 mb-2">
+                        <p className="font-semibold text-gray-800 text-sm leading-snug">
+                          {req.description}
+                        </p>
+                        <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded font-medium whitespace-nowrap">
+                          P{req.priority}
+                        </span>
+                      </div>
+                      <p className="text-xs text-gray-500 mb-2">
+                        <span className={`font-medium ${req.query.type === "Limit" ? "text-orange-600" : "text-green-600"}`}>
+                          {req.query.type}
+                        </span>
+                        {" · "}
+                        {formatQuantity(req.query.quantity)}
+                      </p>
+                      <ul className="flex flex-col gap-1">
+                        {req.query.selector.map((sel, j) => (
+                          <li key={j} className="text-xs text-gray-700 bg-white border border-gray-200 rounded px-2 py-1 font-mono">
+                            {formatSelector(sel)}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
+                </div>
+              )}
             </section>
           </main>
         )}
