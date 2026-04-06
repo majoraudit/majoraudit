@@ -7,6 +7,11 @@ import { useAuth } from "../contexts/AuthContext";
 
 import Loading from "@/pages/Loading/Loading";
 
+import { useUser } from "./UserContext";
+import { type StudentCourse } from "@/types/type-user";
+
+import { apiFetchMajorTemplatesList } from "@/api/majors";
+
 type AppContextType = {
   appData: AppData | undefined;
   setAppData: React.Dispatch<React.SetStateAction<AppData | undefined>>;
@@ -23,19 +28,20 @@ export async function fetchCourses() {
   return data.results ?? data;
 }
 
-export async function fetchTemplates() {
+/*export async function fetchTemplates() {
   const res = await fetch("/api/programs/templates", {
     credentials: "include",
   });
   if (!res.ok) throw new Error("Templates unavailable - getting json");
   return res.json();
-}
+}*/
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const [appData, setAppData] = useState<AppData | undefined>(undefined);
   const { isAuthenticated } = useAuth();
+  const { userData, setUserData } = useUser();
 
   // init user data or retrieve from localStorage
   useEffect(() => {
@@ -43,31 +49,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
 
     async function initializeApp() {
       try {
-        const [course_results, template_results] = await Promise.allSettled([
-          fetchCourses(),
-          fetchTemplates(),
-        ]);
+        const [course_results, major_templates_result] =
+          await Promise.allSettled([
+            fetchCourses(),
+            apiFetchMajorTemplatesList(),
+          ]);
 
-        if (course_results.status === "rejected") {
-          console.warn(
-            "Course API failed, falling back to local JSON:",
-            course_results.reason,
-          );
-        }
-        if (template_results.status === "rejected") {
-          console.warn(
-            "Templates API failed, falling back to local JSON:",
-            template_results.reason,
-          );
-        }
-
-        const [courses_raw, templates] = await Promise.all([
+        const [courses_raw, major_templates] = await Promise.all([
           course_results.status === "fulfilled"
             ? course_results.value
             : loadCourses("/mock_courses_2025_26.json"),
-          template_results.status === "fulfilled"
-            ? template_results.value
-            : loadMajorTemplates("/mock_major_templates.json"),
+          major_templates_result.status === "fulfilled"
+            ? major_templates_result.value
+            : [],
         ]);
 
         const course_database = new CourseDatabase(courses_raw);
@@ -79,7 +73,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
 
         setAppData({
           courses,
-          major_templates: templates,
+          major_templates: major_templates,
           course_database,
           major_processor,
         });
@@ -91,6 +85,50 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
     initializeApp();
     //return () => ctrl.abort();
   }, []);
+
+  useEffect(() => {
+    if (!appData || !userData) return;
+
+    const needsHydration = userData.FYP.worksheets.some((w) =>
+      w.studentSemesters.some(
+        (s) =>
+          (s as any)._rawClasses?.length > 0 && s.studentCourses.length === 0,
+      ),
+    );
+
+    if (!needsHydration) return;
+
+    setUserData((prev) => {
+      if (!prev) return prev;
+
+      const worksheets = prev.FYP.worksheets.map((w) => ({
+        ...w,
+        studentSemesters: w.studentSemesters.map((s) => ({
+          ...s,
+          studentCourses:
+            s.studentCourses.length > 0
+              ? s.studentCourses // already hydrated, skip
+              : ((s as any)._rawClasses?.flatMap((c: any): StudentCourse[] => {
+                  const externalId = String(c.course ?? c.course_instance);
+                  const fullCourse = appData.course_database.getCourse(
+                    Number(externalId),
+                  );
+                  if (!fullCourse) return [];
+                  return [
+                    {
+                      worksheetClassId: c.id,
+                      course: fullCourse,
+                      term: s.season,
+                      status: "DA_COMPLETE",
+                    },
+                  ];
+                }) ?? []),
+        })),
+      }));
+
+      return { ...prev, FYP: { ...prev.FYP, worksheets } };
+    });
+  }, [appData, userData]);
 
   if (isAuthenticated && !appData) {
     // Show loading page while initializing

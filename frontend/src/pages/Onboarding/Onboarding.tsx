@@ -1,45 +1,122 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "@/contexts/UserContext";
+import { useWorksheetManager } from "@/hooks/useWorksheetManager";
+import { apiCreateSemester } from "@/api/semesters";
 import {
   CLASS_YEARS,
   UNDERGRAD_MAJORS,
   LANGUAGE_SUBJECTS,
   LANGUAGE_LEVELS,
 } from "@/constants/onboarding";
+import { type StudentSemester } from "@/types/type-user";
+
+type SeasonCode = "FA" | "SP";
+
+// Season code encoding: YYYYSS where SS = 01 (Spring), 03 (Fall)
+// e.g. Fall 2023 → 202303, Spring 2024 → 202401
+function toSeasonCode(year: number, season: SeasonCode): number {
+  return year * 100 + (season === "SP" ? 1 : 3);
+}
+
+function toSeasonLabel(season: SeasonCode): string {
+  return season === "SP" ? "Spring" : "Fall";
+}
+
+// Generates 8 semesters alternating Fall/Spring starting 4 years before graduation
+// e.g. classYear 2027 → 2023 Fall, 2024 Spring, 2024 Fall, ..., 2026 Fall, 2027 Spring
+function generateSemesters(
+  classYear: number,
+): { year: number; season: SeasonCode }[] {
+  const semesters: { year: number; season: SeasonCode }[] = [];
+  const startYear = classYear - 4;
+
+  for (let i = 0; i < 8; i++) {
+    if (i % 2 === 0) {
+      semesters.push({ year: startYear + Math.floor(i / 2), season: "FA" });
+    } else {
+      semesters.push({ year: startYear + Math.floor(i / 2) + 1, season: "SP" });
+    }
+  }
+
+  return semesters;
+}
 
 function Onboarding() {
   const { userData, setUserData } = useUser();
+  const { createWorksheet } = useWorksheetManager();
   const navigate = useNavigate();
+
   const [first_name, setFirst_name] = useState(userData?.first_name ?? "");
   const [last_name, setLast_name] = useState(userData?.last_name ?? "");
   const [classYear, setClassYear] = useState(userData?.classYear ?? "");
   const [intendedMajorId, setIntendedMajorId] = useState(
-    userData?.intendedMajorId ?? ""
+    userData?.intendedMajorId ?? "",
   );
   const [intendedLanguageCode, setIntendedLanguageCode] = useState(
-    userData?.intendedLanguageCode ?? ""
+    userData?.intendedLanguageCode ?? "",
   );
   const [languageLevel, setLanguageLevel] = useState(
-    userData?.FYP?.languageRequirement ?? "L1"
+    userData?.FYP?.languageRequirement ?? "L1",
   );
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!userData) return;
-    setUserData({
-      ...userData,
-      first_name: first_name.trim() || userData.first_name,
-      last_name: last_name.trim() || userData.last_name,
-      classYear: classYear || undefined,
-      intendedMajorId: intendedMajorId || undefined,
-      intendedLanguageCode: intendedLanguageCode || undefined,
-      onboard: true,
-      FYP: {
-        ...userData.FYP,
-        languageRequirement: languageLevel,
-      },
+
+    // 1. Create worksheet — returns real ID directly, no state read needed
+    const newWorksheet = await createWorksheet("Main Worksheet");
+    if (!newWorksheet) return;
+
+    // 2. Create semesters directly via API using the returned ID
+    const semesterTemplates = classYear
+      ? generateSemesters(parseInt(classYear))
+      : [];
+
+    const createdSemesters = await Promise.all(
+      semesterTemplates.map((s) =>
+        apiCreateSemester(parseInt(newWorksheet.id), {
+          year: s.year,
+          season: s.season,
+          title: `${toSeasonLabel(s.season)} ${s.year}`,
+        }),
+      ),
+    );
+
+    // 3. Map into frontend shape
+    const studentSemesters: StudentSemester[] = createdSemesters.map(
+      (s, i) => ({
+        id: s.id,
+        season: toSeasonCode(
+          semesterTemplates[i].year,
+          semesterTemplates[i].season,
+        ),
+        title: `${toSeasonLabel(semesterTemplates[i].season)} ${semesterTemplates[i].year}`,
+        studentCourses: [],
+        isCompleted: false,
+      }),
+    );
+
+    // 4. Patch semesters + profile fields in one setUserData call
+    setUserData((prev) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        first_name: first_name.trim() || prev.first_name,
+        last_name: last_name.trim() || prev.last_name,
+        classYear: classYear || undefined,
+        intendedMajorId: intendedMajorId || undefined,
+        intendedLanguageCode: intendedLanguageCode || undefined,
+        FYP: {
+          ...prev.FYP,
+          languageRequirement: languageLevel,
+          worksheets: prev.FYP.worksheets.map((w) =>
+            w.id === newWorksheet.id ? { ...w, studentSemesters } : w,
+          ),
+        },
+      };
     });
+
     navigate("/dashboard", { replace: true });
   };
 

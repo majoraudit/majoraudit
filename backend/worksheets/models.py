@@ -15,6 +15,8 @@ class UserWorksheetSemester(models.Model):
     worksheet = models.ForeignKey(UserWorksheet, on_delete=models.CASCADE)
     year = models.PositiveIntegerField()
     season = models.CharField(choices=Seasons.choices, max_length=10)
+    title = models.CharField(max_length=32, blank=True, default="")
+    is_completed = models.BooleanField(default=False)
 
 
 class UserWorksheetClass(models.Model):

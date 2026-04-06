@@ -37,6 +37,10 @@ function codeToYear(code: number): number {
   return year;
 }
 
+const LOCK_IP = lockAnimation.ip ?? 0;
+const LOCK_OP = lockAnimation.op ?? 0;
+const LOCK_MID = Math.floor((LOCK_IP + LOCK_OP) / 2);
+
 // semester prop, mainly to specify the season code
 function SemesterOutput({
   semester,
@@ -49,22 +53,25 @@ function SemesterOutput({
   const { getSemesterCredits } = useWorksheetData();
 
   const updatedSemester =
-    activeSemesters.find((s) => s.season === semester.season) ?? semester;
+    activeSemesters.find((s) => s.id === semester.id) ?? semester;
 
   const isCompleted = updatedSemester.isCompleted ?? false;
 
   const lottieRef = useRef<LottieRefCurrentProps | null>(null);
 
-  const ip = lockAnimation.ip ?? 0;
-  const op = lockAnimation.op ?? 0;
-  const mid = Math.floor((ip + op) / 2);
+  const hasMounted = useRef(false);
 
   useEffect(() => {
     if (!lottieRef.current) return;
+    if (!hasMounted.current) {
+      hasMounted.current = true;
+      lottieRef.current.goToAndStop(isCompleted ? LOCK_OP : LOCK_MID, true);
+      return;
+    }
 
     // Snap to correct resting pose for the current state
-    lottieRef.current.goToAndStop(isCompleted ? op : mid, true);
-  }, [isCompleted, op, mid]);
+    lottieRef.current.goToAndStop(isCompleted ? LOCK_OP : LOCK_MID, true);
+  }, [isCompleted]);
 
   const handleUpdateIsCompleted = () => {
     if (!lottieRef.current) return;
@@ -73,10 +80,10 @@ function SemesterOutput({
 
     if (newCompletedState) {
       // unlocked -> locked
-      lottieRef.current.playSegments([mid, op], true);
+      lottieRef.current.playSegments([LOCK_MID, LOCK_OP], true);
     } else {
       // locked -> unlocked
-      lottieRef.current.playSegments([ip, mid], true);
+      lottieRef.current.playSegments([LOCK_IP, LOCK_MID], true);
     }
 
     setSemesterCompleted(updatedSemester.season, newCompletedState);
@@ -107,9 +114,6 @@ function SemesterOutput({
         };
 
         const res = addCourse(semester.season, newStudentCourse);
-        if (!res.ok) {
-          return;
-        }
 
         if (typeof item.sourceSemesterSeasonCode === "number") {
           removeCourse(item.sourceSemesterSeasonCode, item.selectedCourse);
@@ -129,9 +133,6 @@ function SemesterOutput({
 
   const handleSemesterRemove = () => {
     const res = removeSemester(semester.season);
-    if (!res.ok) {
-      return;
-    }
   };
 
   return (

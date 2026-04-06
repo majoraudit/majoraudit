@@ -207,6 +207,7 @@ function CoursePlanning() {
     }
 
     const newSemester: StudentSemester = {
+      id: 0,
       title: formData.title,
       season,
       studentCourses: [],
@@ -214,9 +215,6 @@ function CoursePlanning() {
     };
 
     const res = addSemester(newSemester);
-    if (!res.ok) {
-      return;
-    }
 
     // Clear form + error after success
     setFormData({ term: "", year: "", title: "" });
@@ -676,9 +674,9 @@ function CoursePlanning() {
 
         <hr className="border-gray-200 border-t-3" />
 
-        {activeSemesters.map((semester, index) => (
+        {activeSemesters.map((semester) => (
           <SemesterOutput
-            key={index}
+            key={semester.id}
             semester={semester}
             onAddCustomCourse={() => openCustomCourseModal(semester)}
             onCourseClick={openCourseDetailsModal}

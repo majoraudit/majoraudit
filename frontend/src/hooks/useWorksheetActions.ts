@@ -1,8 +1,11 @@
 import { useCallback } from "react";
 import { useUser } from "@/contexts/UserContext";
 import { useWorksheetManager } from "@/hooks/useWorksheetManager";
+import { apiCreateSemester, apiDeleteSemester } from "@/api/semesters";
+import {apiAddCourse, apiRemoveCourse } from "@/api/courses";
+import { apiUpdateSemester } from "@/api/semesters";
 
-import type { Course, StudentCourse, StudentSemester} from "@/types/type-user";
+import type { Course, StudentCourse, StudentSemester } from "@/types/type-user";
 import type { MajorProgress } from "../types/type-program";
 
 /**
@@ -14,19 +17,18 @@ import type { MajorProgress } from "../types/type-program";
 export function useWorksheetActions() {
   const { userData, setUserData } = useUser();
 
-  const { activeWorksheetId, activeWorksheet } =
-    useWorksheetManager();
+  const { activeWorksheetId, activeWorksheet } = useWorksheetManager();
 
   const worksheet = activeWorksheet;
 
   const canMutate = Boolean(userData && worksheet && activeWorksheetId);
 
   function isMajorType(t?: string) {
-  return t === "major" || t === "Major";
-}
-function isCertificateType(t?: string) {
-  return t === "certificate" || t === "Certificate";
-}
+    return t === "major" || t === "Major";
+  }
+  function isCertificateType(t?: string) {
+    return t === "certificate" || t === "Certificate";
+  }
 
   const updateActiveWorksheet = useCallback(
     (updater: (ws: any) => any) => {
@@ -48,41 +50,52 @@ function isCertificateType(t?: string) {
   );
 
   const addSemester = useCallback(
-    (newSemester: StudentSemester) => {
-      if (!canMutate) return { ok: false, error: "No active worksheet." };
+    async (newSemester: StudentSemester) => {
+
+      if (!canMutate || !activeWorksheetId) return { ok: false, error: "No active worksheet." };
 
       const exists = worksheet.studentSemesters.some(
         (s: StudentSemester) => s.season === newSemester.season
       );
       if (exists) {
-        return {
-          ok: false,
-          error: "A semester with this term/year already exists.",
-        };
+        return { ok: false, error: "A semester with this term/year already exists." };
       }
+
+
+      // Create on the backend first to get the real ID
+      const created = await apiCreateSemester(parseInt(activeWorksheetId), {
+        year: Math.floor(newSemester.season / 100),
+        season: newSemester.season % 100 === 1 ? "SP" : "FA",
+        title: newSemester.title
+      });
+
+      const semesterWithId: StudentSemester = { ...newSemester, id: created.id };
 
       updateActiveWorksheet((ws) => ({
         ...ws,
-        studentSemesters: [...ws.studentSemesters, newSemester].sort(
+        studentSemesters: [...ws.studentSemesters, semesterWithId].sort(
           (a: StudentSemester, b: StudentSemester) => a.season - b.season
         ),
       }));
 
       return { ok: true as const };
     },
-    [canMutate, worksheet, updateActiveWorksheet]
+    [canMutate, activeWorksheetId, worksheet, updateActiveWorksheet]
   );
 
   const removeSemester = useCallback(
-    (season: number) => {
-      if (!canMutate) return { ok: false, error: "No active worksheet." };
+    async (season: number) => {
+      if (!canMutate || !activeWorksheetId) return { ok: false, error: "No active worksheet." };
 
-      const exists = worksheet.studentSemesters.some(
+      const semester = worksheet.studentSemesters.find(
         (s: StudentSemester) => s.season === season
       );
-      if (!exists) {
+      if (!semester) {
         return { ok: false, error: "That semester does not exist." };
       }
+
+      // Delete on the backend using the stored semester ID
+      await apiDeleteSemester(parseInt(activeWorksheetId), semester.id);
 
       updateActiveWorksheet((ws) => ({
         ...ws,
@@ -93,93 +106,122 @@ function isCertificateType(t?: string) {
 
       return { ok: true as const };
     },
-    [canMutate, worksheet, updateActiveWorksheet]
+    [canMutate, activeWorksheetId, worksheet, updateActiveWorksheet]
   );
 
   const addCourse = useCallback(
-    (season: number, newCourse: StudentCourse) => {
-      if (!canMutate) return { ok: false, error: "No active worksheet." };
+    async (season: number, newCourse: StudentCourse) => {
+      if (!canMutate || !activeWorksheetId) return { ok: false, error: "No active worksheet." };
 
-      updateActiveWorksheet((ws) => {
-        const updatedSemesters = ws.studentSemesters.map(
-          (semester: StudentSemester) => {
-            if (semester.season !== season) return semester;
+      const semester = worksheet.studentSemesters.find(
+        (s: StudentSemester) => s.season === season
+      );
+      if (!semester) return { ok: false, error: "Semester not found." };
 
-            const courseAlreadyExists = semester.studentCourses.some(
-              (sc: StudentCourse) =>
-                sc.course.codes?.[0] === newCourse.course.codes?.[0]
-            );
+      const courseAlreadyExists = semester.studentCourses.some(
+        (sc: StudentCourse) => sc.course.codes?.[0] === newCourse.course.codes?.[0]
+      );
+      if (courseAlreadyExists) return { ok: false, error: "Course already in semester." };
 
-            if (courseAlreadyExists) return semester;
-
-            return {
-              ...semester,
-              studentCourses: [...semester.studentCourses, newCourse],
-            };
-          }
-        );
-
-        return { ...ws, studentSemesters: updatedSemesters };
+      // Add on the backend using the semester's backend ID
+      const created = await apiAddCourse(parseInt(activeWorksheetId), semester.id, {
+        course: newCourse.course.id,
       });
+
+      const courseWithId: StudentCourse = { ...newCourse, worksheetClassId: created.id };
+ 
+
+      updateActiveWorksheet((ws) => ({
+        ...ws,
+        studentSemesters: ws.studentSemesters.map((s: StudentSemester) =>
+          s.season !== season
+            ? s
+            : { ...s, studentCourses: [...s.studentCourses, courseWithId] }
+        ),
+      }));
 
       return { ok: true as const };
     },
-    [canMutate, updateActiveWorksheet]
+    [canMutate, activeWorksheetId, worksheet, updateActiveWorksheet]
   );
 
   const removeCourse = useCallback(
-    (season: number, courseToRemove: Course) => {
-      if (!canMutate) return { ok: false, error: "No active worksheet." };
+    async (season: number, courseToRemove: Course) => {
+      if (!canMutate || !activeWorksheetId) return { ok: false, error: "No active worksheet." };
 
-      updateActiveWorksheet((ws) => {
-        const updatedSemesters = ws.studentSemesters.map(
-          (semester: StudentSemester) => {
-            if (semester.season !== season) return semester;
+      const semester = worksheet.studentSemesters.find(
+        (s: StudentSemester) => s.season === season
+      );
+      if (!semester) return { ok: false, error: "Semester not found." };
 
-            return {
-              ...semester,
-              studentCourses: semester.studentCourses.filter(
-                (sc: StudentCourse) =>
-                  !(
-                    sc.course.codes?.[0] === courseToRemove.codes?.[0] &&
-                    sc.course.title === courseToRemove.title
-                  )
-              ),
-            };
-          }
-        );
+      // Find the StudentCourse entry to get its backend ID
+      const studentCourse = semester.studentCourses.find(
+        (sc: StudentCourse) =>
+          sc.course.codes?.[0] === courseToRemove.codes?.[0] &&
+          sc.course.title === courseToRemove.title
+      );
+      if (!studentCourse) return { ok: false, error: "Course not found in semester." };
 
-        return { ...ws, studentSemesters: updatedSemesters };
-      });
+      // Remove on the backend
+      await apiRemoveCourse(parseInt(activeWorksheetId), semester.id, studentCourse.worksheetClassId!);
+
+      updateActiveWorksheet((ws) => ({
+        ...ws,
+        studentSemesters: ws.studentSemesters.map((s: StudentSemester) =>
+          s.season !== season
+            ? s
+            : {
+                ...s,
+                studentCourses: s.studentCourses.filter(
+                  (sc: StudentCourse) =>
+                    !(
+                      sc.course.codes?.[0] === courseToRemove.codes?.[0] &&
+                      sc.course.title === courseToRemove.title
+                    )
+                ),
+              }
+        ),
+      }));
 
       return { ok: true as const };
     },
-    [canMutate, updateActiveWorksheet]
+    [canMutate, activeWorksheetId, worksheet, updateActiveWorksheet]
   );
 
   const setSemesterCompleted = useCallback(
-  (season: number, isCompleted: boolean) => {
-    if (!canMutate) return { ok: false as const, error: "No active worksheet." };
+    async (season: number, isCompleted: boolean) => {
+      if (!canMutate || !activeWorksheetId)
+        return { ok: false as const, error: "No active worksheet." };
 
-    updateActiveWorksheet((ws) => {
-      const updatedSemesters = ws.studentSemesters.map((semester: StudentSemester) => {
-        if (semester.season !== season) return semester;
-        return { ...semester, isCompleted };
+      const semester = worksheet.studentSemesters.find(
+        (s: StudentSemester) => s.season === season
+      );
+      if (!semester) return { ok: false as const, error: "Semester not found." };
+
+      // Persist to backend — reuse year/season derived from season code
+      await apiUpdateSemester(parseInt(activeWorksheetId), semester.id, {
+        year: Math.floor(season / 100),
+        season: season % 100 === 1 ? "SP" : "FA",
+        is_completed: isCompleted
       });
 
-      return { ...ws, studentSemesters: updatedSemesters };
-    });
+      updateActiveWorksheet((ws) => ({
+        ...ws,
+        studentSemesters: ws.studentSemesters.map((s: StudentSemester) =>
+          s.season !== season ? s : { ...s, isCompleted }
+        ),
+      }));
 
-    return { ok: true as const };
-  },
-  [canMutate, updateActiveWorksheet]
-);
+      return { ok: true as const };
+    },
+    [canMutate, activeWorksheetId, worksheet, updateActiveWorksheet]
+  );
 
-const addProgram = useCallback(
+  const addProgram = useCallback(
     (program: MajorProgress | null) => {
       if (!activeWorksheetId) return { ok: false as const, error: "No active worksheet." };
-        
-      if(!program) return { ok: false as const, error: "Program is null." };
+      if (!program) return { ok: false as const, error: "Program is null." };
+
       setUserData((prev) => {
         if (!prev) return prev;
 
@@ -187,22 +229,15 @@ const addProgram = useCallback(
 
         const newDegreeProgress2 = dp2.map((entry) => {
           if (entry.worksheetID !== activeWorksheetId) return entry;
-
           const exists = entry.majors.some((m) => m.id === program.id);
           if (exists) return entry;
-
           return { ...entry, majors: [...entry.majors, program] };
         });
 
-        // if there was no entry for this worksheet, you may want to create one
-        // (optional; depends on your data invariants)
         const hasEntry = dp2.some((e) => e.worksheetID === activeWorksheetId);
         const finalDegreeProgress2 = hasEntry
           ? newDegreeProgress2
-          : [
-              ...dp2,
-              { worksheetID: activeWorksheetId, majors: [program] } as any,
-            ];
+          : [...dp2, { worksheetID: activeWorksheetId, majors: [program] } as any];
 
         const majorNum = prev.FYP.statCount?.majorNum ?? 0;
         const certificateNum = prev.FYP.statCount?.certificateNum ?? 0;
@@ -239,11 +274,7 @@ const addProgram = useCallback(
 
         const newDegreeProgress2 = dp2.map((entry) => {
           if (entry.worksheetID !== activeWorksheetId) return entry;
-
-          return {
-            ...entry,
-            majors: entry.majors.filter((m) => m.id !== program.id),
-          };
+          return { ...entry, majors: entry.majors.filter((m) => m.id !== program.id) };
         });
 
         const majorNum = prev.FYP.statCount?.majorNum ?? 0;
@@ -279,6 +310,6 @@ const addProgram = useCallback(
     removeCourse,
     setSemesterCompleted,
     addProgram,
-    removeProgram
+    removeProgram,
   };
 }

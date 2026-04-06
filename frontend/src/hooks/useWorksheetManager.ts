@@ -1,6 +1,11 @@
 import { useMemo, useState, useCallback } from "react";
 import { useUser } from "@/contexts/UserContext";
 import { type StudentSemester } from "@/types/type-user";
+import {
+  apiCreateWorksheet,
+  apiUpdateWorksheet,
+  apiDeleteWorksheet,
+} from "@/api/worksheets";
 
 type UseWorksheetManagerReturn = {
   worksheets: any[];
@@ -37,6 +42,7 @@ type UseWorksheetManagerReturn = {
   commitCreate: () => void;
 
   resetWorksheetInlineState: () => void;
+  createWorksheet: (name?: string) => Promise<{ id: string; name: string; studentSemesters: never[] } | undefined>;
 };
 
 export function useWorksheetManager(): UseWorksheetManagerReturn {
@@ -45,6 +51,7 @@ export function useWorksheetManager(): UseWorksheetManagerReturn {
   const worksheets = userData?.FYP?.worksheets ?? [];
   const activeWorksheetId = userData?.FYP?.activeWorksheetID ?? null;
   const activeWorksheet = worksheets.find((w) => w.id === activeWorksheetId);
+  const mainId = userData?.FYP.worksheets.find((w) => w.name === "Main Worksheet")?.id || "";
 
   const activeSemesters: StudentSemester[] = useMemo(() => {
     if (!userData) return [];
@@ -56,9 +63,9 @@ export function useWorksheetManager(): UseWorksheetManagerReturn {
     (id: string | null | undefined) => {
       const ws = worksheets.find((w) => w.id === id);
       if (!ws) return false;
-      return ws.name === "Main Worksheet" || ws.id === "ws_main";
+      return ws.name === "Main Worksheet" || ws.id === mainId;
     },
-    [worksheets]
+    [worksheets, mainId]
   );
 
   // ---------- Inline worksheet actions state ----------
@@ -94,30 +101,32 @@ export function useWorksheetManager(): UseWorksheetManagerReturn {
         ...userData,
         FYP: {
           ...userData.FYP,
-          activeWorksheetID: id ?? "ws_main",
+          activeWorksheetID: id ?? mainId,
         },
       });
 
       resetWorksheetInlineState();
     },
-    [userData, setUserData, resetWorksheetInlineState]
+    [userData, setUserData, resetWorksheetInlineState, mainId]
   );
 
   const createWorksheet = useCallback(
-    (name?: string) => {
+    async (name?: string) => {
       if (!userData) return;
 
       const defaultName = `Worksheet ${worksheets.length}`;
       const finalName = (name ?? defaultName).trim() || defaultName;
 
+      // Create on the backend first to get the real ID
+      const newWs = await apiCreateWorksheet({ name: finalName });
+
       const pastDegreeProgress = userData.FYP.degreeProgress2 ?? [];
       const mainWsMajors =
-        pastDegreeProgress.find((dp) => dp.worksheetID === "ws_main")?.majors ??
-        [];
+        pastDegreeProgress.find((dp) => dp.worksheetID === mainId)?.majors ?? [];
 
-      const newWs = {
-        id: `ws_${Date.now()}`,
-        name: finalName,
+      const frontendWs = {
+        id: String(newWs.id),
+        name: newWs.name,
         studentSemesters: [],
       };
 
@@ -125,21 +134,22 @@ export function useWorksheetManager(): UseWorksheetManagerReturn {
         ...userData,
         FYP: {
           ...userData.FYP,
-          worksheets: [...worksheets, newWs],
-          activeWorksheetID: newWs.id,
+          worksheets: [...worksheets, frontendWs],
+          activeWorksheetID: frontendWs.id,
           degreeProgress2: [
             ...pastDegreeProgress,
-            { worksheetID: newWs.id, majors: [...mainWsMajors] },
+            { worksheetID: frontendWs.id, majors: [...mainWsMajors] },
           ],
         },
       });
+
+      return frontendWs;
     },
-    [userData, setUserData, worksheets]
+    [userData, setUserData, worksheets, mainId]
   );
 
-  // returns success so callers can close UI reliably
   const renameWorksheet = useCallback(
-    (id: string, newName: string) => {
+    async (id: string, newName: string) => {
       if (!userData) return false;
       const trimmed = newName.trim();
 
@@ -149,13 +159,15 @@ export function useWorksheetManager(): UseWorksheetManagerReturn {
       }
 
       const duplicate = worksheets.some(
-        (w) =>
-          w.id !== id && w.name.trim().toLowerCase() === trimmed.toLowerCase()
+        (w) => w.id !== id && w.name.trim().toLowerCase() === trimmed.toLowerCase()
       );
       if (duplicate) {
         setRenameError("A worksheet with this name already exists.");
         return false;
       }
+
+      // Update on the backend
+      await apiUpdateWorksheet(parseInt(id), { name: trimmed });
 
       setUserData({
         ...userData,
@@ -174,8 +186,11 @@ export function useWorksheetManager(): UseWorksheetManagerReturn {
   );
 
   const deleteWorksheet = useCallback(
-    (id: string) => {
+    async (id: string) => {
       if (!userData || isMainId(id)) return;
+
+      // Delete on the backend
+      await apiDeleteWorksheet(parseInt(id));
 
       const nextList = worksheets.filter((w) => w.id !== id);
       const newDegreeProgress = (userData.FYP.degreeProgress2 ?? []).filter(
@@ -183,7 +198,7 @@ export function useWorksheetManager(): UseWorksheetManagerReturn {
       );
 
       let nextActiveId = userData.FYP.activeWorksheetID;
-      if (nextActiveId === id) nextActiveId = "ws_main";
+      if (nextActiveId === id) nextActiveId = mainId;
 
       setUserData({
         ...userData,
@@ -195,10 +210,10 @@ export function useWorksheetManager(): UseWorksheetManagerReturn {
         },
       });
     },
-    [userData, setUserData, worksheets, isMainId]
+    [userData, setUserData, worksheets, isMainId, mainId]
   );
 
-  // ---------- Inline UI actions (nice for the dropdown) ----------
+  // ---------- Inline UI actions ----------
   const setRenameValue = useCallback((v: string) => {
     _setRenameValue(v);
     setRenameError("");
@@ -223,9 +238,9 @@ export function useWorksheetManager(): UseWorksheetManagerReturn {
     setRenameError("");
   }, []);
 
-  const commitRename = useCallback(() => {
+  const commitRename = useCallback(async () => {
     if (!renameTargetId) return;
-    const ok = renameWorksheet(renameTargetId, renameValue);
+    const ok = await renameWorksheet(renameTargetId, renameValue);
     if (ok) cancelRename();
   }, [renameTargetId, renameValue, renameWorksheet, cancelRename]);
 
@@ -246,9 +261,9 @@ export function useWorksheetManager(): UseWorksheetManagerReturn {
     setDeleteTargetId(null);
   }, []);
 
-  const confirmDelete = useCallback(() => {
+  const confirmDelete = useCallback(async () => {
     if (!deleteTargetId) return;
-    deleteWorksheet(deleteTargetId);
+    await deleteWorksheet(deleteTargetId);
     cancelDelete();
   }, [deleteTargetId, deleteWorksheet, cancelDelete]);
 
@@ -275,7 +290,7 @@ export function useWorksheetManager(): UseWorksheetManagerReturn {
     setNewWorksheetError("");
   }, []);
 
-  const commitCreate = useCallback(() => {
+  const commitCreate = useCallback(async () => {
     const trimmed = newWorksheetName.trim();
     if (!trimmed) {
       setNewWorksheetError("Name cannot be empty.");
@@ -288,7 +303,7 @@ export function useWorksheetManager(): UseWorksheetManagerReturn {
       setNewWorksheetError("A worksheet with this name already exists.");
       return;
     }
-    createWorksheet(trimmed);
+    await createWorksheet(trimmed);
     cancelCreate();
   }, [newWorksheetName, worksheets, createWorksheet, cancelCreate]);
 
@@ -325,5 +340,6 @@ export function useWorksheetManager(): UseWorksheetManagerReturn {
     commitCreate,
 
     resetWorksheetInlineState,
+    createWorksheet,
   };
 }
