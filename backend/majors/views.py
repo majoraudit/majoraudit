@@ -10,11 +10,22 @@ class MajorListView(APIView):
     def get(self, request):
         templates_dir = './major_templates/'
         try:
-            major_ids = [
-                name for name in os.listdir(templates_dir)
-                if os.path.isdir(os.path.join(templates_dir, name))
-            ]
-            return Response(major_ids)
+            result = []
+            for name in os.listdir(templates_dir):
+                dir_path = os.path.join(templates_dir, name)
+                if not os.path.isdir(dir_path):
+                    continue
+                json_path = os.path.join(dir_path, f"{name}.json")
+                try:
+                    with open(json_path) as f:
+                        data = json.load(f)
+                        result.append({
+                            "id": name,
+                            "name": data.get("name", name),
+                        })
+                except (FileNotFoundError, json.JSONDecodeError):
+                    result.append({"id": name, "name": name})
+            return Response(result)
         except FileNotFoundError:
             return Response([], status=404)
 

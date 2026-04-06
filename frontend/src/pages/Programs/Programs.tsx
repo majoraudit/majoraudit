@@ -31,11 +31,9 @@ function specializationLabel(
   specializationFile: string,
   majorId: string,
 ): string {
-  // Remove the major id prefix and .mql extension
   const withoutMajor = specializationFile
     .replace(`${majorId}_`, "")
     .replace(".mql", "");
-  // Replace underscores with / and uppercase everything
   return withoutMajor
     .split("_")
     .map((s) => s.toUpperCase())
@@ -80,28 +78,25 @@ function Programs() {
   const [searchTerm, setSearchTerm] = useState("");
   const [isLoadingTemplate, setIsLoadingTemplate] = useState(false);
 
-  // Sorted list of major IDs
-  const sortedMajorIds = useMemo(() => {
+  // major_templates is now { id: string; name: string }[]
+  // Sort by name directly
+  const sortedMajors = useMemo(() => {
     if (!appData?.major_templates) return [];
-    return [...appData.major_templates].sort((a, b) => {
-      const nameA = templateCache[a]?.name ?? a;
-      const nameB = templateCache[b]?.name ?? b;
-      return nameA.localeCompare(nameB, "en", { sensitivity: "base" });
-    });
-  }, [appData?.major_templates, templateCache]);
+    return [...appData.major_templates].sort((a, b) =>
+      a.name.localeCompare(b.name, "en", { sensitivity: "base" }),
+    );
+  }, [appData?.major_templates]);
 
-  // Filtered list based on search
-  const filteredMajorIds = useMemo(() => {
-    if (!searchTerm.trim()) return sortedMajorIds;
+  // Filter by name or id
+  const filteredMajors = useMemo(() => {
+    if (!searchTerm.trim()) return sortedMajors;
     const normalized = searchTerm.toLowerCase();
-    return sortedMajorIds.filter((id) => {
-      const name = templateCache[id]?.name ?? id;
-      return (
-        name.toLowerCase().includes(normalized) ||
-        id.toLowerCase().includes(normalized)
-      );
-    });
-  }, [sortedMajorIds, searchTerm, templateCache]);
+    return sortedMajors.filter(
+      (m) =>
+        m.name.toLowerCase().includes(normalized) ||
+        m.id.toLowerCase().includes(normalized),
+    );
+  }, [sortedMajors, searchTerm]);
 
   const handleSelectMajor = useCallback(
     async (majorId: string) => {
@@ -116,7 +111,6 @@ function Programs() {
         }
 
         setSelectedMajorInfo(info);
-        // Default to first specialization
         setSelectedSpecialization(info.specializations?.[0] ?? null);
       } catch (e) {
         console.error("Failed to load major template:", e);
@@ -129,9 +123,9 @@ function Programs() {
 
   // Load the first major by default once appData is ready
   useEffect(() => {
-    if (!appData || sortedMajorIds.length === 0 || selectedMajorInfo) return;
-    handleSelectMajor(sortedMajorIds[0]);
-  }, [appData, sortedMajorIds]);
+    if (!appData || sortedMajors.length === 0 || selectedMajorInfo) return;
+    handleSelectMajor(sortedMajors[0].id);
+  }, [appData, sortedMajors]);
 
   const setActiveWorksheet = (id: string | null) => {
     if (!userData) return;
@@ -159,14 +153,13 @@ function Programs() {
           />
           <div className="overflow-y-auto flex-1 pb-2">
             <ul className="flex flex-col w-full">
-              {filteredMajorIds.map((majorId, index) => {
-                const displayName = templateCache[majorId]?.name ?? majorId;
-                const isSelected = selectedMajorInfo?.id === majorId;
+              {filteredMajors.map((major, index) => {
+                const isSelected = selectedMajorInfo?.id === major.id;
                 return (
-                  <li key={majorId}>
+                  <li key={major.id}>
                     <button
                       type="button"
-                      onClick={() => handleSelectMajor(majorId)}
+                      onClick={() => handleSelectMajor(major.id)}
                       className={`w-full text-left m-0 p-2 cursor-pointer transition-colors duration-200 hover:bg-blue-200 ${
                         isSelected
                           ? "bg-blue-100 font-medium"
@@ -175,7 +168,7 @@ function Programs() {
                             : "bg-white"
                       }`}
                     >
-                      {displayName}
+                      {major.name}
                     </button>
                   </li>
                 );
@@ -212,7 +205,6 @@ function Programs() {
           <main className="grid grid-cols-1 lg:grid-cols-2 gap-6 p-6 w-full flex-1">
             {/* Left Panel — Major Info */}
             <section className="relative min-w-0 min-h-screen flex flex-col bg-white border-2 border-gray-200 p-6 rounded-xl shadow-md">
-              {/* Add button — placeholder, will wire to addProgram with specialization later */}
               {isAuthenticated && (
                 <button
                   className="absolute top-6 right-6 rounded-full w-8 h-8 flex items-center justify-center text-center text-xl leading-none z-10 transition duration-300 ease-in-out bg-brand-blue text-white hover:scale-110"
@@ -351,7 +343,7 @@ function Programs() {
               </div>
             </section>
 
-            {/* Right Panel — Requirements (placeholder until MQL parsing implemented) */}
+            {/* Right Panel — Requirements placeholder */}
             <section className="min-w-0 min-h-screen flex flex-col bg-white p-6 border-2 border-gray-200 rounded-xl shadow-md">
               <div className="flex justify-between gap-4 items-center mb-4">
                 <h2 className="text-2xl font-bold text-gray-800">

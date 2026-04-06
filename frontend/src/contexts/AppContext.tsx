@@ -64,9 +64,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
             : [],
         ]);
 
-        console.log(major_templates_result);
-        console.log(major_templates);
-
         const course_database = new CourseDatabase(courses_raw);
         const courses = course_database
           .getAllCourses()
