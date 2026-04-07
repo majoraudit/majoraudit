@@ -1,7 +1,3 @@
-import type { GroupItemProgress } from "@/types/type-program";
-import { formatCourseItemTypes } from "@/utils/formatHelpers";
-import type { MajorTemplate } from "@/types/type-program";
-
 import { useUser } from "@/contexts/UserContext";
 import { useApp } from "@/contexts/AppContext";
 
@@ -15,7 +11,14 @@ import SidebarLayout from "@/components/shared-components/SidebarLayout";
 
 import { useAuth } from "@/contexts/AuthContext";
 import { apiFetchMajorTemplate, apiFetchMajorMQL } from "@/api/majors";
-import type { MQLQueryFile, Class, Selector, Quantity } from "@/types/schema/mql/mql";
+
+import type {
+  MQLQueryFile,
+  MQLRequirement,
+  Quantity,
+  Class,
+  Selector,
+} from "@/types/schema/mql/mql";
 
 import {
   DropdownMenu,
@@ -25,6 +28,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 import { Plus } from "lucide-react";
+
+// ---------- Formatters ----------
 
 function formatClass(cls: Class): string {
   return `${cls.department_id} ${cls.course_number}${cls.lab ? " (Lab)" : ""}`;
@@ -42,15 +47,23 @@ function formatSelector(sel: Selector): string {
   if ("TagCode" in sel) return `${sel.TagCode.tag}: ${sel.TagCode.code}`;
   if ("Dist" in sel) return `Distribution: ${sel.Dist}`;
   if ("DistCode" in sel) return `${sel.DistCode.dist}: ${sel.DistCode.code}`;
-  if ("Range" in sel) return `${formatClass(sel.Range.from)} – ${formatClass(sel.Range.to)}`;
-  if ("RangeDist" in sel) return `${formatClass(sel.RangeDist.from)} – ${formatClass(sel.RangeDist.to)} (${sel.RangeDist.dist})`;
-  if ("RangeTag" in sel) return `${formatClass(sel.RangeTag.from)} – ${formatClass(sel.RangeTag.to)} [${sel.RangeTag.tag}]`;
-  if ("Query" in sel) return "(nested query)";
+  if ("Range" in sel)
+    return `${formatClass(sel.Range.from)} – ${formatClass(sel.Range.to)}`;
+  if ("RangeDist" in sel)
+    return `${formatClass(sel.RangeDist.from)} – ${formatClass(sel.RangeDist.to)} (${sel.RangeDist.dist})`;
+  if ("RangeTag" in sel)
+    return `${formatClass(sel.RangeTag.from)} – ${formatClass(sel.RangeTag.to)} [${sel.RangeTag.tag}]`;
+  if ("Query" in sel) {
+    const inner = sel.Query;
+    const quantity = formatQuantity(inner.quantity);
+    const selectors = inner.selector.map(formatSelector).join(" or ");
+    return `${quantity} from: ${selectors}`;
+  }
   return "";
 }
 
-// Converts a specialization filename into a display label
-// e.g. "computer_science_bs_ms.mql" with major id "computer_science" → "BS/MS"
+// ---------- Specialization label ----------
+
 function specializationLabel(
   specializationFile: string,
   majorId: string,
@@ -64,7 +77,8 @@ function specializationLabel(
     .join("/");
 }
 
-// Major info shape returned by the backend
+// ---------- Major info shape ----------
+
 interface MajorInfo {
   name: string;
   id: string;
@@ -82,12 +96,64 @@ interface MajorInfo {
   specializations: string[];
 }
 
+function SelectorItem({ sel }: { sel: Selector }) {
+  if ("Query" in sel) {
+    const inner = sel.Query;
+    return (
+      <li className="text-xs text-gray-700 bg-white border border-gray-200 rounded px-2 py-1">
+        <span className="font-medium text-blue-700">
+          {formatQuantity(inner.quantity)} from:
+        </span>
+        <ul className="mt-1 ml-3 flex flex-col gap-1">
+          {inner.selector.map((s, k) => (
+            <SelectorItem key={k} sel={s} />
+          ))}
+        </ul>
+      </li>
+    );
+  }
+
+  return (
+    <li className="text-xs text-gray-700 bg-white border border-gray-200 rounded px-2 py-1 font-mono">
+      {formatSelector(sel)}
+    </li>
+  );
+}
+
+function RequirementCard({ req }: { req: MQLRequirement }) {
+  const quantityLabel = formatQuantity(req.query.quantity);
+  const isLimit = req.query.type === "Limit";
+
+  return (
+    <div className="border border-gray-200 rounded-lg p-4 bg-gray-50 flex flex-col gap-2">
+      <div className="flex items-center justify-between gap-2">
+        <p className="font-semibold text-gray-800 text-sm">{req.description}</p>
+        <span
+          className={`text-xs px-2 py-0.5 rounded-full font-medium whitespace-nowrap ${
+            isLimit
+              ? "bg-orange-100 text-orange-700"
+              : "bg-blue-100 text-blue-700"
+          }`}
+        >
+          {isLimit ? "Limit" : "Select"} · {quantityLabel}
+        </span>
+      </div>
+      <ul className="flex flex-col gap-1">
+        {req.query.selector.map((sel, j) => (
+          <SelectorItem key={j} sel={sel} />
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+// ---------- Main component ----------
+
 function Programs() {
   const { userData, setUserData } = useUser();
   const { appData } = useApp();
   const { isAuthenticated } = useAuth();
-  const { worksheets, activeWorksheetId, activeWorksheet } =
-    useWorksheetManager();
+  const { worksheets, activeWorksheetId } = useWorksheetManager();
   const { addProgram } = useWorksheetActions();
 
   const [selectedMajorInfo, setSelectedMajorInfo] = useState<MajorInfo | null>(
@@ -99,13 +165,12 @@ function Programs() {
   const [templateCache, setTemplateCache] = useState<Record<string, MajorInfo>>(
     {},
   );
+  const [mqlCache, setMqlCache] = useState<Record<string, MQLQueryFile>>({});
   const [searchTerm, setSearchTerm] = useState("");
   const [isLoadingTemplate, setIsLoadingTemplate] = useState(false);
   const [mqlData, setMqlData] = useState<MQLQueryFile | null>(null);
   const [isLoadingMQL, setIsLoadingMQL] = useState(false);
 
-  // major_templates is now { id: string; name: string }[]
-  // Sort by name directly
   const sortedMajors = useMemo(() => {
     if (!appData?.major_templates) return [];
     return [...appData.major_templates].sort((a, b) =>
@@ -113,7 +178,6 @@ function Programs() {
     );
   }, [appData?.major_templates]);
 
-  // Filter by name or id
   const filteredMajors = useMemo(() => {
     if (!searchTerm.trim()) return sortedMajors;
     const normalized = searchTerm.toLowerCase();
@@ -127,7 +191,6 @@ function Programs() {
   const handleSelectMajor = useCallback(
     async (majorId: string) => {
       if (!appData) return;
-
       setIsLoadingTemplate(true);
       try {
         let info = templateCache[majorId];
@@ -135,7 +198,6 @@ function Programs() {
           info = await apiFetchMajorTemplate(majorId);
           setTemplateCache((prev) => ({ ...prev, [majorId]: info }));
         }
-
         setSelectedMajorInfo(info);
         setSelectedSpecialization(info.specializations?.[0] ?? null);
       } catch (e) {
@@ -147,16 +209,27 @@ function Programs() {
     [appData, templateCache],
   );
 
+  // Fetch MQL whenever major or specialization changes
   useEffect(() => {
     if (!selectedMajorInfo || !selectedSpecialization) {
       setMqlData(null);
       return;
     }
+
+    const specName = selectedSpecialization.replace(".mql", "");
+    const cacheKey = `${selectedMajorInfo.id}/${specName}`;
+
+    if (mqlCache[cacheKey]) {
+      setMqlData(mqlCache[cacheKey]);
+      return;
+    }
+
     setIsLoadingMQL(true);
-    apiFetchMajorMQL(selectedMajorInfo.id, selectedSpecialization.substring(0, selectedSpecialization.lastIndexOf(".")))
+    apiFetchMajorMQL(selectedMajorInfo.id, specName)
       .then((d) => {
-        alert(d)
-        setMqlData(d)
+        console.log("MQL response:", JSON.stringify(d, null, 2));
+        setMqlCache((prev) => ({ ...prev, [cacheKey]: d }));
+        setMqlData(d);
       })
       .catch((e) => {
         console.error("Failed to fetch MQL:", e);
@@ -165,7 +238,7 @@ function Programs() {
       .finally(() => setIsLoadingMQL(false));
   }, [selectedMajorInfo?.id, selectedSpecialization]);
 
-  // Load the first major by default once appData is ready
+  // Load first major by default
   useEffect(() => {
     if (!appData || sortedMajors.length === 0 || selectedMajorInfo) return;
     handleSelectMajor(sortedMajors[0].id);
@@ -175,10 +248,7 @@ function Programs() {
     if (!userData) return;
     setUserData({
       ...userData,
-      FYP: {
-        ...userData.FYP,
-        activeWorksheetID: id ?? "",
-      },
+      FYP: { ...userData.FYP, activeWorksheetID: id ?? "" },
     });
   };
 
@@ -222,12 +292,10 @@ function Programs() {
         </div>
       }
     >
-      {/* RIGHT SIDE CONTENT */}
       <div className="flex flex-col w-full">
         <header className="m-6 mt-4 flex flex-col">
           <div className="flex flex-row gap-2 items-center">
             <h1 className="text-3xl font-bold text-gray-800">Program Viewer</h1>
-            
             <img src={bookIcon} alt="book icon" className="h-8 w-8 ml-1" />
           </div>
           <p className="text-gray-500 font-medium mt-2">
@@ -256,7 +324,7 @@ function Programs() {
                   aria-label="Add"
                   title="Add major"
                   onClick={() => {
-                    // TODO: wire up addProgram with selected specialization once MQL parsing is implemented
+                    // TODO: wire up addProgram once MQL parsing is implemented
                   }}
                 >
                   <Plus size={18} />
@@ -277,7 +345,7 @@ function Programs() {
                 </div>
               </div>
 
-              {/* Specialization toggle buttons */}
+              {/* Specialization toggle */}
               {selectedMajorInfo.specializations?.length > 0 && (
                 <div className="mt-4 flex items-center gap-1">
                   <span className="text-sm font-medium text-gray-600 mr-2">
@@ -297,11 +365,7 @@ function Programs() {
                           onClick={() => setSelectedSpecialization(spec)}
                           className={`px-3 py-1 text-sm font-medium transition-colors duration-150 cursor-pointer
                             ${i > 0 ? "border-l border-gray-300" : ""}
-                            ${
-                              isActive
-                                ? "bg-brand-blue text-white"
-                                : "bg-white text-gray-700 hover:bg-gray-50"
-                            }`}
+                            ${isActive ? "bg-brand-blue text-white" : "bg-white text-gray-700 hover:bg-gray-50"}`}
                         >
                           {label}
                         </button>
@@ -388,7 +452,7 @@ function Programs() {
               </div>
             </section>
 
-            {/* Right Panel — Requirements placeholder */}
+            {/* Right Panel — MQL Requirements */}
             <section className="min-w-0 min-h-screen flex flex-col bg-white p-6 border-2 border-gray-200 rounded-xl shadow-md">
               <div className="flex justify-between gap-4 items-center mb-4">
                 <h2 className="text-2xl font-bold text-gray-800">
@@ -411,11 +475,7 @@ function Programs() {
                     {worksheets.map((w) => (
                       <DropdownMenuItem
                         key={w.id}
-                        className={`text-sm cursor-pointer ${
-                          w.id === activeWorksheetId
-                            ? "bg-gray-100 font-medium"
-                            : ""
-                        }`}
+                        className={`text-sm cursor-pointer ${w.id === activeWorksheetId ? "bg-gray-100 font-medium" : ""}`}
                         onClick={() => setActiveWorksheet(w.id)}
                       >
                         <span className="truncate block">{w.name}</span>
@@ -435,32 +495,8 @@ function Programs() {
                 </div>
               ) : (
                 <div className="flex flex-col gap-3 overflow-y-auto">
-                  {JSON.stringify(mqlData)}
-                  {false && mqlData.requirements.map((req, i) => (
-                    <div key={i} className="border border-gray-200 rounded-lg p-4 bg-gray-50">
-                      <div className="flex items-start justify-between gap-2 mb-2">
-                        <p className="font-semibold text-gray-800 text-sm leading-snug">
-                          {req.description}
-                        </p>
-                        <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded font-medium whitespace-nowrap">
-                          P{req.priority}
-                        </span>
-                      </div>
-                      <p className="text-xs text-gray-500 mb-2">
-                        <span className={`font-medium ${req.query.type === "Limit" ? "text-orange-600" : "text-green-600"}`}>
-                          {req.query.type}
-                        </span>
-                        {" · "}
-                        {formatQuantity(req.query.quantity)}
-                      </p>
-                      <ul className="flex flex-col gap-1">
-                        {req.query.selector.map((sel, j) => (
-                          <li key={j} className="text-xs text-gray-700 bg-white border border-gray-200 rounded px-2 py-1 font-mono">
-                            {formatSelector(sel)}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
+                  {mqlData.requirements.slice().map((req, i) => (
+                    <RequirementCard key={i} req={req} />
                   ))}
                 </div>
               )}

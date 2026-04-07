@@ -11,8 +11,13 @@ export async function apiFetchMajorTemplate(majorId: string) {
 }
 
 export async function apiFetchMajorMQL(majorId: string, majorSpecification: string) {
-  const res = await fetch(`/api/majors/${majorId}/mql?specialization=${majorSpecification}`, { credentials: "include" });
+  const url = `/api/majors/${majorId}/mql?specialization=${majorSpecification}`;
+  console.log("Fetching MQL:", url);
+  const res = await fetch(url, { credentials: "include" });
   const body = await res.json();
-  if (!res.ok) throw new Error(`Failed to fetch major MQL for ${majorId}/${majorSpecification}.mql: ${res.status}`);
+  if (!res.ok) {
+    console.log("MQL error response:", body);
+    throw new Error(`Failed to fetch major MQL: ${res.status}`);
+  }
   return body;
 }
