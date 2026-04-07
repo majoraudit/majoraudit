@@ -118,7 +118,9 @@ function getSlotWidgets(
   widgetSelections: Record<string, DashboardWidgetId[]>,
   worksheetId: string | null,
 ) {
-  const selectedWidgets = worksheetId ? widgetSelections[worksheetId] : undefined;
+  const selectedWidgets = worksheetId
+    ? widgetSelections[worksheetId]
+    : undefined;
   const fallbackWidgets = [...DEFAULT_WIDGETS];
 
   if (!selectedWidgets || selectedWidgets.length === 0) {
@@ -165,15 +167,23 @@ function computeMetrics({
   degreeProgram,
 }: Omit<DashboardInsightGridProps, "activeWorksheetId">): DashboardMetrics {
   const plannedCredits = Math.max(0, totalCredits - completedCredits);
-  const creditsRemaining = Math.max(0, graduationCreditsRequired - totalCredits);
+  const creditsRemaining = Math.max(
+    0,
+    graduationCreditsRequired - totalCredits,
+  );
   const completedCreditRatio =
     graduationCreditsRequired > 0
       ? completedCredits / graduationCreditsRequired
       : 0;
 
-  const plannedCourseCount = Math.max(0, totalCourseCount - completedCourseCount);
+  const plannedCourseCount = Math.max(
+    0,
+    totalCourseCount - completedCourseCount,
+  );
 
-  const completedSemesters = semesters.filter((semester) => semester.isCompleted);
+  const completedSemesters = semesters.filter(
+    (semester) => semester.isCompleted,
+  );
   const targetCreditsPerSemester = graduationCreditsRequired / 8;
   const averageCreditsPerCompletedSemester =
     completedSemesters.length > 0
@@ -184,7 +194,8 @@ function computeMetrics({
     key: `${semester.season}`,
     shortLabel: getShortSemesterLabel(semester.title),
     credits: semester.studentCourses.reduce(
-      (total, studentCourse) => total + Number(studentCourse.course?.credit ?? 0),
+      (total, studentCourse) =>
+        total + Number(studentCourse.course?.credit ?? 0),
       0,
     ),
     isCompleted: semester.isCompleted,
@@ -243,11 +254,12 @@ function computeMetrics({
   if (incompleteGroups.length > 0) {
     const nextGroup = incompleteGroups[0].group;
     const labels = formatCourseItemTypes(nextGroup);
-    const firstIncompleteItem = nextGroup.courseItems.find((item) => !item.isCompleted);
+    const firstIncompleteItem = nextGroup.courseItems.find(
+      (item) => !item.isCompleted,
+    );
     const firstIncompleteLabel =
-      labels[
-        nextGroup.courseItems.findIndex((item) => !item.isCompleted)
-      ] ?? "Review open requirement options";
+      labels[nextGroup.courseItems.findIndex((item) => !item.isCompleted)] ??
+      "Review open requirement options";
 
     recommendationTitle = nextGroup.description;
     recommendationDetail = firstIncompleteItem
@@ -329,7 +341,7 @@ function WidgetShell({
 }) {
   return (
     <div
-      className={`relative flex h-[19rem] flex-col overflow-hidden rounded-2xl border border-slate-200 bg-gradient-to-br ${accentClass} p-4 shadow-sm`}
+      className={`relative flex h-[16rem] flex-col overflow-hidden rounded-2xl border border-slate-200 bg-gradient-to-br ${accentClass} p-4 shadow-sm`}
     >
       <div className="mb-4 text-center">
         <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
@@ -423,18 +435,14 @@ const widgetDefinitions: WidgetDefinition[] = [
         subcopy={metrics.recommendationDetail}
         accentClass="from-sky-50 via-white to-cyan-100"
       >
-        <div className="mt-5 flex items-end justify-between gap-4">
-          <div className="max-w-[14rem] rounded-2xl bg-white/80 p-4 shadow-sm ring-1 ring-sky-100">
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-sky-700">
-              Recommended focus
-            </p>
-            <p className="mt-2 text-sm text-slate-700">
-              Close the nearest unfinished group before filling more long-tail electives.
-            </p>
-          </div>
-          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-sky-600 text-white shadow-lg shadow-sky-200">
-            <MoveRight className="h-6 w-6" />
-          </div>
+        <div className="mt-1 rounded-2xl bg-white/80 p-3 shadow-sm ring-1 ring-sky-100">
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-sky-700">
+            Recommended focus
+          </p>
+          <p className="mt-1 text-xs text-slate-700">
+            Close the nearest unfinished group before filling more long-tail
+            electives.
+          </p>
         </div>
       </WidgetShell>
     ),
@@ -460,12 +468,17 @@ const widgetDefinitions: WidgetDefinition[] = [
           <div className="mt-5">
             <div className="flex h-28 items-end gap-3">
               {metrics.recentSemesterCredits.map((semester) => (
-                <div key={semester.key} className="flex flex-1 flex-col items-center gap-2">
+                <div
+                  key={semester.key}
+                  className="flex flex-1 flex-col items-center gap-2"
+                >
                   <div className="flex h-20 w-full items-end">
                     <div className="w-full rounded-t-xl bg-slate-200">
                       <div
                         className={`w-full rounded-t-xl transition-all duration-500 ${
-                          semester.isCompleted ? "bg-indigo-600" : "bg-indigo-300"
+                          semester.isCompleted
+                            ? "bg-indigo-600"
+                            : "bg-indigo-300"
                         }`}
                         style={{
                           height: `${clampPercentage((semester.credits / maxCredits) * 100)}%`,
@@ -512,19 +525,25 @@ const widgetDefinitions: WidgetDefinition[] = [
           </div>
           <div className="mt-4 grid grid-cols-3 gap-3 text-center">
             <div className="rounded-2xl bg-white/80 p-3 ring-1 ring-fuchsia-100">
-              <p className="text-xs uppercase tracking-[0.12em] text-slate-500">Flexible</p>
+              <p className="text-xs uppercase tracking-[0.12em] text-slate-500">
+                Flexible
+              </p>
               <p className="mt-1 text-xl font-semibold text-slate-900">
                 {metrics.flexibilityCounts.flexible}
               </p>
             </div>
             <div className="rounded-2xl bg-white/80 p-3 ring-1 ring-fuchsia-100">
-              <p className="text-xs uppercase tracking-[0.12em] text-slate-500">Fixed</p>
+              <p className="text-xs uppercase tracking-[0.12em] text-slate-500">
+                Fixed
+              </p>
               <p className="mt-1 text-xl font-semibold text-slate-900">
                 {metrics.flexibilityCounts.fixed}
               </p>
             </div>
             <div className="rounded-2xl bg-white/80 p-3 ring-1 ring-fuchsia-100">
-              <p className="text-xs uppercase tracking-[0.12em] text-slate-500">Open</p>
+              <p className="text-xs uppercase tracking-[0.12em] text-slate-500">
+                Open
+              </p>
               <p className="mt-1 text-xl font-semibold text-slate-900">
                 {metrics.flexibilityCounts.totalRemaining}
               </p>
@@ -551,7 +570,9 @@ const widgetDefinitions: WidgetDefinition[] = [
               className="h-full bg-emerald-600"
               style={{
                 width: `${clampPercentage(
-                  (metrics.completedCredits / metrics.graduationCreditsRequired) * 100,
+                  (metrics.completedCredits /
+                    metrics.graduationCreditsRequired) *
+                    100,
                 )}%`,
               }}
             />
@@ -559,7 +580,8 @@ const widgetDefinitions: WidgetDefinition[] = [
               className="h-full bg-amber-400"
               style={{
                 width: `${clampPercentage(
-                  (metrics.plannedCredits / metrics.graduationCreditsRequired) * 100,
+                  (metrics.plannedCredits / metrics.graduationCreditsRequired) *
+                    100,
                 )}%`,
               }}
             />
@@ -662,21 +684,23 @@ const widgetDefinitions: WidgetDefinition[] = [
           accentClass="from-violet-50 via-white to-sky-50"
         >
           <div className="mt-5 grid grid-cols-6 gap-2">
-            {Array.from({ length: Math.min(18, totalCourses) }).map((_, index) => {
-              const threshold = Math.round(
-                (metrics.completedCourseCount / totalCourses) *
-                  Math.min(18, totalCourses),
-              );
+            {Array.from({ length: Math.min(18, totalCourses) }).map(
+              (_, index) => {
+                const threshold = Math.round(
+                  (metrics.completedCourseCount / totalCourses) *
+                    Math.min(18, totalCourses),
+                );
 
-              return (
-                <div
-                  key={index}
-                  className={`h-7 rounded-xl ${
-                    index < threshold ? "bg-violet-600" : "bg-slate-200"
-                  }`}
-                />
-              );
-            })}
+                return (
+                  <div
+                    key={index}
+                    className={`h-7 rounded-xl ${
+                      index < threshold ? "bg-violet-600" : "bg-slate-200"
+                    }`}
+                  />
+                );
+              },
+            )}
           </div>
         </WidgetShell>
       );
@@ -697,7 +721,8 @@ const widgetDefinitions: WidgetDefinition[] = [
           {Array.from({ length: 8 }).map((_, index) => {
             const completion = Math.max(
               0,
-              metrics.creditsRemaining - index * (metrics.graduationCreditsRequired / 8),
+              metrics.creditsRemaining -
+                index * (metrics.graduationCreditsRequired / 8),
             );
             const barHeight = Math.max(
               16,
@@ -708,10 +733,16 @@ const widgetDefinitions: WidgetDefinition[] = [
             );
 
             return (
-              <div key={index} className="flex flex-1 flex-col items-center gap-2">
+              <div
+                key={index}
+                className="flex flex-1 flex-col items-center gap-2"
+              >
                 <div
                   className="w-full rounded-t-2xl bg-gradient-to-t from-orange-500 to-amber-300"
-                  style={{ height: `${barHeight}px`, opacity: 1 - index * 0.08 }}
+                  style={{
+                    height: `${barHeight}px`,
+                    opacity: 1 - index * 0.08,
+                  }}
                 />
                 <span className="text-[11px] text-slate-500">S{index + 1}</span>
               </div>
@@ -780,7 +811,8 @@ const widgetDefinitions: WidgetDefinition[] = [
 
 function getWidgetDefinition(widgetId: DashboardWidgetId) {
   return (
-    widgetDefinitions.find((widget) => widget.id === widgetId) ?? widgetDefinitions[0]
+    widgetDefinitions.find((widget) => widget.id === widgetId) ??
+    widgetDefinitions[0]
   );
 }
 
@@ -803,7 +835,9 @@ function WidgetPicker({
       <DropdownMenuContent align="end" className="w-72">
         <DropdownMenuRadioGroup
           value={value}
-          onValueChange={(nextValue) => onChange(nextValue as DashboardWidgetId)}
+          onValueChange={(nextValue) =>
+            onChange(nextValue as DashboardWidgetId)
+          }
         >
           {widgetDefinitions.map((widget) => (
             <DropdownMenuRadioItem
@@ -812,8 +846,12 @@ function WidgetPicker({
               className="items-center"
             >
               <div className="flex flex-col">
-                <span className="font-medium text-slate-800">{widget.label}</span>
-                <span className="text-xs text-slate-500">{widget.description}</span>
+                <span className="font-medium text-slate-800">
+                  {widget.label}
+                </span>
+                <span className="text-xs text-slate-500">
+                  {widget.description}
+                </span>
               </div>
             </DropdownMenuRadioItem>
           ))}
@@ -823,9 +861,7 @@ function WidgetPicker({
   );
 }
 
-export default function DashboardInsightGrid(
-  props: DashboardInsightGridProps,
-) {
+export default function DashboardInsightGrid(props: DashboardInsightGridProps) {
   const {
     activeWorksheetId,
     graduationCreditsRequired,
@@ -876,7 +912,10 @@ export default function DashboardInsightGrid(
     ],
   );
 
-  const handleWidgetChange = (slotIndex: number, nextWidget: DashboardWidgetId) => {
+  const handleWidgetChange = (
+    slotIndex: number,
+    nextWidget: DashboardWidgetId,
+  ) => {
     if (!activeWorksheetId) return;
 
     setWidgetSelections((current) => {
@@ -894,16 +933,17 @@ export default function DashboardInsightGrid(
   return (
     <section className="space-y-3">
       <div className="flex items-center justify-between gap-4">
-        <div>
+        {/*<div>
           <h2 className="text-lg font-semibold text-slate-900">Dashboard Insights</h2>
           <p className="text-sm text-slate-500">
-            Each card can be swapped to the metric or insight you care about most.
+            Each card can be swapped to the metric or insight you care about
+            most.
           </p>
         </div>
         <div className="hidden items-center gap-2 rounded-full bg-white px-4 py-2 text-sm text-slate-600 shadow-sm ring-1 ring-slate-200 lg:flex">
           <Layers3 className="h-4 w-4 text-slate-400" />
           <span>Selections are saved per worksheet.</span>
-        </div>
+        </div>*/}
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -911,11 +951,16 @@ export default function DashboardInsightGrid(
           const widget = getWidgetDefinition(widgetId);
 
           return (
-            <div key={`${slotIndex}-${widgetId}`} className="flex h-full flex-col gap-3">
+            <div
+              key={`${slotIndex}-${widgetId}`}
+              className="flex h-full flex-col gap-3"
+            >
               <div className="flex justify-center">
                 <WidgetPicker
                   value={widgetId}
-                  onChange={(nextWidget) => handleWidgetChange(slotIndex, nextWidget)}
+                  onChange={(nextWidget) =>
+                    handleWidgetChange(slotIndex, nextWidget)
+                  }
                 />
               </div>
               {widget.render(metrics)}

@@ -104,7 +104,10 @@ function Dashboard() {
     if (!appData?.major_processor) return;
 
     setUserData((currentUserData) => {
-      if (!currentUserData?.FYP?.degreeProgress2 || !currentUserData?.FYP?.worksheets) {
+      if (
+        !currentUserData?.FYP?.degreeProgress2 ||
+        !currentUserData?.FYP?.worksheets
+      ) {
         return currentUserData;
       }
 
@@ -135,7 +138,12 @@ function Dashboard() {
         },
       };
     });
-  }, [userData?.FYP?.worksheets, appData?.major_processor, activeWorksheetId, setUserData]);
+  }, [
+    userData?.FYP?.worksheets,
+    appData?.major_processor,
+    activeWorksheetId,
+    setUserData,
+  ]);
 
   return (
     <>
@@ -149,7 +157,7 @@ function Dashboard() {
         </header>
 
         {/* Requirements Progress */}
-        <section className="grid lg:grid-cols-2 md:grid-cols-1 sm:grid-cols-1 w-full gap-4">
+        {/*<section className="grid lg:grid-cols-2 md:grid-cols-1 sm:grid-cols-1 w-full gap-4">
           <div className="bg-white rounded-lg shadow p-6">
             <h3 className="text-md font-semibold mb-2">
               General Progress (Credits)
@@ -241,7 +249,7 @@ function Dashboard() {
               activeProgramRemainingGroups,
             )}
           </div>
-        </section>
+        </section>*/}
 
         <DashboardInsightGrid
           activeWorksheetId={activeWorksheetId}
@@ -256,7 +264,7 @@ function Dashboard() {
         />
 
         {/* Major List and Major Graph container */}
-        <section className="bg-white rounded-lg shadow p-4 w-full flex flex-col flex-1 min-h-[26rem]">
+        <section className="bg-white rounded-lg border border-slate-200 shadow-sm p-4 w-full flex flex-col flex-1 min-h-[26rem]">
           <div className="flex flex-row items-center border-b mb-2">
             <div className="flex gap-4">
               <button
