@@ -15,7 +15,7 @@ interface CustomCourseModalProps {
       code: string;
       distribution: string;
       credits: number;
-    }
+    },
   ) => void;
 }
 
@@ -98,8 +98,7 @@ const CustomCourseModal: React.FC<CustomCourseModalProps> = ({
 
   if (!open || !semester) return null;
 
-  const showCatalog =
-    Boolean(onAddCatalog) && catalogCourses.length > 0;
+  const showCatalog = Boolean(onAddCatalog) && catalogCourses.length > 0;
 
   const { termLabel, academicYearLabel } = getSemesterDisplay(semester);
 
@@ -145,7 +144,7 @@ const CustomCourseModal: React.FC<CustomCourseModalProps> = ({
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-xl shadow-xl p-6 w-full max-w-md mx-4"
+        className="bg-white rounded-xl shadow-xl p-6 w-full max-w-md mx-4 h-[32rem] flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header / context */}
@@ -210,7 +209,7 @@ const CustomCourseModal: React.FC<CustomCourseModalProps> = ({
               value={catalogSearch}
               onChange={(e) => setCatalogSearch(e.target.value)}
             />
-            <ul className="max-h-48 overflow-y-auto border border-gray-200 rounded-md divide-y divide-gray-100">
+            <ul className="max-h-60 overflow-y-auto border border-gray-200 rounded-md divide-y divide-gray-100">
               {slicedCatalog.length === 0 ? (
                 <li className="px-3 py-4 text-xs text-gray-500 text-center">
                   No matches
