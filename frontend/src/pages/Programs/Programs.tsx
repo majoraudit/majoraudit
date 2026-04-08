@@ -1,4 +1,4 @@
-import DOMPurify from 'dompurify';
+import DOMPurify from "dompurify";
 
 import { useUser } from "@/contexts/UserContext";
 import { useApp } from "@/contexts/AppContext";
@@ -408,10 +408,6 @@ function Programs() {
             <h1 className="text-3xl font-bold text-gray-800">Program Viewer</h1>
             <img src={bookIcon} alt="book icon" className="h-8 w-8 ml-1" />
           </div>
-          <p className="text-gray-500 font-medium mt-2">
-            Welcome to the Program Viewer page! Search through majors and
-            certificates, and add them to your profile!
-          </p>
         </header>
 
         <hr className="border-gray-200 border-t-3" />
@@ -524,8 +520,14 @@ function Programs() {
                 <h2 className="text-gray-700 font-semibold text-sm mb-2">
                   ABOUT
                 </h2>
-                <p className="text-gray-600 text-sm leading-relaxed whitespace-pre-line" dangerouslySetInnerHTML={{__html: DOMPurify.sanitize(selectedMajorInfo.about, {USE_PROFILES: {html: true}}) }}>
-                </p>
+                <p
+                  className="text-gray-600 text-sm leading-relaxed whitespace-pre-line"
+                  dangerouslySetInnerHTML={{
+                    __html: DOMPurify.sanitize(selectedMajorInfo.about, {
+                      USE_PROFILES: { html: true },
+                    }),
+                  }}
+                ></p>
               </div>
 
               <div className="mt-6 text-sm">

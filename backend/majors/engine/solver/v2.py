@@ -389,7 +389,7 @@ def solve(matching_eval: dict, include_query: bool = False) -> SolveResult:
     
     model.maximize(
         expr * M
-        + sum(y.values())
+        #+ sum(y.values())
         + weighted_assignments
         - PLACEMENT_PENALTY * sum(x_place.values())
     )
