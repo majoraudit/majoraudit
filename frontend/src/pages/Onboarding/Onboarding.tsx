@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { useUser } from "@/contexts/UserContext";
 import { useWorksheetManager } from "@/hooks/useWorksheetManager";
 import { apiCreateSemester } from "@/api/semesters";
+import { apiUpdateUserInfo, apiAddMajor } from "@/api/user_info";
+
 import {
   CLASS_YEARS,
   UNDERGRAD_MAJORS,
@@ -64,11 +66,21 @@ function Onboarding() {
     e.preventDefault();
     if (!userData) return;
 
-    // 1. Create worksheet — returns real ID directly, no state read needed
+    // 1. Save user info to backend
+    await apiUpdateUserInfo({
+      class_year: classYear ? parseInt(classYear) : null,
+      intended_major_id: intendedMajorId || "",
+      intended_language_code: intendedLanguageCode || "",
+      language_requirement: languageLevel,
+    });
+
+    await apiAddMajor({ major_id: "general_degree", specialization: "" });
+
+    // 2. Create worksheet — returns real ID directly, no state read needed
     const newWorksheet = await createWorksheet("Main Worksheet");
     if (!newWorksheet) return;
 
-    // 2. Create semesters directly via API using the returned ID
+    // 3. Create semesters directly via API using the returned ID
     const semesterTemplates = classYear
       ? generateSemesters(parseInt(classYear))
       : [];
@@ -83,7 +95,7 @@ function Onboarding() {
       ),
     );
 
-    // 3. Map into frontend shape
+    // 4. Map into frontend shape
     const studentSemesters: StudentSemester[] = createdSemesters.map(
       (s, i) => ({
         id: s.id,
@@ -97,7 +109,7 @@ function Onboarding() {
       }),
     );
 
-    // 4. Patch semesters + profile fields in one setUserData call
+    // 5. Patch semesters + profile fields in one setUserData call
     setUserData((prev) => {
       if (!prev) return prev;
       return {

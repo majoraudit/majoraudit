@@ -12,6 +12,13 @@ export interface Course {
   //season_codes: string[]; // ["202601", "202503"]
 }
 
+export interface UserMajor {
+  id: number;
+  major_id: string;
+  specialization: string;
+  added_at: string;
+}
+
 export interface StudentCourse {
   worksheetClassId?: number;
   course: Course; 	
@@ -42,31 +49,17 @@ interface ProgramStats
 }
 
 export interface FYP {
-	languageRequirement: string;
-	//studentSemesters: StudentSemester[];
-
-  // shows degree, major, certificate requirements
-  // degreeConfigurations: MajorRequirement[];
-
-  degreeProgress: MajorProgress[];
-  degreeProgress2:
-    {
-      worksheetID: string;
-      majors: MajorProgress[];
-    }[];
-  statCount: ProgramStats; // how many majors added, how many certificates added
-
-	//degreeConfigurations: DegreeConfiguration[][];
-	//degreeDeclarations: StudentDegree[];
+	
   worksheets: Worksheet[]; 
   activeWorksheetID: string;
+  languageRequirement: string;
+  majors : UserMajor[];
 }
 
 export interface User {
 	first_name: string;
   last_name: string;
 	netID: string;
-	//onboard: boolean;
 	classYear?: string; 
 	intendedMajorId?: string;
 	intendedLanguageCode?: string;

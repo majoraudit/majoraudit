@@ -23,6 +23,13 @@ function Navbar() {
   const currentPath = location.pathname;
 
   const { isAuthenticated, login, logout } = useAuth();
+  const { userData } = useUser();
+
+  const initials = userData
+    ? `${userData.first_name?.[0] ?? ""}${userData.last_name?.[0] ?? ""}`.toUpperCase() ||
+      "?"
+    : "?";
+
   const navigate = useNavigate();
 
   const linkFormat = (path: string) =>
@@ -73,7 +80,7 @@ function Navbar() {
 */}
           <DropdownMenu>
             <DropdownMenuTrigger className="flex bg-brand-blue p-3 rounded-full text-white w-10 h-10 items-center justify-center cursor-pointer">
-              AC
+              {initials}
             </DropdownMenuTrigger>
 
             <DropdownMenuContent className="w-48" align="end" sideOffset={10}>

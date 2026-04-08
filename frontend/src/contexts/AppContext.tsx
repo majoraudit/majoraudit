@@ -90,10 +90,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
     if (!appData || !userData) return;
 
     const needsHydration = userData.FYP.worksheets.some((w) =>
-      w.studentSemesters.some(
-        (s) =>
-          (s as any)._rawClasses?.length > 0 && s.studentCourses.length === 0,
-      ),
+      w.studentSemesters.some((s) => (s as any)._rawClasses !== undefined),
     );
 
     if (!needsHydration) return;
@@ -103,27 +100,32 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
 
       const worksheets = prev.FYP.worksheets.map((w) => ({
         ...w,
-        studentSemesters: w.studentSemesters.map((s) => ({
-          ...s,
-          studentCourses:
-            s.studentCourses.length > 0
-              ? s.studentCourses // already hydrated, skip
-              : ((s as any)._rawClasses?.flatMap((c: any): StudentCourse[] => {
-                  const externalId = String(c.course ?? c.course_instance);
-                  const fullCourse = appData.course_database.getCourse(
-                    Number(externalId),
-                  );
-                  if (!fullCourse) return [];
-                  return [
-                    {
-                      worksheetClassId: c.id,
-                      course: fullCourse,
-                      term: s.season,
-                      status: "DA_COMPLETE",
-                    },
-                  ];
-                }) ?? []),
-        })),
+        studentSemesters: w.studentSemesters.map((s) => {
+          const raw = (s as any)._rawClasses;
+          if (raw === undefined) return s; // already hydrated, skip
+
+          const studentCourses = raw.flatMap((c: any): StudentCourse[] => {
+            const externalId = String(c.course ?? c.course_instance);
+            const fullCourse = appData.course_database.getCourse(
+              Number(externalId),
+            );
+            if (!fullCourse) return [];
+            return [
+              {
+                worksheetClassId: c.id,
+                course: fullCourse,
+                term: s.season,
+                status: "DA_COMPLETE",
+              },
+            ];
+          });
+
+          return {
+            ...s,
+            _rawClasses: undefined, // ← clear so this never re-runs
+            studentCourses,
+          };
+        }),
       }));
 
       return { ...prev, FYP: { ...prev.FYP, worksheets } };

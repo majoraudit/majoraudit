@@ -50,7 +50,8 @@ INSTALLED_APPS = [
     'authentication',
     'worksheets',
     'majors',
-    'courses'
+    'courses',
+    'user_data',
 ]
 
 MIDDLEWARE = [
@@ -175,6 +176,7 @@ CSRF_COOKIE_SAMESITE = 'None'
 CSRF_TRUSTED_ORIGINS = [
     "https://localhost:5173",
     "https://127.0.0.1:5173",
+    "https://localhost:5174",
     FRONTEND_URL,
 ]
 

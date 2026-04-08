@@ -1,4 +1,13 @@
-SELECT 4 FROM [] : "Gateway Courses" : 2
-SELECT 2 FROM [TAG(YC AMST Junior Seminars), TAG(YC AMST Junior Seminars)] : "Junior Seminars" : 3
-SELECT 5 FROM [] : "Area of Concentration" : 3
-SELECT 1 FROM [] : "Senior Requirement" : 1
+SELECT 1 FROM [CLASS(ANTH 4091), CLASS(ANTH 4071)] : "Senior Essay" : 5;
+
+SELECT 1 FROM [RANGE(ANTH 1000, ANTH 2999)] : "Introductory/Intermediate Course - Subfield 1 (Evolution/Biological)" : 3;
+
+SELECT 1 FROM [RANGE(ANTH 1000, ANTH 2999)] : "Introductory/Intermediate Course - Subfield 2 (Archaeological)" : 3;
+
+SELECT 1 FROM [RANGE(ANTH 1000, ANTH 2999)] : "Introductory/Intermediate Course - Subfield 3 (Sociocultural/Linguistic)" : 3;
+
+SELECT 3 FROM [RANGE(ANTH 3000, ANTH 4000), RANGE(ANTH 3000, ANTH 4000), RANGE(ANTH 3000, ANTH 4000)] : "Advanced Courses" : 4;
+
+SELECT 4 FROM [RANGE(ANTH 1000, ANTH 9999), RANGE(ANTH 1000, ANTH 9999), RANGE(ANTH 1000, ANTH 9999), RANGE(ANTH 1000, ANTH 9999)] : "Remaining Electives" : 2;
+
+SELECT 3 FROM [RANGE(ANTH 1000, ANTH 9999), RANGE(ANTH 1000, ANTH 9999), RANGE(ANTH 1000, ANTH 9999)] : "Cognate Courses (up to 3 outside departments)" : 1;

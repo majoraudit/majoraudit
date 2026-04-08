@@ -8,7 +8,8 @@ from .serializers import (
     UserWorksheetClassSerializer
 )
 from .permissions import IsOwnerPermission
-
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
 # Create your views here.
 
 
@@ -68,6 +69,7 @@ class UserWorksheetSemesterDetailView(generics.RetrieveUpdateDestroyAPIView):
         ).prefetch_related('userworksheetclass_set')
 
 
+@method_decorator(csrf_exempt, name='dispatch')
 class UserWorksheetClassListCreateView(generics.ListCreateAPIView):
     serializer_class = UserWorksheetClassSerializer
     permission_classes = [permissions.IsAuthenticated, IsOwnerPermission]

@@ -1,5 +1,5 @@
 """
-solver.py — CP-SAT requirement-matching solver library.
+v2.py — CP-SAT requirement-matching solver library with granular MQL tracking.
 
 Usage
 -----
@@ -20,17 +20,54 @@ from typing import Any
 from ortools.sat.python import cp_model
 
 
+API_VERSION = 2
+
+
 # ---------------------------------------------------------------------------
 # Public types
 # ---------------------------------------------------------------------------
+
+@dataclass
+class SelectorPath:
+    """Represents the path to a specific selector in the MQL tree."""
+    selector_index: int                    # index in requirement.query.selector[]
+    selector_kind: str                     # "Class" | "Tag" | "Query" | etc.
+    nested_path: list[SelectorPath] = field(default_factory=list)  # for Query selectors
+    
+    def to_dict(self) -> dict:
+        d = {
+            "selector_index": self.selector_index,
+            "selector_kind": self.selector_kind,
+        }
+        if self.nested_path:
+            d["nested_path"] = [p.to_dict() for p in self.nested_path]
+        return d
+
+
+@dataclass
+class SelectedCourse:
+    """A course selection with its MQL component mapping."""
+    course_id: str                         # course code or PLACEMENT:<uuid>
+    selector_path: SelectorPath            # which MQL component matched this
+    group_index: int | None = None         # index within selectedCourses array
+    
+    def to_dict(self) -> dict:
+        d = {
+            "course_id": self.course_id,
+            "selector_path": self.selector_path.to_dict(),
+        }
+        if self.group_index is not None:
+            d["group_index"] = self.group_index
+        return d
+
 
 @dataclass
 class RequirementResult:
     description: str
     priority: int
     satisfied: bool
-    selected: list[str]          # course-ids and/or "PLACEMENT:<uuid>" keys
-    query: dict | None = None    # only populated when include_query=True
+    selected: list[SelectedCourse]         # now includes MQL mapping
+    query: dict | None = None              # only populated when include_query=True
 
 
 @dataclass
@@ -45,6 +82,7 @@ class SolveResult:
 
     def to_dict(self) -> dict:
         d: dict[str, Any] = {
+            "version": API_VERSION,
             "status": self.status,
             "status_cpsat": self.status_cpsat,
             "total_satisfied": self.total_satisfied,
@@ -58,7 +96,7 @@ class SolveResult:
                 "description": r.description,
                 "priority": r.priority,
                 "satisfied": r.satisfied,
-                "selected": r.selected,
+                "selected": [sc.to_dict() for sc in r.selected],
             }
             if r.query is not None:
                 item["query"] = r.query
@@ -111,19 +149,64 @@ def _safe_var_name(s: str) -> str:
     return s.replace(" ", "_").replace("@", "_").replace(":", "_")
 
 
+def _get_selector_kind(selector: dict) -> str:
+    """Extract the selector kind from a selector dict."""
+    kinds = ["Class", "Placement", "Tag", "TagCode", "Dist", "DistCode", 
+             "Range", "RangeDist", "RangeTag", "Query"]
+    for kind in kinds:
+        if kind in selector:
+            return kind
+    return "Unknown"
+
+
+def _build_selector_path(selector: dict, selector_index: int, group_index: int | None = None) -> SelectorPath:
+    """Build a SelectorPath from a selector dict."""
+    kind = _get_selector_kind(selector)
+    path = SelectorPath(
+        selector_index=selector_index,
+        selector_kind=kind,
+    )
+    
+    # If this is a Query selector, we need to track nested paths
+    # This is a placeholder - actual nested path would be built during matching
+    # For now, we just mark that this is a Query type
+    if kind == "Query" and "Query" in selector:
+        # Nested queries would be handled recursively during course matching
+        pass
+    
+    return path
+
+
+# ---------------------------------------------------------------------------
+# Course metadata tracking
+# ---------------------------------------------------------------------------
+
+@dataclass
+class CourseMetadata:
+    """Metadata about which selector matched a course."""
+    selector_index: int
+    selector_kind: str
+    group_index: int
+    nested_path: list[SelectorPath] = field(default_factory=list)
+
+
 # ---------------------------------------------------------------------------
 # Solver
 # ---------------------------------------------------------------------------
 
 def solve(matching_eval: dict, include_query: bool = False) -> SolveResult:
     """
-    Run the CP-SAT requirement-matching solver.
+    Run the CP-SAT requirement-matching solver with granular MQL component tracking.
 
     Parameters
     ----------
     matching_eval:
         The dict produced by the upstream MQL matching pipeline.  Expected
         top-level keys: ``"results"``, ``"allSelectedCourses"``.
+        
+        REQUIRED ADDITIONS to matching_eval structure:
+        - Each item in qr["selectedCourses"] should include metadata about which
+          selector matched it. This can be added by the frontend matcher.
     include_query:
         When True, each ``RequirementResult`` will carry the raw query dict
         from the original requirement.
@@ -141,6 +224,7 @@ def solve(matching_eval: dict, include_query: bool = False) -> SolveResult:
     * Within the same priority tier, the solver maximises the number of
       assigned items; placements are slightly penalised so real courses are
       preferred when both would satisfy a requirement.
+    * Each selected course now includes its MQL selector path for UI mapping.
     """
     model = cp_model.CpModel()
     results = matching_eval["results"]
@@ -168,9 +252,11 @@ def solve(matching_eval: dict, include_query: bool = False) -> SolveResult:
                 offerings[cid] = item
                 x[cid] = model.new_bool_var(f"x_{_safe_var_name(cid)}")
 
-    # ---- per-requirement assignment variables ----
+    # ---- per-requirement assignment variables with metadata tracking ----
     y: dict[tuple[int, str], cp_model.IntVar] = {}
     req_cands: list[list[str]] = []
+    # NEW: track metadata for each candidate
+    course_metadata: dict[tuple[int, str], CourseMetadata] = {}
     sat: list[cp_model.IntVar] = []
 
     for r, qr in enumerate(results):
@@ -185,6 +271,9 @@ def solve(matching_eval: dict, include_query: bool = False) -> SolveResult:
                 group_items = [group_items]
 
             selector = req["query"].get("selector", [])
+            selector_idx = group_idx if group_idx < len(selector) else 0
+            selector_kind = _get_selector_kind(selector[selector_idx]) if selector_idx < len(selector) else "Unknown"
+            
             if group_idx < len(selector):
                 inner_q = selector[group_idx].get("Query", {})
                 _, glimit = _q_bounds(inner_q.get("quantity", {"Single": len(group_items)}))
@@ -197,6 +286,14 @@ def solve(matching_eval: dict, include_query: bool = False) -> SolveResult:
                     pk = _placement_key(item)
                     cand_keys.append(pk)
                     group_keys.append(pk)
+                    
+                    # Store metadata
+                    course_metadata[(r, pk)] = CourseMetadata(
+                        selector_index=selector_idx,
+                        selector_kind=selector_kind,
+                        group_index=group_idx,
+                    )
+                    
                     if pk not in x_place:
                         placements[pk] = item
                         x_place[pk] = model.new_bool_var(f"x_{_safe_var_name(pk)}")
@@ -204,6 +301,14 @@ def solve(matching_eval: dict, include_query: bool = False) -> SolveResult:
                     cid = _course_id(item)
                     cand_keys.append(cid)
                     group_keys.append(cid)
+                    
+                    # Store metadata
+                    course_metadata[(r, cid)] = CourseMetadata(
+                        selector_index=selector_idx,
+                        selector_kind=selector_kind,
+                        group_index=group_idx,
+                    )
+                    
                     if cid not in x:
                         offerings[cid] = item
                         x[cid] = model.new_bool_var(f"x_{_safe_var_name(cid)}")
@@ -272,9 +377,20 @@ def solve(matching_eval: dict, include_query: bool = False) -> SolveResult:
         sum(sat[r] for r in range(R) if req_priority[r] == p) * (BASE ** (len(priorities) - 1 - i))
         for i, p in enumerate(priorities)
     )
+    # model.maximize(
+    #     expr * M
+    #     + sum(y.values())
+    #     - PLACEMENT_PENALTY * sum(x_place.values())
+    # )
+    weighted_assignments = sum(
+        y[(r, key)] * (BASE ** (len(priorities) - 1 - priorities.index(req_priority[r])))
+        for (r, key) in y
+    )
+    
     model.maximize(
         expr * M
         + sum(y.values())
+        + weighted_assignments
         - PLACEMENT_PENALTY * sum(x_place.values())
     )
 
@@ -292,12 +408,38 @@ def solve(matching_eval: dict, include_query: bool = False) -> SolveResult:
 
     per_req: list[RequirementResult] = []
     for r, qr in enumerate(results):
-        chosen = [k for k in req_cands[r] if solver.value(y[(r, k)]) == 1]
+        chosen_keys = [k for k in req_cands[r] if solver.value(y[(r, k)]) == 1]
+        
+        # Build SelectedCourse objects with MQL component mapping
+        chosen_courses = []
+        for key in chosen_keys:
+            metadata = course_metadata.get((r, key))
+            if metadata:
+                selector_path = SelectorPath(
+                    selector_index=metadata.selector_index,
+                    selector_kind=metadata.selector_kind,
+                    nested_path=metadata.nested_path,
+                )
+                chosen_courses.append(SelectedCourse(
+                    course_id=key,
+                    selector_path=selector_path,
+                    group_index=metadata.group_index,
+                ))
+            else:
+                # Fallback if metadata missing
+                chosen_courses.append(SelectedCourse(
+                    course_id=key,
+                    selector_path=SelectorPath(
+                        selector_index=0,
+                        selector_kind="Unknown",
+                    ),
+                ))
+        
         per_req.append(RequirementResult(
             description=qr["requirement"]["description"],
             priority=qr["requirement"]["priority"],
             satisfied=solver.value(sat[r]) == 1,
-            selected=chosen,
+            selected=chosen_courses,
             query=qr["requirement"]["query"] if include_query else None,
         ))
 
