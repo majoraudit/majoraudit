@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { useUser } from "@/contexts/UserContext";
+import { apiUpdateProfile } from "@/api/auth";
 import {
   CLASS_YEARS,
-  UNDERGRAD_MAJORS,
   LANGUAGE_SUBJECTS,
   LANGUAGE_LEVELS,
 } from "@/constants/onboarding";
@@ -12,9 +12,6 @@ function Profile() {
   const [first_name, setFirst_name] = useState(userData?.first_name ?? "");
   const [last_name, setLast_name] = useState(userData?.last_name ?? "");
   const [classYear, setClassYear] = useState(userData?.classYear ?? "");
-  const [intendedMajorId, setIntendedMajorId] = useState(
-    userData?.intendedMajorId ?? ""
-  );
   const [intendedLanguageCode, setIntendedLanguageCode] = useState(
     userData?.intendedLanguageCode ?? ""
   );
@@ -27,26 +24,36 @@ function Profile() {
     setFirst_name(userData.first_name ?? "");
     setLast_name(userData.last_name ?? "");
     setClassYear(userData.classYear ?? "");
-    setIntendedMajorId(userData.intendedMajorId ?? "");
     setIntendedLanguageCode(userData.intendedLanguageCode ?? "");
     setLanguageLevel(userData.FYP?.languageRequirement ?? "L1");
   }, [userData]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!userData) return;
-    setUserData({
-      ...userData,
-      first_name: first_name.trim() || userData.first_name,
-      last_name: last_name.trim() || userData.last_name,
-      classYear: classYear || undefined,
-      intendedMajorId: intendedMajorId || undefined,
-      intendedLanguageCode: intendedLanguageCode || undefined,
-      FYP: {
-        ...userData.FYP,
-        languageRequirement: languageLevel,
-      },
-    });
+
+    const parsedYear = classYear ? parseInt(classYear) : null;
+    try {
+      const updated = await apiUpdateProfile({
+        class_year: parsedYear,
+        intended_language_code: intendedLanguageCode || "",
+        language_requirement: languageLevel,
+      });
+      setUserData({
+        ...userData,
+        first_name: updated.first_name || userData.first_name,
+        last_name: updated.last_name || userData.last_name,
+        classYear:
+          updated.class_year != null ? String(updated.class_year) : undefined,
+        intendedLanguageCode: updated.intended_language_code || undefined,
+        FYP: {
+          ...userData.FYP,
+          languageRequirement: updated.language_requirement || "L1",
+        },
+      });
+    } catch (err) {
+      console.error("Failed to save profile", err);
+    }
   };
 
   if (!userData) return null;
@@ -92,23 +99,6 @@ function Profile() {
             {CLASS_YEARS.map((y) => (
               <option key={y} value={y}>
                 {y}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-slate-600 mb-1">
-            Major
-          </label>
-          <select
-            value={intendedMajorId}
-            onChange={(e) => setIntendedMajorId(e.target.value)}
-            className="w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 focus:border-brand-blue focus:outline-none focus:ring-1 focus:ring-brand-blue"
-          >
-            <option value="">Select major</option>
-            {UNDERGRAD_MAJORS.map((major) => (
-              <option key={major} value={major}>
-                {major}
               </option>
             ))}
           </select>

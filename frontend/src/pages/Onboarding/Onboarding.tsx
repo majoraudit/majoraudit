@@ -3,9 +3,9 @@ import { useNavigate } from "react-router-dom";
 import { useUser } from "@/contexts/UserContext";
 import { useWorksheetManager } from "@/hooks/useWorksheetManager";
 import { apiCreateSemester } from "@/api/semesters";
+import { apiUpdateProfile } from "@/api/auth";
 import {
   CLASS_YEARS,
-  UNDERGRAD_MAJORS,
   LANGUAGE_SUBJECTS,
   LANGUAGE_LEVELS,
 } from "@/constants/onboarding";
@@ -47,12 +47,7 @@ function Onboarding() {
   const { createWorksheet } = useWorksheetManager();
   const navigate = useNavigate();
 
-  const [first_name, setFirst_name] = useState(userData?.first_name ?? "");
-  const [last_name, setLast_name] = useState(userData?.last_name ?? "");
   const [classYear, setClassYear] = useState(userData?.classYear ?? "");
-  const [intendedMajorId, setIntendedMajorId] = useState(
-    userData?.intendedMajorId ?? "",
-  );
   const [intendedLanguageCode, setIntendedLanguageCode] = useState(
     userData?.intendedLanguageCode ?? "",
   );
@@ -64,11 +59,22 @@ function Onboarding() {
     e.preventDefault();
     if (!userData) return;
 
-    // 1. Create worksheet — returns real ID directly, no state read needed
+    // 1. Persist profile fields to backend
+    try {
+      await apiUpdateProfile({
+        class_year: classYear ? parseInt(classYear) : null,
+        intended_language_code: intendedLanguageCode || "",
+        language_requirement: languageLevel,
+      });
+    } catch (err) {
+      console.error("Failed to save profile during onboarding", err);
+    }
+
+    // 2. Create worksheet — returns real ID directly, no state read needed
     const newWorksheet = await createWorksheet("Main Worksheet");
     if (!newWorksheet) return;
 
-    // 2. Create semesters directly via API using the returned ID
+    // 3. Create semesters directly via API using the returned ID
     const semesterTemplates = classYear
       ? generateSemesters(parseInt(classYear))
       : [];
@@ -83,7 +89,7 @@ function Onboarding() {
       ),
     );
 
-    // 3. Map into frontend shape
+    // 4. Map into frontend shape
     const studentSemesters: StudentSemester[] = createdSemesters.map(
       (s, i) => ({
         id: s.id,
@@ -97,15 +103,12 @@ function Onboarding() {
       }),
     );
 
-    // 4. Patch semesters + profile fields in one setUserData call
+    // 5. Patch local state with new semesters + profile fields
     setUserData((prev) => {
       if (!prev) return prev;
       return {
         ...prev,
-        first_name: first_name.trim() || prev.first_name,
-        last_name: last_name.trim() || prev.last_name,
         classYear: classYear || undefined,
-        intendedMajorId: intendedMajorId || undefined,
         intendedLanguageCode: intendedLanguageCode || undefined,
         FYP: {
           ...prev.FYP,
@@ -131,28 +134,6 @@ function Onboarding() {
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label className="block text-sm font-medium text-slate-700 mb-1">
-            First name
-          </label>
-          <input
-            type="text"
-            value={first_name}
-            onChange={(e) => setFirst_name(e.target.value)}
-            className="w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 focus:border-brand-blue focus:outline-none focus:ring-1 focus:ring-brand-blue"
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1">
-            Last name
-          </label>
-          <input
-            type="text"
-            value={last_name}
-            onChange={(e) => setLast_name(e.target.value)}
-            className="w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 focus:border-brand-blue focus:outline-none focus:ring-1 focus:ring-brand-blue"
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1">
             Expected graduation year
           </label>
           <select
@@ -164,23 +145,6 @@ function Onboarding() {
             {CLASS_YEARS.map((y) => (
               <option key={y} value={y}>
                 {y}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1">
-            Major
-          </label>
-          <select
-            value={intendedMajorId}
-            onChange={(e) => setIntendedMajorId(e.target.value)}
-            className="w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 focus:border-brand-blue focus:outline-none focus:ring-1 focus:ring-brand-blue"
-          >
-            <option value="">Select major</option>
-            {UNDERGRAD_MAJORS.map((major) => (
-              <option key={major} value={major}>
-                {major}
               </option>
             ))}
           </select>

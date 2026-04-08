@@ -152,13 +152,14 @@ export function useWorksheetData() {
   return completedStudentCourses.length;
 }, [completedStudentCourses]);
 
+// Counts come from the backend-fetched worksheet.majors list. We don't
+// distinguish "Major" vs "Certificate" type yet — treat all as majors.
+// (To split, we'd need to read each major's <id>.json metadata.)
 const majorCount = useMemo(() => {
-  return activeWorksheet ? (userData?.FYP?.statCount?.majorNum ?? 0) : 0;
-}, [userData?.FYP?.statCount?.majorNum, activeWorksheet]);
+  return activeWorksheet?.majors?.length ?? 0;
+}, [activeWorksheet?.majors]);
 
-const certificateCount = useMemo(() => {
-  return activeWorksheet ? (userData?.FYP?.statCount?.certificateNum ?? 0) : 0;
-}, [userData?.FYP?.statCount?.certificateNum, activeWorksheet]);
+const certificateCount = 0;
 
   return {
     // raw worksheet

@@ -1,8 +1,9 @@
 from django.urls import path
-from .views import MajorListView, MajorIDView, check_major_status
+from .views import MajorListView, MajorIDView, MajorPreviewView
 
 urlpatterns = [
     path('', MajorListView.as_view(), name='major-list'),
-    path('check/', check_major_status, name='check-major-status'),
+    path('<str:major_id>/<str:degree_type>/preview/',
+         MajorPreviewView.as_view(), name='major-preview'),
     path('<str:major_id>/', MajorIDView.as_view(), name='major-id'),
 ]

@@ -7,6 +7,11 @@ from .views import (
     UserWorksheetClassListCreateView,
     UserWorksheetClassDetailView,
 )
+from majors.views import (
+    WorksheetMajorListCreateView,
+    WorksheetMajorDetailView,
+    WorksheetAuditView,
+)
 
 urlpatterns = [
     path('', UserWorksheetListCreateView.as_view(), name='worksheet-list'),
@@ -21,4 +26,12 @@ urlpatterns = [
          UserWorksheetClassListCreateView.as_view(), name='semester-class-list'),
     path('<int:worksheet_pk>/semesters/<int:semester_pk>/classes/<int:pk>/',
          UserWorksheetClassDetailView.as_view(), name='semester-class-detail'),
+
+    path('<int:worksheet_pk>/majors/',
+         WorksheetMajorListCreateView.as_view(), name='ws-major-list'),
+    path('<int:worksheet_pk>/majors/<int:pk>/',
+         WorksheetMajorDetailView.as_view(), name='ws-major-detail'),
+
+    path('<int:worksheet_pk>/audit/',
+         WorksheetAuditView.as_view(), name='worksheet-audit'),
 ]

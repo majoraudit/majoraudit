@@ -1,5 +1,6 @@
 
 import {type MajorTemplate, type MajorProgress} from "./type-program";
+import type { WorksheetMajor } from "@/api/worksheetMajors";
 
 export interface Course {
   id: string;
@@ -14,7 +15,7 @@ export interface Course {
 
 export interface StudentCourse {
   worksheetClassId?: number;
-  course: Course; 	
+  course: Course;
 	term: number; 		// 202401
   status: string; 	// "DA_COMPLETE" | "DA_PROSPECT" | "MA_VALID" | "MA_HYPOTHETICAL"
   manualFulfillInfo?: {manualFulfill: boolean, groupIdx: Number, itemIdx: Number}; // whether this course was manually added by the user
@@ -31,6 +32,8 @@ export interface StudentSemester {
 
 export interface Worksheet {
   id: string;
+  /** Majors selected for this worksheet, fetched from /api/worksheets/<id>/majors/. */
+  majors?: WorksheetMajor[];
   name: string;
   studentSemesters: StudentSemester[];
 }

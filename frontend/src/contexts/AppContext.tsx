@@ -2,7 +2,6 @@ import { type AppData } from "../types/type-program";
 import React, { useState, createContext, useContext, useEffect } from "react";
 import { loadCourses, CourseDatabase } from "../services/CourseDatabase";
 
-import { loadMajorTemplates, MajorProcessor } from "../services/MajorProcessor";
 import { useAuth } from "../contexts/AuthContext";
 
 import Loading from "@/pages/Loading/Loading";
@@ -69,13 +68,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
           .getAllCourses()
           .filter((c) => c.credit != 0);
 
-        const major_processor = new MajorProcessor(course_database);
-
         setAppData({
           courses,
           major_templates: major_templates,
           course_database,
-          major_processor,
         });
       } catch (e) {
         console.error(e);

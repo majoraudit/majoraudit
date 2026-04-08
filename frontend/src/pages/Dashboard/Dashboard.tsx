@@ -2,7 +2,6 @@ import { formatC_P_UP } from "@/utils/formatHelpers";
 import type { MajorProgress } from "../../types/type-program";
 
 import { useUser } from "@/contexts/UserContext";
-import { useApp } from "@/contexts/AppContext";
 
 import MajorRequirementList from "./components/MajorRequirementList";
 import MajorRequirementGraph from "./components/MajorRequirementGraph";
@@ -11,13 +10,16 @@ import DashboardInsightGrid from "./components/DashboardInsightGrid";
 import checkIcon from "./assets/check.svg";
 import trashcan from "./assets/trashcan.svg";
 
-import { useMemo, useEffect } from "react";
+import { useMemo, useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 
 import { useWorksheetManager } from "@/hooks/useWorksheetManager";
 import { useWorksheetActions } from "@/hooks/useWorksheetActions";
 import { useWorksheetData } from "@/hooks/useWorksheetData";
 import { useProgramNavigation } from "./hooks/useProgramNavigation";
+
+import { apiFetchAudit, type MajorAudit } from "@/api/audit";
+import { auditToMajorProgress } from "@/services/auditToMajorProgress";
 
 import {
   DropdownMenu,
@@ -27,8 +29,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 function Dashboard() {
-  const { userData, setUserData } = useUser();
-  const { appData } = useApp();
+  const { userData } = useUser();
 
   const { worksheets, activeWorksheetId, setActiveWorksheet } =
     useWorksheetManager();
@@ -45,13 +46,15 @@ function Dashboard() {
 
   const graduationCreditsRequired = 36;
 
+  // Solver-driven audit results, fetched from the backend whenever the
+  // active worksheet or its courses change.
+  const [audits, setAudits] = useState<MajorAudit[]>([]);
+
   const activeMajorProgress: MajorProgress[] = useMemo(() => {
-    if (!userData) return [];
-    const dP = userData.FYP.degreeProgress2.find(
-      (w) => w.worksheetID === activeWorksheetId,
-    );
-    return dP?.majors ?? [];
-  }, [userData, activeWorksheetId]);
+    return audits
+      .map((a) => auditToMajorProgress(a))
+      .filter((m): m is MajorProgress => m !== null);
+  }, [audits]);
 
   const totalCompletedCredits = completedCredits;
 
@@ -87,65 +90,49 @@ function Dashboard() {
       activeProgramInProgressGroups,
   );
 
-  const handleRemoveMajor = () => {
-    console.log("Removing major/certificate...");
-    if (!userData) return;
+  // Resolve which raw audit corresponds to the currently visible program
+  // (needed for remove, since `activeProgram` is a synthesized shim).
+  const activeAudit = useMemo(() => {
+    if (!activeProgram) return null;
+    return (
+      audits.find(
+        (a) => `${a.major_id}_${a.degree_type}` === activeProgram.id,
+      ) ?? null
+    );
+  }, [audits, activeProgram]);
 
-    // Compute the next user snapshot after removal
-    const res = removeProgram(activeProgram);
-    if (!res.ok) {
-      return;
-    }
-    nav.afterRemove({
-      majorCount: majorCount,
-      certificateCount: certificateCount,
-    });
+  const handleRemoveMajor = async () => {
+    if (!userData || !activeAudit) return;
+    const res = await removeProgram(activeAudit.major_id, activeAudit.degree_type);
+    if (!res.ok) return;
+    nav.afterRemove({ majorCount, certificateCount });
   };
 
+  // Fetch audit from the backend solver whenever the active worksheet or
+  // its courses change. Replaces the legacy greedy MajorProcessor flow.
   useEffect(() => {
-    if (!appData?.major_processor) return;
-
-    setUserData((currentUserData) => {
-      if (
-        !currentUserData?.FYP?.degreeProgress2 ||
-        !currentUserData?.FYP?.worksheets
-      ) {
-        return currentUserData;
-      }
-
-      const updatedDegreeProgress2 = currentUserData.FYP.degreeProgress2.map(
-        (entry) => {
-          const worksheet = currentUserData.FYP.worksheets.find(
-            (ws) => ws.id === entry.worksheetID,
-          );
-          if (!worksheet) return entry;
-          const updatedMajors = entry.majors
-            .map((major) =>
-              appData.major_processor.updateMajorProgress(major, worksheet),
-            )
-            .filter((m): m is MajorProgress => m !== undefined);
-
-          return {
-            ...entry,
-            majors: updatedMajors,
-          };
-        },
-      );
-
-      return {
-        ...currentUserData,
-        FYP: {
-          ...currentUserData.FYP,
-          degreeProgress2: updatedDegreeProgress2,
-        },
-      };
-    });
-  }, [
-    userData?.FYP?.worksheets,
-    appData?.major_processor,
-    activeWorksheetId,
-    setUserData,
-  ]);
+    if (!activeWorksheetId) {
+      setAudits([]);
+      return;
+    }
+    const wsId = Number(activeWorksheetId);
+    if (Number.isNaN(wsId)) {
+      setAudits([]);
+      return;
+    }
+    let cancelled = false;
+    apiFetchAudit(wsId)
+      .then((result) => {
+        if (!cancelled) setAudits(result);
+      })
+      .catch((e) => {
+        console.error("audit fetch failed", e);
+        if (!cancelled) setAudits([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [activeWorksheetId, userData?.FYP?.worksheets]);
 
   return (
     <>

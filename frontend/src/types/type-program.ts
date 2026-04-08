@@ -1,8 +1,6 @@
 
 import { type Course, type StudentCourse } from "./type-user";
 import { CourseDatabase } from "../services/CourseDatabase";
-import type { MajorProcessor } from "../services/MajorProcessor";
-// also have to import MajorResolver
 
 interface DUS {
 	name: string[];
@@ -171,7 +169,6 @@ export interface MajorProgress extends MajorTemplate {
 
 export interface AppData {
 	courses: Course[];
-	major_templates: {id: string; name: string}[]; // changed from MajorTemplate to string
+	major_templates: {id: string; name: string}[];
 	course_database: CourseDatabase;
-	major_processor: MajorProcessor;
 }

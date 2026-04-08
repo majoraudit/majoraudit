@@ -14,7 +14,13 @@ import { useState, useEffect, useMemo, useCallback } from "react";
 import SidebarLayout from "@/components/shared-components/SidebarLayout";
 
 import { useAuth } from "@/contexts/AuthContext";
-import { apiFetchMajorTemplate } from "@/api/majors";
+import {
+  apiFetchMajorTemplate,
+  apiFetchMajorPreview,
+  type MajorPreview,
+} from "@/api/majors";
+import type { RequirementResult } from "@/api/audit";
+import { formatSelector, formatQuantity } from "@/services/formatMQL";
 
 import {
   DropdownMenu,
@@ -23,7 +29,7 @@ import {
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
 
-import { Plus } from "lucide-react";
+import { Plus, Check, Loader2 } from "lucide-react";
 
 // Converts a specialization filename into a display label
 // e.g. "computer_science_bs_ms.mql" with major id "computer_science" → "BS/MS"
@@ -31,13 +37,22 @@ function specializationLabel(
   specializationFile: string,
   majorId: string,
 ): string {
-  const withoutMajor = specializationFile
-    .replace(`${majorId}_`, "")
-    .replace(".mql", "");
-  return withoutMajor
+  return specializationDegreeType(specializationFile, majorId)
     .split("_")
     .map((s) => s.toUpperCase())
     .join("/");
+}
+
+// Extracts the degree-type slug from a specialization filename.
+// e.g. "computer_science_bs_ms.mql" with major id "computer_science" → "bs_ms"
+// This is the suffix the backend WorksheetMajor.degree_type column expects.
+function specializationDegreeType(
+  specializationFile: string,
+  majorId: string,
+): string {
+  return specializationFile
+    .replace(`${majorId}_`, "")
+    .replace(".mql", "");
 }
 
 // Major info shape returned by the backend
@@ -77,6 +92,186 @@ function Programs() {
   );
   const [searchTerm, setSearchTerm] = useState("");
   const [isLoadingTemplate, setIsLoadingTemplate] = useState(false);
+  const [isAddingProgram, setIsAddingProgram] = useState(false);
+  const [addError, setAddError] = useState<string | null>(null);
+
+  // Clear add-error when the user changes selection
+  useEffect(() => {
+    setAddError(null);
+  }, [selectedMajorInfo?.id, selectedSpecialization, activeWorksheetId]);
+
+  // Is the currently-selected (major, degree_type) pair already on the active worksheet?
+  const selectedDegreeType = useMemo(() => {
+    if (!selectedMajorInfo || !selectedSpecialization) return null;
+    return specializationDegreeType(
+      selectedSpecialization,
+      selectedMajorInfo.id,
+    );
+  }, [selectedMajorInfo, selectedSpecialization]);
+
+  const alreadyAdded = useMemo(() => {
+    if (!selectedMajorInfo || !selectedDegreeType) return false;
+    return (
+      activeWorksheet?.majors?.some(
+        (m) =>
+          m.major_id === selectedMajorInfo.id &&
+          m.degree_type === selectedDegreeType,
+      ) ?? false
+    );
+  }, [activeWorksheet?.majors, selectedMajorInfo, selectedDegreeType]);
+
+  const handleAddProgram = useCallback(async () => {
+    if (!selectedMajorInfo || !selectedDegreeType) return;
+    if (!activeWorksheetId) {
+      setAddError("Select a worksheet first.");
+      return;
+    }
+    if (alreadyAdded) return;
+
+    setIsAddingProgram(true);
+    setAddError(null);
+    try {
+      const res = await addProgram(selectedMajorInfo.id, selectedDegreeType);
+      if (!res.ok) {
+        setAddError(res.error ?? "Failed to add program.");
+      }
+    } catch (e: any) {
+      setAddError(String(e?.message ?? e));
+    } finally {
+      setIsAddingProgram(false);
+    }
+  }, [
+    selectedMajorInfo,
+    selectedDegreeType,
+    activeWorksheetId,
+    alreadyAdded,
+    addProgram,
+  ]);
+
+  // ---- MQL preview cache ---------------------------------------------------
+  // Keyed on `${major_id}|${degree_type}|${worksheet_id}|${courses_fp}`. The
+  // course fingerprint is a stable hash of the worksheet's current course list
+  // (sorted UserWorksheetClass ids), so cache entries automatically invalidate
+  // whenever a course is added or removed on the active worksheet.
+
+  const [previewCache, setPreviewCache] = useState<Map<string, MajorPreview>>(
+    () => new Map(),
+  );
+  const [isLoadingPreviews, setIsLoadingPreviews] = useState(false);
+
+  // Stable hash of the active worksheet's courses. Sorting makes it
+  // independent of insertion order; missing ids are skipped (only happens for
+  // optimistically-added courses that haven't yet been persisted).
+  const courseFingerprint = useMemo(() => {
+    if (!activeWorksheet) return "no-ws";
+    const ids: number[] = [];
+    for (const sem of activeWorksheet.studentSemesters ?? []) {
+      for (const sc of sem.studentCourses ?? []) {
+        if (sc.worksheetClassId != null) ids.push(sc.worksheetClassId);
+      }
+    }
+    ids.sort((a, b) => a - b);
+    return ids.length === 0 ? "empty" : ids.join(",");
+  }, [activeWorksheet]);
+
+  const cacheKey = (
+    majorId: string,
+    degreeType: string,
+    worksheetId: number | undefined,
+    fp: string,
+  ) => `${majorId}|${degreeType}|${worksheetId ?? "none"}|${fp}`;
+
+  // When the user clicks a major in the sidebar — or when the active
+  // worksheet's courses change — sequentially fetch previews for every
+  // variant of that major. The toggle (BA/BS/...) is a pure cache lookup.
+  useEffect(() => {
+    if (!selectedMajorInfo) return;
+
+    const wsIdRaw = activeWorksheetId ? Number(activeWorksheetId) : undefined;
+    const wsId =
+      wsIdRaw != null && !Number.isNaN(wsIdRaw) ? wsIdRaw : undefined;
+
+    let cancelled = false;
+
+    (async () => {
+      setIsLoadingPreviews(true);
+      try {
+        for (const specFile of selectedMajorInfo.specializations ?? []) {
+          const degreeType = specializationDegreeType(
+            specFile,
+            selectedMajorInfo.id,
+          );
+          const key = cacheKey(
+            selectedMajorInfo.id,
+            degreeType,
+            wsId,
+            courseFingerprint,
+          );
+          if (previewCache.has(key)) continue;
+          try {
+            const preview = await apiFetchMajorPreview(
+              selectedMajorInfo.id,
+              degreeType,
+              wsId,
+            );
+            if (cancelled) return;
+            setPreviewCache((prev) => {
+              const next = new Map(prev);
+              next.set(key, preview);
+              return next;
+            });
+          } catch (e) {
+            console.error(
+              `preview fetch failed for ${selectedMajorInfo.id}_${degreeType}`,
+              e,
+            );
+          }
+        }
+      } finally {
+        if (!cancelled) setIsLoadingPreviews(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+    // previewCache is intentionally NOT in deps — we read it inside via .has()
+    // for de-duplication. Re-running on every successful fetch would loop.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedMajorInfo?.id, activeWorksheetId, courseFingerprint]);
+
+  // Currently-displayed preview, looked up from the cache.
+  const activePreview = useMemo(() => {
+    if (!selectedMajorInfo || !selectedDegreeType) return null;
+    const wsIdRaw = activeWorksheetId ? Number(activeWorksheetId) : undefined;
+    const wsId =
+      wsIdRaw != null && !Number.isNaN(wsIdRaw) ? wsIdRaw : undefined;
+    return (
+      previewCache.get(
+        cacheKey(
+          selectedMajorInfo.id,
+          selectedDegreeType,
+          wsId,
+          courseFingerprint,
+        ),
+      ) ?? null
+    );
+  }, [
+    previewCache,
+    selectedMajorInfo,
+    selectedDegreeType,
+    activeWorksheetId,
+    courseFingerprint,
+  ]);
+
+  // Audit results indexed by requirement description for fast lookup during render.
+  const reqResultsByDesc = useMemo(() => {
+    const m = new Map<string, RequirementResult>();
+    for (const r of activePreview?.solve_result?.per_requirement ?? []) {
+      m.set(r.description, r);
+    }
+    return m;
+  }, [activePreview]);
 
   // major_templates is now { id: string; name: string }[]
   // Sort by name directly
@@ -207,15 +402,49 @@ function Programs() {
             <section className="relative min-w-0 min-h-screen flex flex-col bg-white border-2 border-gray-200 p-6 rounded-xl shadow-md">
               {isAuthenticated && (
                 <button
-                  className="absolute top-6 right-6 rounded-full w-8 h-8 flex items-center justify-center text-center text-xl leading-none z-10 transition duration-300 ease-in-out bg-brand-blue text-white hover:scale-110"
-                  aria-label="Add"
-                  title="Add major"
-                  onClick={() => {
-                    // TODO: wire up addProgram with selected specialization once MQL parsing is implemented
-                  }}
+                  className={`absolute top-6 right-6 rounded-full w-8 h-8 flex items-center justify-center text-center text-xl leading-none z-10 transition duration-300 ease-in-out text-white
+                    ${
+                      alreadyAdded
+                        ? "bg-green-600 cursor-default"
+                        : isAddingProgram ||
+                          !selectedDegreeType ||
+                          !activeWorksheetId
+                          ? "bg-gray-400 cursor-not-allowed"
+                          : "bg-brand-blue hover:scale-110"
+                    }`}
+                  aria-label={
+                    alreadyAdded ? "Already added" : "Add major to worksheet"
+                  }
+                  title={
+                    alreadyAdded
+                      ? "Already on this worksheet"
+                      : !activeWorksheetId
+                        ? "Select a worksheet first"
+                        : !selectedDegreeType
+                          ? "Select a degree type first"
+                          : "Add major to worksheet"
+                  }
+                  disabled={
+                    alreadyAdded ||
+                    isAddingProgram ||
+                    !selectedDegreeType ||
+                    !activeWorksheetId
+                  }
+                  onClick={handleAddProgram}
                 >
-                  <Plus size={18} />
+                  {alreadyAdded ? (
+                    <Check size={18} />
+                  ) : isAddingProgram ? (
+                    <Loader2 size={18} className="animate-spin" />
+                  ) : (
+                    <Plus size={18} />
+                  )}
                 </button>
+              )}
+              {addError && (
+                <div className="absolute top-16 right-6 z-10 max-w-[18rem] rounded-md bg-red-50 border border-red-200 px-3 py-2 text-xs text-red-700 shadow-sm">
+                  {addError}
+                </div>
               )}
 
               <div className="flex flex-col items-start min-w-0 pr-12">
@@ -380,20 +609,66 @@ function Programs() {
                 </DropdownMenu>
               </div>
 
-              {/* TODO: render MajorProgress requirements once MQL specialization parsing is implemented */}
-              <div className="flex flex-col items-center justify-center flex-1 text-gray-400 gap-2">
-                <p className="text-sm">
-                  Requirements for{" "}
-                  <span className="font-medium text-gray-600">
-                    {selectedMajorInfo.name}
-                    {selectedSpecialization
-                      ? ` (${specializationLabel(selectedSpecialization, selectedMajorInfo.id)})`
-                      : ""}
-                  </span>{" "}
-                  will appear here.
-                </p>
-                <p className="text-xs text-gray-400">Coming soon.</p>
-              </div>
+              {!activePreview ? (
+                <div className="flex items-center justify-center flex-1 text-gray-500 text-sm">
+                  {isLoadingPreviews
+                    ? "Loading requirements..."
+                    : "No requirements available."}
+                </div>
+              ) : (
+                <ul className="flex-1 overflow-y-auto space-y-3 pr-1">
+                  {activePreview.mql_file.requirements.map((req, i) => {
+                    const result = reqResultsByDesc.get(req.description);
+                    const satisfied = result?.satisfied ?? null;
+                    return (
+                      <li
+                        key={i}
+                        className={`rounded-md border-2 p-3 ${
+                          satisfied === true
+                            ? "border-green-300 bg-green-50"
+                            : satisfied === false
+                              ? "border-red-200 bg-red-50"
+                              : "border-gray-200 bg-gray-50"
+                        }`}
+                      >
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="font-medium text-gray-800">
+                            {req.description}
+                          </span>
+                          <span className="text-xs text-gray-500">
+                            pick {formatQuantity(req.query.quantity)}
+                          </span>
+                        </div>
+                        <ul className="text-sm space-y-1 ml-2">
+                          {req.query.selector.map((sel, j) => {
+                            const label = formatSelector(sel);
+                            const code =
+                              "Class" in sel
+                                ? `${sel.Class.department_id} ${sel.Class.course_number}`
+                                : null;
+                            const fulfilled = code
+                              ? (result?.selected.includes(code) ?? false)
+                              : false;
+                            return (
+                              <li
+                                key={j}
+                                className={
+                                  fulfilled
+                                    ? "text-green-700"
+                                    : "text-gray-700"
+                                }
+                              >
+                                • {label}
+                                {fulfilled && " ✓"}
+                              </li>
+                            );
+                          })}
+                        </ul>
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
             </section>
           </main>
         )}

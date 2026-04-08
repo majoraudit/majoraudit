@@ -45,3 +45,27 @@ class UserWorksheetClass(models.Model):
                 name="usercourse_exactly_one_fk"
             )
         ]
+
+
+class WorksheetMajor(models.Model):
+    """
+    A major (with degree type) selected for a specific worksheet.
+
+    `major_id` is a string matching the folder name under
+    `backend/major_templates/` (e.g. "computer_science"). `degree_type` is
+    the suffix used in MQL filenames (e.g. "ba", "bs", "bs_ms"). Together
+    they identify a single `<major_id>_<degree_type>.mql` file.
+    """
+    worksheet = models.ForeignKey(
+        UserWorksheet,
+        on_delete=models.CASCADE,
+        related_name='worksheet_majors',
+    )
+    major_id = models.CharField(max_length=100)
+    degree_type = models.CharField(max_length=20)
+
+    class Meta:
+        unique_together = [('worksheet', 'major_id', 'degree_type')]
+
+    def __str__(self):
+        return f"{self.major_id}_{self.degree_type} (ws={self.worksheet_id})"

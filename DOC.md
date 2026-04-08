@@ -75,8 +75,6 @@ Login to the frontend with the "Login with CAS" button, then while in the backen
 
 > python manage.py shell
 > 
-> from authentication.models import CustomUser
-> 
 > user = CustomUser.objects.get(username='yournetid')
 > 
 > user.is_staff = True
