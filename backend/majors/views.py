@@ -509,6 +509,8 @@ class MajorIDMQLView(MajorOpView):
         path = self.build_safe_path(major_id, f"{specialization}.mql")
         
         if not path.is_file():
+            print(f"MQL template not found: {path}")
+            logger.warning(f"MQL template not found: {path}")
             raise NotFound("MQL template not found.")
         
         try:
@@ -520,6 +522,7 @@ class MajorIDMQLView(MajorOpView):
         try:
             result = pylibmql.parse(data).json()
         except Exception as e:
+            logger.error(f"Malformed MQL: {path}: {e}")
             raise ParseError(f"Malformed MQL: {e}")
         
         # parse the string into a dict before returning
