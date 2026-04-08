@@ -7,12 +7,18 @@ import bookIcon from "./assets/book.svg";
 
 import { useWorksheetManager } from "@/hooks/useWorksheetManager";
 import { useWorksheetActions } from "@/hooks/useWorksheetActions";
+import { useWorksheetData } from "@/hooks/useWorksheetData";
 
 import { useState, useEffect, useMemo, useCallback } from "react";
 import SidebarLayout from "@/components/shared-components/SidebarLayout";
 
 import { useAuth } from "@/contexts/AuthContext";
-import { apiFetchMajorTemplate, apiFetchMajorMQL } from "@/api/majors";
+import {
+  apiFetchMajorTemplate,
+  apiFetchMajorMQL,
+  apiRunAudit,
+} from "@/api/majors";
+import type { AuditResult } from "@/api/majors";
 
 import type {
   MQLQueryFile,
@@ -57,14 +63,10 @@ function formatSelector(sel: Selector): string {
     return `${formatClass(sel.RangeTag.from)} – ${formatClass(sel.RangeTag.to)} [${sel.RangeTag.tag}]`;
   if ("Query" in sel) {
     const inner = sel.Query;
-    const quantity = formatQuantity(inner.quantity);
-    const selectors = inner.selector.map(formatSelector).join(" or ");
-    return `${quantity} from: ${selectors}`;
+    return `${formatQuantity(inner.quantity)} from: ${inner.selector.map(formatSelector).join(" or ")}`;
   }
   return "";
 }
-
-// ---------- Specialization label ----------
 
 function specializationLabel(
   specializationFile: string,
@@ -98,6 +100,8 @@ interface MajorInfo {
   specializations: string[];
 }
 
+// ---------- Requirement card with audit ----------
+
 function SelectorItem({ sel }: { sel: Selector }) {
   if ("Query" in sel) {
     const inner = sel.Query;
@@ -114,7 +118,6 @@ function SelectorItem({ sel }: { sel: Selector }) {
       </li>
     );
   }
-
   return (
     <li className="text-xs text-gray-700 bg-white border border-gray-200 rounded px-2 py-1 font-mono">
       {formatSelector(sel)}
@@ -122,14 +125,40 @@ function SelectorItem({ sel }: { sel: Selector }) {
   );
 }
 
-function RequirementCard({ req }: { req: MQLRequirement }) {
+interface RequirementCardProps {
+  req: MQLRequirement;
+  auditReq?: AuditResult["per_requirement"][number];
+}
+
+function RequirementCard({ req, auditReq }: RequirementCardProps) {
   const quantityLabel = formatQuantity(req.query.quantity);
   const isLimit = req.query.type === "Limit";
+  const satisfied = auditReq?.satisfied;
+  const selectedCourses = auditReq?.selected ?? [];
 
   return (
-    <div className="border border-gray-200 rounded-lg p-4 bg-gray-50 flex flex-col gap-2">
+    <div
+      className={`border rounded-lg p-4 flex flex-col gap-2 ${
+        auditReq === undefined
+          ? "border-gray-200 bg-gray-50"
+          : satisfied
+            ? "border-green-200 bg-green-50"
+            : "border-red-200 bg-red-50"
+      }`}
+    >
       <div className="flex items-center justify-between gap-2">
-        <p className="font-semibold text-gray-800 text-sm">{req.description}</p>
+        <div className="flex items-center gap-2">
+          {auditReq !== undefined && (
+            <span
+              className={`text-sm ${satisfied ? "text-green-600" : "text-red-500"}`}
+            >
+              {satisfied ? "✓" : "✗"}
+            </span>
+          )}
+          <p className="font-semibold text-gray-800 text-sm">
+            {req.description}
+          </p>
+        </div>
         <span
           className={`text-xs px-2 py-0.5 rounded-full font-medium whitespace-nowrap ${
             isLimit
@@ -140,11 +169,29 @@ function RequirementCard({ req }: { req: MQLRequirement }) {
           {isLimit ? "Limit" : "Select"} · {quantityLabel}
         </span>
       </div>
-      <ul className="flex flex-col gap-1">
-        {req.query.selector.map((sel, j) => (
-          <SelectorItem key={j} sel={sel} />
-        ))}
-      </ul>
+
+      {/* Show fulfilled courses if audit ran */}
+      {auditReq !== undefined && selectedCourses.length > 0 && (
+        <div className="flex flex-wrap gap-1 mt-1">
+          {selectedCourses.map((s, i) => (
+            <span
+              key={i}
+              className="text-xs bg-white border border-green-200 rounded px-2 py-0.5 text-green-700 font-medium"
+            >
+              {s.course_id}
+            </span>
+          ))}
+        </div>
+      )}
+
+      {/* Show selectors if not yet audited or not satisfied */}
+      {(auditReq === undefined || !satisfied) && (
+        <ul className="flex flex-col gap-1">
+          {req.query.selector.map((sel, j) => (
+            <SelectorItem key={j} sel={sel} />
+          ))}
+        </ul>
+      )}
     </div>
   );
 }
@@ -155,8 +202,10 @@ function Programs() {
   const { userData, setUserData } = useUser();
   const { appData } = useApp();
   const { isAuthenticated } = useAuth();
-  const { worksheets, activeWorksheetId } = useWorksheetManager();
+  const { worksheets, activeWorksheetId, activeWorksheet } =
+    useWorksheetManager();
   const { addProgram } = useWorksheetActions();
+  const { uniqueCourses } = useWorksheetData();
 
   const [selectedMajorInfo, setSelectedMajorInfo] = useState<MajorInfo | null>(
     null,
@@ -172,6 +221,8 @@ function Programs() {
   const [isLoadingTemplate, setIsLoadingTemplate] = useState(false);
   const [mqlData, setMqlData] = useState<MQLQueryFile | null>(null);
   const [isLoadingMQL, setIsLoadingMQL] = useState(false);
+  const [auditResult, setAuditResult] = useState<AuditResult | null>(null);
+  const [isLoadingAudit, setIsLoadingAudit] = useState(false);
 
   const sortedMajors = useMemo(() => {
     if (!appData?.major_templates) return [];
@@ -189,6 +240,26 @@ function Programs() {
         m.id.toLowerCase().includes(normalized),
     );
   }, [sortedMajors, searchTerm]);
+
+  const runAudit = useCallback(
+    async (majorId: string, specialization: string, mql: MQLQueryFile) => {
+      setIsLoadingAudit(true);
+      setAuditResult(null);
+      try {
+        const result = await apiRunAudit(
+          uniqueCourses,
+          appData!.course_database.getAllCourses(),
+          mql,
+        );
+        setAuditResult(result);
+      } catch (e) {
+        console.error("Audit failed:", e);
+      } finally {
+        setIsLoadingAudit(false);
+      }
+    },
+    [uniqueCourses],
+  );
 
   const handleSelectMajor = useCallback(
     async (majorId: string) => {
@@ -211,7 +282,6 @@ function Programs() {
     [appData, templateCache],
   );
 
-  // Add majorExists check
   const majorExists = useMemo(() => {
     if (!userData || !selectedMajorInfo || !selectedSpecialization)
       return false;
@@ -222,7 +292,6 @@ function Programs() {
     );
   }, [userData?.FYP.majors, selectedMajorInfo?.id, selectedSpecialization]);
 
-  // Add handler
   const handleAddMajor = async () => {
     if (!selectedMajorInfo || !selectedSpecialization) return;
     await addProgram(
@@ -235,6 +304,7 @@ function Programs() {
   useEffect(() => {
     if (!selectedMajorInfo || !selectedSpecialization) {
       setMqlData(null);
+      setAuditResult(null);
       return;
     }
 
@@ -243,22 +313,32 @@ function Programs() {
 
     if (mqlCache[cacheKey]) {
       setMqlData(mqlCache[cacheKey]);
-      return;
+      runAudit(selectedMajorInfo.id, specName, mqlCache[cacheKey]); // ← add this
+    } else {
+      setIsLoadingMQL(true);
+      apiFetchMajorMQL(selectedMajorInfo.id, specName)
+        .then((d) => {
+          const parsed = typeof d === "string" ? JSON.parse(d) : d;
+          setMqlCache((prev) => ({ ...prev, [cacheKey]: parsed }));
+          setMqlData(parsed);
+          runAudit(selectedMajorInfo.id, specName, parsed); // ← pass parsed MQL
+        })
+        .catch((e) => {
+          console.error("Failed to fetch MQL:", e);
+          setMqlData(null);
+        })
+        .finally(() => setIsLoadingMQL(false));
     }
 
-    setIsLoadingMQL(true);
-    apiFetchMajorMQL(selectedMajorInfo.id, specName)
-      .then((d) => {
-        console.log("MQL response:", JSON.stringify(d, null, 2));
-        setMqlCache((prev) => ({ ...prev, [cacheKey]: d }));
-        setMqlData(d);
-      })
-      .catch((e) => {
-        console.error("Failed to fetch MQL:", e);
-        setMqlData(null);
-      })
-      .finally(() => setIsLoadingMQL(false));
+    // Run audit whenever major/specialization changes
   }, [selectedMajorInfo?.id, selectedSpecialization]);
+
+  // Re-run audit when worksheet courses change
+  useEffect(() => {
+    if (!selectedMajorInfo || !selectedSpecialization || !mqlData) return;
+    const specName = selectedSpecialization.replace(".mql", "");
+    runAudit(selectedMajorInfo.id, specName, mqlData);
+  }, [activeWorksheetId, uniqueCourses.length]);
 
   // Load first major by default
   useEffect(() => {
@@ -273,6 +353,14 @@ function Programs() {
       FYP: { ...userData.FYP, activeWorksheetID: id ?? "" },
     });
   };
+
+  // Map audit results by description for quick lookup
+  const auditByDescription = useMemo(() => {
+    if (!auditResult) return {};
+    return Object.fromEntries(
+      auditResult.per_requirement.map((r) => [r.description, r]),
+    );
+  }, [auditResult]);
 
   if (!appData) return <div>Loading courses and majors...</div>;
 
@@ -343,11 +431,11 @@ function Programs() {
               {isAuthenticated && (
                 <button
                   className={`absolute top-6 right-6 rounded-full w-8 h-8 flex items-center justify-center text-center text-xl leading-none z-10 transition duration-300 ease-in-out
-      ${
-        majorExists
-          ? "bg-green-500 text-white cursor-default"
-          : "bg-brand-blue text-white hover:scale-110 cursor-pointer"
-      }`}
+                    ${
+                      majorExists
+                        ? "bg-green-500 text-white cursor-default"
+                        : "bg-brand-blue text-white hover:scale-110 cursor-pointer"
+                    }`}
                   aria-label={majorExists ? "Added" : "Add"}
                   title={majorExists ? "Already added" : "Add major"}
                   onClick={handleAddMajor}
@@ -371,7 +459,6 @@ function Programs() {
                 </div>
               </div>
 
-              {/* Specialization toggle */}
               {selectedMajorInfo.specializations?.length > 0 && (
                 <div className="mt-4 flex items-center gap-1">
                   <span className="text-sm font-medium text-gray-600 mr-2">
@@ -477,12 +564,33 @@ function Programs() {
               </div>
             </section>
 
-            {/* Right Panel — MQL Requirements */}
+            {/* Right Panel — Requirements + Audit */}
             <section className="min-w-0 min-h-screen flex flex-col bg-white p-6 border-2 border-gray-200 rounded-xl shadow-md">
               <div className="flex justify-between gap-4 items-center mb-4">
-                <h2 className="text-2xl font-bold text-gray-800">
-                  Requirements
-                </h2>
+                <div className="flex items-center gap-3">
+                  <h2 className="text-2xl font-bold text-gray-800">
+                    Requirements
+                  </h2>
+                  {/* Audit summary */}
+                  {auditResult && (
+                    <span
+                      className={`text-sm font-medium px-2 py-0.5 rounded-full ${
+                        auditResult.total_satisfied ===
+                        auditResult.per_requirement.length
+                          ? "bg-green-100 text-green-700"
+                          : "bg-yellow-100 text-yellow-700"
+                      }`}
+                    >
+                      {auditResult.total_satisfied}/
+                      {auditResult.per_requirement.length} satisfied
+                    </span>
+                  )}
+                  {isLoadingAudit && (
+                    <span className="text-xs text-gray-400">
+                      Running audit...
+                    </span>
+                  )}
+                </div>
 
                 <DropdownMenu>
                   <DropdownMenuTrigger className="flex items-center gap-2 px-3 py-2 border rounded-md bg-white text-sm font-medium shadow-sm hover:bg-gray-50 max-w-[16rem]">
@@ -520,8 +628,12 @@ function Programs() {
                 </div>
               ) : (
                 <div className="flex flex-col gap-3 overflow-y-auto">
-                  {mqlData.requirements.slice().map((req, i) => (
-                    <RequirementCard key={i} req={req} />
+                  {mqlData.requirements.map((req, i) => (
+                    <RequirementCard
+                      key={i}
+                      req={req}
+                      auditReq={auditByDescription[req.description]}
+                    />
                   ))}
                 </div>
               )}
