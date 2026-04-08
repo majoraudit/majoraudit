@@ -4,7 +4,7 @@ SELECT 5 FROM [
     CLASS(CPSC 2230),
     CLASS(CPSC 3230),
     SELECT 1 FROM [CLASS(CPSC 3650), CLASS(CPSC 3660)]
-] : "Core Classes" : 1
+] : "Core Classes" : 1;
 
 SELECT 6 FROM [
     RANGE(CPSC 2000 , CPSC 9999),
@@ -13,11 +13,11 @@ SELECT 6 FROM [
     RANGE(CPSC 2000 , CPSC 9999),
     RANGE(CPSC 2000 , CPSC 9999),
     RANGE(CPSC 2000 , CPSC 9999)
-] : "CS Electives (Intermediate/Advanced)" : 2
+] : "CS Electives (Intermediate/Advanced)" : 2;
 
 SELECT 1 FROM [
     CLASS(CPSC 4900)
-] : "Senior Project" : 3
+] : "Senior Project" : 3;
 
 SELECT 8 FROM [
     RANGE(CPSC 6000 , CPSC 6999),
@@ -28,4 +28,4 @@ SELECT 8 FROM [
     RANGE(CPSC 6000 , CPSC 6999),
     RANGE(CPSC 6000 , CPSC 6999),
     RANGE(CPSC 6000 , CPSC 6999)
-] : "Graduate Courses (Total 8)" : 4
+] : "Graduate Courses (Total 8)" : 4;
