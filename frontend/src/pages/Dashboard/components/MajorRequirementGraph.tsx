@@ -5,8 +5,7 @@ import type {
   Class,
   Selector,
 } from "@/types/schema/mql/mql";
-
-// ---------- Formatters ----------
+import type { AuditResult } from "@/api/majors";
 
 function formatClass(cls: Class): string {
   return `${cls.department_id} ${cls.course_number}${cls.lab ? " (Lab)" : ""}`;
@@ -37,18 +36,12 @@ function formatSelector(sel: Selector): string {
   return "";
 }
 
-// Flatten a requirement's selectors into individual "slots"
-// e.g. SELECT 3 FROM [...] → 3 slots, each showing the selector label
 function buildSlots(req: MQLRequirement): string[] {
   const count =
     "Single" in req.query.quantity
       ? req.query.quantity.Single
       : req.query.quantity.Many.from;
-
   const selectors = req.query.selector;
-
-  // If we have exactly `count` selectors, each selector = one slot
-  // If we have fewer selectors (e.g. RANGE repeated), repeat the label
   const slots: string[] = [];
   for (let i = 0; i < count; i++) {
     const sel = selectors[i] ?? selectors[selectors.length - 1];
@@ -57,19 +50,36 @@ function buildSlots(req: MQLRequirement): string[] {
   return slots;
 }
 
-// ---------- Single requirement column (for graph) ----------
-
 interface RequirementColumnProps {
   req: MQLRequirement;
+  auditReq?: AuditResult["per_requirement"][number];
 }
 
-function RequirementColumn({ req }: RequirementColumnProps) {
+function RequirementColumn({ req, auditReq }: RequirementColumnProps) {
   const slots = buildSlots(req);
   const quantityLabel = formatQuantity(req.query.quantity);
+  const satisfied = auditReq?.satisfied;
+  const selectedCourses = auditReq?.selected ?? [];
+
+  const headerBg =
+    auditReq === undefined
+      ? "bg-gray-100 border-gray-200"
+      : satisfied
+        ? "bg-green-50 border-green-200"
+        : "bg-red-50 border-red-200";
 
   return (
-    <div className="bg-gray-100 border-gray-200 border-2 p-2 flex flex-col flex-1 min-h-0 min-w-48">
+    <div
+      className={`border-2 p-2 flex flex-col flex-1 min-h-0 min-w-48 ${headerBg}`}
+    >
       <div className="font-medium mb-1 mt-1 shrink-0 flex items-center justify-center gap-1">
+        {auditReq !== undefined && (
+          <span
+            className={`text-sm ${satisfied ? "text-green-600" : "text-red-500"}`}
+          >
+            {satisfied ? "✓" : "✗"}
+          </span>
+        )}
         <span className="truncate whitespace-nowrap overflow-hidden text-ellipsis max-w-[70%] text-center text-sm">
           {req.description}
         </span>
@@ -79,14 +89,31 @@ function RequirementColumn({ req }: RequirementColumnProps) {
       </div>
 
       <div className="flex flex-col flex-1 min-h-0 overflow-y-auto gap-2">
-        {slots.map((label, i) => (
-          <div
-            key={i}
-            className="h-20 p-2 m-1 rounded-md flex items-center justify-center flex-none bg-gray-200 border-2 border-dashed border-gray-300 text-gray-400"
-          >
-            <div className="text-xs text-center font-mono">{label}</div>
-          </div>
-        ))}
+        {slots.map((label, i) => {
+          const fulfilledBy = selectedCourses[i]?.course_id;
+          return (
+            <div
+              key={i}
+              className={`h-20 p-2 m-1 rounded-md flex flex-col items-center justify-center flex-none border-2 text-xs text-center
+                ${
+                  fulfilledBy
+                    ? "bg-green-100 border-green-300 text-green-800"
+                    : auditReq !== undefined
+                      ? "bg-red-50 border-dashed border-red-200 text-red-400"
+                      : "bg-gray-200 border-dashed border-gray-300 text-gray-400"
+                }`}
+            >
+              {fulfilledBy ? (
+                <>
+                  <span className="font-bold">{fulfilledBy}</span>
+                  <span className="font-mono opacity-60 mt-0.5">{label}</span>
+                </>
+              ) : (
+                <span className="font-mono">{label}</span>
+              )}
+            </div>
+          );
+        })}
       </div>
     </div>
   );
@@ -94,9 +121,13 @@ function RequirementColumn({ req }: RequirementColumnProps) {
 
 interface MajorRequirementGraphProps {
   mqlData: MQLQueryFile;
+  auditResult?: AuditResult | null;
 }
 
-function MajorRequirementGraph({ mqlData }: MajorRequirementGraphProps) {
+function MajorRequirementGraph({
+  mqlData,
+  auditResult,
+}: MajorRequirementGraphProps) {
   if (!mqlData?.requirements?.length) {
     return (
       <div className="flex items-center justify-center flex-1 text-gray-400 text-sm">
@@ -105,10 +136,20 @@ function MajorRequirementGraph({ mqlData }: MajorRequirementGraphProps) {
     );
   }
 
+  const auditByDescription = auditResult
+    ? Object.fromEntries(
+        auditResult.per_requirement.map((r) => [r.description, r]),
+      )
+    : {};
+
   return (
     <div className="flex flex-row items-stretch gap-2 w-full flex-1 min-h-0 overflow-x-auto">
       {mqlData.requirements.map((req, i) => (
-        <RequirementColumn key={i} req={req} />
+        <RequirementColumn
+          key={i}
+          req={req}
+          auditReq={auditByDescription[req.description]}
+        />
       ))}
     </div>
   );

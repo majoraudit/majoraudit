@@ -1,8 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
-import type { MajorProgress } from "@/types/type-program";
 import type { StudentSemester } from "@/types/type-user";
-import { formatCourseItemTypes } from "@/utils/formatHelpers";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,13 +8,7 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  AlertTriangle,
-  GraduationCap,
-  Layers3,
-  MoveRight,
-  Sparkles,
-} from "lucide-react";
+import { AlertTriangle, GraduationCap, Sparkles } from "lucide-react";
 
 export type DashboardWidgetId =
   | "risk-status"
@@ -27,8 +19,13 @@ export type DashboardWidgetId =
   | "program-progress"
   | "courses-completed"
   | "credits-remaining"
-  | "distribution-progress"
   | "gpa-overview";
+
+type AuditProgramMetrics = {
+  completed: number;
+  total: number;
+  inProgress: number;
+};
 
 type DashboardInsightGridProps = {
   activeWorksheetId: string | null;
@@ -38,8 +35,8 @@ type DashboardInsightGridProps = {
   completedCourseCount: number;
   totalCourseCount: number;
   semesters: StudentSemester[];
-  activeProgram: MajorProgress | null;
-  degreeProgram: MajorProgress | null;
+  auditProgramMetrics?: AuditProgramMetrics;
+  activeProgramName?: string;
 };
 
 type DashboardMetrics = {
@@ -63,19 +60,6 @@ type DashboardMetrics = {
   riskLevel: "on-track" | "at-risk" | "off-track";
   riskHeadline: string;
   riskDetail: string;
-  recommendationTitle: string;
-  recommendationDetail: string;
-  flexibilityPercent: number;
-  flexibilityLabel: string;
-  flexibilityCounts: {
-    flexible: number;
-    fixed: number;
-    totalRemaining: number;
-  };
-  distributionGroups: Array<{
-    label: string;
-    completed: boolean;
-  }>;
   activeProgramName: string;
   activeProgramCompletedGroups: number;
   activeProgramTotalGroups: number;
@@ -89,13 +73,13 @@ type WidgetDefinition = {
   render: (metrics: DashboardMetrics) => ReactNode;
 };
 
-const WIDGET_STORAGE_KEY = "dashboard-insight-slots-v1";
+const WIDGET_STORAGE_KEY = "dashboard-insight-slots-v2";
 
 const DEFAULT_WIDGETS: DashboardWidgetId[] = [
   "risk-status",
-  "next-recommendation",
   "progress-velocity",
-  "flexibility-meter",
+  "credits-progress",
+  "program-progress",
 ];
 
 function clampPercentage(value: number) {
@@ -104,7 +88,6 @@ function clampPercentage(value: number) {
 
 function getWidgetSelections(): Record<string, DashboardWidgetId[]> {
   if (typeof window === "undefined") return {};
-
   try {
     const raw = window.localStorage.getItem(WIDGET_STORAGE_KEY);
     if (!raw) return {};
@@ -122,35 +105,12 @@ function getSlotWidgets(
     ? widgetSelections[worksheetId]
     : undefined;
   const fallbackWidgets = [...DEFAULT_WIDGETS];
-
-  if (!selectedWidgets || selectedWidgets.length === 0) {
-    return fallbackWidgets;
-  }
-
-  return fallbackWidgets.map(
-    (defaultWidget, index) => selectedWidgets[index] ?? defaultWidget,
-  );
-}
-
-function getCourseTypeMood(type: string) {
-  switch (type) {
-    case "single-choice":
-      return "fixed";
-    case "multi-choice":
-    case "combo-choice":
-    case "range-choice":
-    case "level-choice":
-    case "category-choice":
-    case "designation-choice":
-      return "flexible";
-    default:
-      return "fixed";
-  }
+  if (!selectedWidgets || selectedWidgets.length === 0) return fallbackWidgets;
+  return fallbackWidgets.map((d, i) => selectedWidgets[i] ?? d);
 }
 
 function getShortSemesterLabel(label: string) {
   if (!label) return "Term";
-
   const [first] = label.split(" ");
   if (!first) return "Term";
   return first.slice(0, 3);
@@ -163,8 +123,8 @@ function computeMetrics({
   completedCourseCount,
   totalCourseCount,
   semesters,
-  activeProgram,
-  degreeProgram,
+  auditProgramMetrics,
+  activeProgramName,
 }: Omit<DashboardInsightGridProps, "activeWorksheetId">): DashboardMetrics {
   const plannedCredits = Math.max(0, totalCredits - completedCredits);
   const creditsRemaining = Math.max(
@@ -175,15 +135,12 @@ function computeMetrics({
     graduationCreditsRequired > 0
       ? completedCredits / graduationCreditsRequired
       : 0;
-
   const plannedCourseCount = Math.max(
     0,
     totalCourseCount - completedCourseCount,
   );
 
-  const completedSemesters = semesters.filter(
-    (semester) => semester.isCompleted,
-  );
+  const completedSemesters = semesters.filter((s) => s.isCompleted);
   const targetCreditsPerSemester = graduationCreditsRequired / 8;
   const averageCreditsPerCompletedSemester =
     completedSemesters.length > 0
@@ -194,8 +151,7 @@ function computeMetrics({
     key: `${semester.season}`,
     shortLabel: getShortSemesterLabel(semester.title),
     credits: semester.studentCourses.reduce(
-      (total, studentCourse) =>
-        total + Number(studentCourse.course?.credit ?? 0),
+      (total, sc) => total + Number(sc.course?.credit ?? 0),
       0,
     ),
     isCompleted: semester.isCompleted,
@@ -204,18 +160,6 @@ function computeMetrics({
   const expectedCompletionRatio =
     completedSemesters.length > 0 ? completedSemesters.length / 8 : 0;
   const creditGap = completedCreditRatio - expectedCompletionRatio;
-
-  const activeProgramCompletedGroups =
-    activeProgram?.totalCompletedRequirementGroups ?? 0;
-  const activeProgramTotalGroups = activeProgram?.totalRequirementGroups ?? 0;
-  const activeProgramInProgressGroups =
-    activeProgram?.requirements.filter(
-      (group) => !group.isCompleted && group.completedNum > 0,
-    ).length ?? 0;
-  const programCompletionRatio =
-    activeProgramTotalGroups > 0
-      ? activeProgramCompletedGroups / activeProgramTotalGroups
-      : 0;
 
   let riskLevel: DashboardMetrics["riskLevel"] = "on-track";
   let riskHeadline = "Your current pace is healthy";
@@ -239,59 +183,13 @@ function computeMetrics({
       ? `${totalCredits.toFixed(0)} of ${graduationCreditsRequired} credits are already planned.`
       : `Average pace is ${averageCreditsPerCompletedSemester.toFixed(1)} credits per completed term against a ${targetCreditsPerSemester.toFixed(1)} target.`;
 
-  const incompleteGroups =
-    activeProgram?.requirements
-      .filter((group) => !group.isCompleted)
-      .map((group) => ({
-        group,
-        remaining: Math.max(1, group.requiredNum - group.completedNum),
-      }))
-      .sort((a, b) => a.remaining - b.remaining) ?? [];
-
-  let recommendationTitle = "No open recommendations";
-  let recommendationDetail = "This program currently looks fully satisfied.";
-
-  if (incompleteGroups.length > 0) {
-    const nextGroup = incompleteGroups[0].group;
-    const labels = formatCourseItemTypes(nextGroup);
-    const firstIncompleteItem = nextGroup.courseItems.find(
-      (item) => !item.isCompleted,
-    );
-    const firstIncompleteLabel =
-      labels[nextGroup.courseItems.findIndex((item) => !item.isCompleted)] ??
-      "Review open requirement options";
-
-    recommendationTitle = nextGroup.description;
-    recommendationDetail = firstIncompleteItem
-      ? `${firstIncompleteLabel} is the fastest open requirement to close next.`
-      : `${nextGroup.requiredNum - nextGroup.completedNum} item(s) remain in this group.`;
-  }
-
-  const remainingItems =
-    activeProgram?.requirements.flatMap((group) =>
-      group.courseItems.filter((item) => !item.isCompleted),
-    ) ?? [];
-  const flexibleCount = remainingItems.filter(
-    (item) => getCourseTypeMood(item.type) === "flexible",
-  ).length;
-  const fixedCount = remainingItems.length - flexibleCount;
-  const totalRemainingItems = remainingItems.length;
-  const flexibilityPercent =
-    totalRemainingItems > 0 ? flexibleCount / totalRemainingItems : 1;
-  const flexibilityLabel =
-    totalRemainingItems === 0
-      ? "Wrapped up"
-      : flexibilityPercent >= 0.67
-        ? "Highly flexible"
-        : flexibilityPercent >= 0.34
-          ? "Balanced"
-          : "Tightly constrained";
-
-  const distributionGroups =
-    degreeProgram?.requirements.map((group) => ({
-      label: group.description,
-      completed: group.isCompleted,
-    })) ?? [];
+  const activeProgramCompletedGroups = auditProgramMetrics?.completed ?? 0;
+  const activeProgramTotalGroups = auditProgramMetrics?.total ?? 0;
+  const activeProgramInProgressGroups = auditProgramMetrics?.inProgress ?? 0;
+  const programCompletionRatio =
+    activeProgramTotalGroups > 0
+      ? activeProgramCompletedGroups / activeProgramTotalGroups
+      : 0;
 
   return {
     graduationCreditsRequired,
@@ -309,17 +207,7 @@ function computeMetrics({
     riskLevel,
     riskHeadline,
     riskDetail,
-    recommendationTitle,
-    recommendationDetail,
-    flexibilityPercent,
-    flexibilityLabel,
-    flexibilityCounts: {
-      flexible: flexibleCount,
-      fixed: fixedCount,
-      totalRemaining: totalRemainingItems,
-    },
-    distributionGroups,
-    activeProgramName: activeProgram?.name ?? "Active Program",
+    activeProgramName: activeProgramName ?? "Active Program",
     activeProgramCompletedGroups,
     activeProgramTotalGroups,
     activeProgramInProgressGroups,
@@ -387,7 +275,6 @@ const widgetDefinitions: WidgetDefinition[] = [
     description: "Pace and warning signal",
     render: (metrics) => {
       const riskClasses = getRiskClasses(metrics.riskLevel);
-
       return (
         <WidgetShell
           eyebrow="Status"
@@ -403,7 +290,6 @@ const widgetDefinitions: WidgetDefinition[] = [
             </span>
             <AlertTriangle className="h-5 w-5 text-slate-500" />
           </div>
-
           <div className="mt-5 space-y-3">
             <div className="flex items-center justify-between text-sm text-slate-600">
               <span>Credit progress</span>
@@ -425,39 +311,15 @@ const widgetDefinitions: WidgetDefinition[] = [
     },
   },
   {
-    id: "next-recommendation",
-    label: "Next Best Recommendation",
-    description: "Most actionable unmet requirement",
-    render: (metrics) => (
-      <WidgetShell
-        eyebrow="Next Move"
-        title={metrics.recommendationTitle}
-        subcopy={metrics.recommendationDetail}
-        accentClass="from-sky-50 via-white to-cyan-100"
-      >
-        <div className="mt-1 rounded-2xl bg-white/80 p-3 shadow-sm ring-1 ring-sky-100">
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-sky-700">
-            Recommended focus
-          </p>
-          <p className="mt-1 text-xs text-slate-700">
-            Close the nearest unfinished group before filling more long-tail
-            electives.
-          </p>
-        </div>
-      </WidgetShell>
-    ),
-  },
-  {
     id: "progress-velocity",
     label: "Progress Velocity",
     description: "Semester pace and momentum",
     render: (metrics) => {
       const maxCredits = Math.max(
         metrics.targetCreditsPerSemester,
-        ...metrics.recentSemesterCredits.map((semester) => semester.credits),
+        ...metrics.recentSemesterCredits.map((s) => s.credits),
         1,
       );
-
       return (
         <WidgetShell
           eyebrow="Velocity"
@@ -475,11 +337,7 @@ const widgetDefinitions: WidgetDefinition[] = [
                   <div className="flex h-20 w-full items-end">
                     <div className="w-full rounded-t-xl bg-slate-200">
                       <div
-                        className={`w-full rounded-t-xl transition-all duration-500 ${
-                          semester.isCompleted
-                            ? "bg-indigo-600"
-                            : "bg-indigo-300"
-                        }`}
+                        className={`w-full rounded-t-xl transition-all duration-500 ${semester.isCompleted ? "bg-indigo-600" : "bg-indigo-300"}`}
                         style={{
                           height: `${clampPercentage((semester.credits / maxCredits) * 100)}%`,
                           minHeight: semester.credits > 0 ? "12px" : "0px",
@@ -504,56 +362,6 @@ const widgetDefinitions: WidgetDefinition[] = [
     },
   },
   {
-    id: "flexibility-meter",
-    label: "Major Flexibility Meter",
-    description: "How many open paths remain",
-    render: (metrics) => (
-      <WidgetShell
-        eyebrow="Flexibility"
-        title={metrics.flexibilityLabel}
-        subcopy={`${metrics.flexibilityCounts.flexible} flexible paths and ${metrics.flexibilityCounts.fixed} fixed requirements remain.`}
-        accentClass="from-fuchsia-50 via-white to-rose-100"
-      >
-        <div className="mt-5">
-          <div className="h-4 overflow-hidden rounded-full bg-slate-200">
-            <div
-              className="h-full rounded-full bg-gradient-to-r from-fuchsia-500 to-rose-500 transition-all duration-500"
-              style={{
-                width: `${clampPercentage(metrics.flexibilityPercent * 100)}%`,
-              }}
-            />
-          </div>
-          <div className="mt-4 grid grid-cols-3 gap-3 text-center">
-            <div className="rounded-2xl bg-white/80 p-3 ring-1 ring-fuchsia-100">
-              <p className="text-xs uppercase tracking-[0.12em] text-slate-500">
-                Flexible
-              </p>
-              <p className="mt-1 text-xl font-semibold text-slate-900">
-                {metrics.flexibilityCounts.flexible}
-              </p>
-            </div>
-            <div className="rounded-2xl bg-white/80 p-3 ring-1 ring-fuchsia-100">
-              <p className="text-xs uppercase tracking-[0.12em] text-slate-500">
-                Fixed
-              </p>
-              <p className="mt-1 text-xl font-semibold text-slate-900">
-                {metrics.flexibilityCounts.fixed}
-              </p>
-            </div>
-            <div className="rounded-2xl bg-white/80 p-3 ring-1 ring-fuchsia-100">
-              <p className="text-xs uppercase tracking-[0.12em] text-slate-500">
-                Open
-              </p>
-              <p className="mt-1 text-xl font-semibold text-slate-900">
-                {metrics.flexibilityCounts.totalRemaining}
-              </p>
-            </div>
-          </div>
-        </div>
-      </WidgetShell>
-    ),
-  },
-  {
     id: "credits-progress",
     label: "Credits Progress",
     description: "Completed, planned, and remaining credits",
@@ -569,25 +377,17 @@ const widgetDefinitions: WidgetDefinition[] = [
             <div
               className="h-full bg-emerald-600"
               style={{
-                width: `${clampPercentage(
-                  (metrics.completedCredits /
-                    metrics.graduationCreditsRequired) *
-                    100,
-                )}%`,
+                width: `${clampPercentage((metrics.completedCredits / metrics.graduationCreditsRequired) * 100)}%`,
               }}
             />
             <div
               className="h-full bg-amber-400"
               style={{
-                width: `${clampPercentage(
-                  (metrics.plannedCredits / metrics.graduationCreditsRequired) *
-                    100,
-                )}%`,
+                width: `${clampPercentage((metrics.plannedCredits / metrics.graduationCreditsRequired) * 100)}%`,
               }}
             />
           </div>
         </div>
-
         <div className="mt-4 grid grid-cols-3 gap-3 text-sm">
           <div className="rounded-2xl bg-white/80 p-3 ring-1 ring-emerald-100">
             <p className="text-slate-500">Completed</p>
@@ -614,12 +414,16 @@ const widgetDefinitions: WidgetDefinition[] = [
   {
     id: "program-progress",
     label: "Program Progress",
-    description: "Requirement completion for the active program",
+    description: "Requirement completion from audit",
     render: (metrics) => (
       <WidgetShell
         eyebrow="Program"
         title={metrics.activeProgramName}
-        subcopy={`${metrics.activeProgramCompletedGroups} of ${metrics.activeProgramTotalGroups} requirement groups are complete.`}
+        subcopy={
+          metrics.activeProgramTotalGroups > 0
+            ? `${metrics.activeProgramCompletedGroups} of ${metrics.activeProgramTotalGroups} requirements satisfied.`
+            : "Run audit to see progress."
+        }
         accentClass="from-slate-50 via-white to-blue-100"
       >
         <div className="mt-5 flex items-center gap-5">
@@ -627,9 +431,7 @@ const widgetDefinitions: WidgetDefinition[] = [
             <div
               className="absolute inset-0 rounded-full"
               style={{
-                background: `conic-gradient(#0f172a ${clampPercentage(
-                  metrics.programCompletionRatio * 100,
-                )}%, #e2e8f0 0)`,
+                background: `conic-gradient(#0f172a ${clampPercentage(metrics.programCompletionRatio * 100)}%, #e2e8f0 0)`,
               }}
             />
             <div className="absolute inset-3 rounded-full bg-white" />
@@ -639,10 +441,9 @@ const widgetDefinitions: WidgetDefinition[] = [
               </p>
             </div>
           </div>
-
           <div className="flex-1 space-y-3">
             <div className="flex items-center justify-between text-sm text-slate-600">
-              <span>Completed groups</span>
+              <span>Satisfied</span>
               <span>{metrics.activeProgramCompletedGroups}</span>
             </div>
             <div className="flex items-center justify-between text-sm text-slate-600">
@@ -650,7 +451,7 @@ const widgetDefinitions: WidgetDefinition[] = [
               <span>{metrics.activeProgramInProgressGroups}</span>
             </div>
             <div className="flex items-center justify-between text-sm text-slate-600">
-              <span>Remaining groups</span>
+              <span>Remaining</span>
               <span>
                 {Math.max(
                   0,
@@ -675,7 +476,6 @@ const widgetDefinitions: WidgetDefinition[] = [
         metrics.completedCourseCount,
         1,
       );
-
       return (
         <WidgetShell
           eyebrow="Courses"
@@ -690,13 +490,10 @@ const widgetDefinitions: WidgetDefinition[] = [
                   (metrics.completedCourseCount / totalCourses) *
                     Math.min(18, totalCourses),
                 );
-
                 return (
                   <div
                     key={index}
-                    className={`h-7 rounded-xl ${
-                      index < threshold ? "bg-violet-600" : "bg-slate-200"
-                    }`}
+                    className={`h-7 rounded-xl ${index < threshold ? "bg-violet-600" : "bg-slate-200"}`}
                   />
                 );
               },
@@ -731,7 +528,6 @@ const widgetDefinitions: WidgetDefinition[] = [
                 (completion / (metrics.graduationCreditsRequired / 2)) * 88,
               ),
             );
-
             return (
               <div
                 key={index}
@@ -753,35 +549,101 @@ const widgetDefinitions: WidgetDefinition[] = [
     ),
   },
   {
-    id: "distribution-progress",
-    label: "Distribution Progress",
-    description: "Checklist for degree-wide requirement groups",
+    id: "flexibility-meter",
+    label: "Major Flexibility Meter",
+    description: "Ratio of satisfied vs unsatisfied requirements",
+    render: (metrics) => {
+      const satisfied = metrics.activeProgramCompletedGroups;
+      const total = metrics.activeProgramTotalGroups;
+      const unsatisfied = Math.max(
+        0,
+        total - satisfied - metrics.activeProgramInProgressGroups,
+      );
+      const flexPercent = total > 0 ? satisfied / total : 0;
+      const label =
+        total === 0
+          ? "No data"
+          : flexPercent >= 0.8
+            ? "Almost there"
+            : flexPercent >= 0.5
+              ? "Halfway"
+              : "Just getting started";
+      return (
+        <WidgetShell
+          eyebrow="Requirements"
+          title={label}
+          subcopy={
+            total > 0
+              ? `${satisfied} satisfied, ${metrics.activeProgramInProgressGroups} in progress, ${unsatisfied} remaining.`
+              : "Run audit to see data."
+          }
+          accentClass="from-fuchsia-50 via-white to-rose-100"
+        >
+          <div className="mt-5">
+            <div className="h-4 overflow-hidden rounded-full bg-slate-200">
+              <div
+                className="h-full rounded-full bg-gradient-to-r from-fuchsia-500 to-rose-500 transition-all duration-500"
+                style={{ width: `${clampPercentage(flexPercent * 100)}%` }}
+              />
+            </div>
+            <div className="mt-4 grid grid-cols-3 gap-3 text-center">
+              <div className="rounded-2xl bg-white/80 p-3 ring-1 ring-fuchsia-100">
+                <p className="text-xs uppercase tracking-[0.12em] text-slate-500">
+                  Satisfied
+                </p>
+                <p className="mt-1 text-xl font-semibold text-slate-900">
+                  {satisfied}
+                </p>
+              </div>
+              <div className="rounded-2xl bg-white/80 p-3 ring-1 ring-fuchsia-100">
+                <p className="text-xs uppercase tracking-[0.12em] text-slate-500">
+                  In Progress
+                </p>
+                <p className="mt-1 text-xl font-semibold text-slate-900">
+                  {metrics.activeProgramInProgressGroups}
+                </p>
+              </div>
+              <div className="rounded-2xl bg-white/80 p-3 ring-1 ring-fuchsia-100">
+                <p className="text-xs uppercase tracking-[0.12em] text-slate-500">
+                  Remaining
+                </p>
+                <p className="mt-1 text-xl font-semibold text-slate-900">
+                  {unsatisfied}
+                </p>
+              </div>
+            </div>
+          </div>
+        </WidgetShell>
+      );
+    },
+  },
+  {
+    id: "next-recommendation",
+    label: "Next Best Recommendation",
+    description: "Most actionable unmet requirement",
     render: (metrics) => (
       <WidgetShell
-        eyebrow="Degree Breadth"
-        title={`${metrics.distributionGroups.filter((group) => group.completed).length} / ${metrics.distributionGroups.length} groups finished`}
-        subcopy="These groups are pulled from the degree-wide requirement set."
-        accentClass="from-teal-50 via-white to-cyan-100"
+        eyebrow="Next Move"
+        title={
+          metrics.activeProgramTotalGroups > 0
+            ? `${metrics.activeProgramTotalGroups - metrics.activeProgramCompletedGroups} requirements left`
+            : "No data yet"
+        }
+        subcopy={
+          metrics.activeProgramTotalGroups > 0
+            ? "Focus on unsatisfied requirements first."
+            : "Run an audit to get recommendations."
+        }
+        accentClass="from-sky-50 via-white to-cyan-100"
       >
-        <div className="mt-5 flex flex-wrap gap-2">
-          {metrics.distributionGroups.length > 0 ? (
-            metrics.distributionGroups.map((group) => (
-              <span
-                key={group.label}
-                className={`rounded-full px-3 py-1 text-sm ${
-                  group.completed
-                    ? "bg-emerald-100 text-emerald-700"
-                    : "bg-slate-100 text-slate-600"
-                }`}
-              >
-                {group.label}
-              </span>
-            ))
-          ) : (
-            <span className="text-sm text-slate-500">
-              No degree-wide requirement groups were found.
-            </span>
-          )}
+        <div className="mt-1 rounded-2xl bg-white/80 p-3 shadow-sm ring-1 ring-sky-100">
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-sky-700">
+            Recommended focus
+          </p>
+          <p className="mt-1 text-xs text-slate-700">
+            Check the Requirements tab in the major viewer to see which specific
+            courses are needed.
+          </p>
         </div>
       </WidgetShell>
     ),
@@ -794,7 +656,7 @@ const widgetDefinitions: WidgetDefinition[] = [
       <WidgetShell
         eyebrow="GPA"
         title="Awaiting transcript data"
-        subcopy="The current frontend does not have a reliable GPA source yet, so this tile stays informational."
+        subcopy="The current frontend does not have a reliable GPA source yet."
         accentClass="from-slate-50 via-white to-slate-100"
       >
         <div className="mt-5 flex items-center justify-between rounded-2xl bg-white/80 p-4 ring-1 ring-slate-200">
@@ -811,8 +673,7 @@ const widgetDefinitions: WidgetDefinition[] = [
 
 function getWidgetDefinition(widgetId: DashboardWidgetId) {
   return (
-    widgetDefinitions.find((widget) => widget.id === widgetId) ??
-    widgetDefinitions[0]
+    widgetDefinitions.find((w) => w.id === widgetId) ?? widgetDefinitions[0]
   );
 }
 
@@ -821,10 +682,9 @@ function WidgetPicker({
   onChange,
 }: {
   value: DashboardWidgetId;
-  onChange: (nextValue: DashboardWidgetId) => void;
+  onChange: (v: DashboardWidgetId) => void;
 }) {
   const selectedWidget = getWidgetDefinition(value);
-
   return (
     <DropdownMenu>
       <DropdownMenuTrigger className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-2 text-center text-sm font-normal text-slate-700 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500">
@@ -835,9 +695,7 @@ function WidgetPicker({
       <DropdownMenuContent align="end" className="w-72">
         <DropdownMenuRadioGroup
           value={value}
-          onValueChange={(nextValue) =>
-            onChange(nextValue as DashboardWidgetId)
-          }
+          onValueChange={(v) => onChange(v as DashboardWidgetId)}
         >
           {widgetDefinitions.map((widget) => (
             <DropdownMenuRadioItem
@@ -870,8 +728,8 @@ export default function DashboardInsightGrid(props: DashboardInsightGridProps) {
     completedCourseCount,
     totalCourseCount,
     semesters,
-    activeProgram,
-    degreeProgram,
+    auditProgramMetrics,
+    activeProgramName,
   } = props;
 
   const [widgetSelections, setWidgetSelections] = useState<
@@ -897,8 +755,8 @@ export default function DashboardInsightGrid(props: DashboardInsightGridProps) {
         completedCourseCount,
         totalCourseCount,
         semesters,
-        activeProgram,
-        degreeProgram,
+        auditProgramMetrics,
+        activeProgramName,
       }),
     [
       graduationCreditsRequired,
@@ -907,8 +765,8 @@ export default function DashboardInsightGrid(props: DashboardInsightGridProps) {
       completedCourseCount,
       totalCourseCount,
       semesters,
-      activeProgram,
-      degreeProgram,
+      auditProgramMetrics,
+      activeProgramName,
     ],
   );
 
@@ -917,39 +775,19 @@ export default function DashboardInsightGrid(props: DashboardInsightGridProps) {
     nextWidget: DashboardWidgetId,
   ) => {
     if (!activeWorksheetId) return;
-
     setWidgetSelections((current) => {
       const previousSlots = current[activeWorksheetId] ?? DEFAULT_WIDGETS;
       const nextSlots = [...previousSlots];
       nextSlots[slotIndex] = nextWidget;
-
-      return {
-        ...current,
-        [activeWorksheetId]: nextSlots,
-      };
+      return { ...current, [activeWorksheetId]: nextSlots };
     });
   };
 
   return (
     <section className="space-y-3">
-      <div className="flex items-center justify-between gap-4">
-        {/*<div>
-          <h2 className="text-lg font-semibold text-slate-900">Dashboard Insights</h2>
-          <p className="text-sm text-slate-500">
-            Each card can be swapped to the metric or insight you care about
-            most.
-          </p>
-        </div>
-        <div className="hidden items-center gap-2 rounded-full bg-white px-4 py-2 text-sm text-slate-600 shadow-sm ring-1 ring-slate-200 lg:flex">
-          <Layers3 className="h-4 w-4 text-slate-400" />
-          <span>Selections are saved per worksheet.</span>
-        </div>*/}
-      </div>
-
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {slotWidgets.map((widgetId, slotIndex) => {
           const widget = getWidgetDefinition(widgetId);
-
           return (
             <div
               key={`${slotIndex}-${widgetId}`}
