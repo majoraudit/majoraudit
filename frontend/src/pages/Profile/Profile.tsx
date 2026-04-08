@@ -7,19 +7,21 @@ import {
   LANGUAGE_LEVELS,
 } from "@/constants/onboarding";
 
+import { apiUpdateUserInfo } from "@/api/user_info";
+
 function Profile() {
   const { userData, setUserData } = useUser();
   const [first_name, setFirst_name] = useState(userData?.first_name ?? "");
   const [last_name, setLast_name] = useState(userData?.last_name ?? "");
   const [classYear, setClassYear] = useState(userData?.classYear ?? "");
   const [intendedMajorId, setIntendedMajorId] = useState(
-    userData?.intendedMajorId ?? ""
+    userData?.intendedMajorId ?? "",
   );
   const [intendedLanguageCode, setIntendedLanguageCode] = useState(
-    userData?.intendedLanguageCode ?? ""
+    userData?.intendedLanguageCode ?? "",
   );
   const [languageLevel, setLanguageLevel] = useState(
-    userData?.FYP?.languageRequirement ?? "L1"
+    userData?.FYP?.languageRequirement ?? "L1",
   );
 
   useEffect(() => {
@@ -32,9 +34,20 @@ function Profile() {
     setLanguageLevel(userData.FYP?.languageRequirement ?? "L1");
   }, [userData]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [saved, setSaved] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!userData) return;
+    setSaved(false);
+
+    await apiUpdateUserInfo({
+      class_year: classYear ? parseInt(classYear) : null,
+      intended_major_id: intendedMajorId || "",
+      intended_language_code: intendedLanguageCode || "",
+      language_requirement: languageLevel,
+    });
+
     setUserData({
       ...userData,
       first_name: first_name.trim() || userData.first_name,
@@ -47,6 +60,9 @@ function Profile() {
         languageRequirement: languageLevel,
       },
     });
+
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2000);
   };
 
   if (!userData) return null;
@@ -150,7 +166,7 @@ function Profile() {
           type="submit"
           className="w-full cursor-pointer inline-flex items-center justify-center rounded-lg bg-brand-blue px-5 py-3 text-sm font-semibold text-white shadow-sm hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2"
         >
-          Save changes
+          {saved ? "Saved ✓" : "Save changes"}
         </button>
       </form>
     </div>
