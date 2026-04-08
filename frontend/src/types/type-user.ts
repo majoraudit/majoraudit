@@ -53,13 +53,6 @@ export interface FYP {
   worksheets: Worksheet[]; 
   activeWorksheetID: string;
   languageRequirement: string;
-  degreeProgress: MajorProgress[];
-  degreeProgress2:
-    {
-      worksheetID: string;
-      majors: MajorProgress[];
-    }[];
-  statCount: ProgramStats; // how many majors added, how many certificates added
   majors : UserMajor[];
 }
 
