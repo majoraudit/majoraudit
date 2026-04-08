@@ -3,6 +3,11 @@ import type { UserMajor } from "@/api/user_info";
 
 import { useUser } from "@/contexts/UserContext";
 
+import MajorRequirementList from "./components/MajorRequirementList";
+import MajorRequirementGraph from "./components/MajorRequirementGraph";
+import DashboardInsightGrid from "./components/DashboardInsightGrid";
+
+import checkIcon from "./assets/check.svg";
 import trashcan from "./assets/trashcan.svg";
 
 import { useMemo, useEffect, useState, useCallback } from "react";
@@ -11,9 +16,6 @@ import { useWorksheetManager } from "@/hooks/useWorksheetManager";
 import { useWorksheetActions } from "@/hooks/useWorksheetActions";
 import { useWorksheetData } from "@/hooks/useWorksheetData";
 import { apiFetchMajorTemplate, apiFetchMajorMQL } from "@/api/majors";
-
-import MajorRequirementList from "./components/MajorRequirementList";
-import MajorRequirementGraph from "./components/MajorRequirementGraph";
 
 import type { MQLQueryFile } from "@/types/schema/mql/mql";
 
@@ -48,6 +50,8 @@ function Dashboard() {
     totalCredits,
     completedCredits,
     completedCourseCount,
+    allStudentCourses,
+    semesters,
     majorCount,
     certificateCount,
   } = useWorksheetData();
@@ -56,6 +60,10 @@ function Dashboard() {
   const totalCompletedCredits = completedCredits;
   const totalPlannedCredits = totalCredits - completedCredits;
   const totalCompletedCourses = completedCourseCount;
+  const creditsRemaining = Math.max(
+    0,
+    graduationCreditsRequired - totalCompletedCredits - totalPlannedCredits,
+  );
 
   // ---------- Tab + navigation state ----------
   const [activeTab, setActiveTab] = useState<ActiveTab>("degree");
@@ -242,9 +250,7 @@ function Dashboard() {
             {formatC_P_UP(
               totalCompletedCredits,
               totalPlannedCredits,
-              graduationCreditsRequired -
-                totalCompletedCredits -
-                totalPlannedCredits,
+              creditsRemaining,
             )}
           </div>
 
@@ -273,11 +279,9 @@ function Dashboard() {
               />
             </div>
             {formatC_P_UP(
-              totalCompletedCredits,
-              totalPlannedCredits,
-              graduationCreditsRequired -
-                totalCompletedCredits -
-                totalPlannedCredits,
+              activeProgramCompletedGroups,
+              activeProgramInProgressGroups,
+              activeProgramRemainingGroups,
             )}
           </div>
         </section>

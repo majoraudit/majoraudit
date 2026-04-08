@@ -158,6 +158,18 @@ function CoursePlanning() {
     addCourse(semester.season, newStudentCourse);
   };
 
+  const handleAddCatalogFromModal = (
+    semester: StudentSemester,
+    course: Course,
+  ) => {
+    const newStudentCourse: StudentCourse = {
+      course,
+      term: semester.season,
+      status: "DA_COMPLETE",
+    };
+    addCourse(semester.season, newStudentCourse);
+  };
+
   const openCourseDetailsModal = (course: Course) => {
     setSelectedCourse(course);
   };
@@ -688,6 +700,8 @@ function CoursePlanning() {
         open={isCustomCourseModalOpen}
         onClose={closeCustomCourseModal}
         semester={selectedSemester}
+        catalogCourses={appData.courses}
+        onAddCatalog={handleAddCatalogFromModal}
         onCreate={handleCreateCustomCourse}
       />
       <CourseDetailsModal

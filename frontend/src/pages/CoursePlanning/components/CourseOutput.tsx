@@ -8,6 +8,7 @@ import cancel from "../assets/cancel.svg";
 import { useDrag } from "react-dnd";
 import { useRef } from "react";
 import clsx from "clsx";
+import { GripVertical } from "lucide-react";
 
 interface CourseOutputProps {
   course: Course;
@@ -69,6 +70,10 @@ function CourseOutput({
       <div
         className={clsx(
           "flex flex-col justify-between p-2 bg-gray-200 w-full h-24 rounded-md relative",
+          draggable &&
+            !semesterCompleted &&
+            semesterSeasonCode < 1 &&
+            "pl-7",
           isDragging
             ? "border-4 border-blue-200 cursor-grabbing"
             : draggable && !semesterCompleted
@@ -83,6 +88,12 @@ function CourseOutput({
         role={onCourseClick ? "button" : undefined}
         tabIndex={onCourseClick ? 0 : undefined}
       >
+        {draggable && !semesterCompleted && semesterSeasonCode < 1 && (
+          <GripVertical
+            className="absolute left-0.5 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-500 pointer-events-none"
+            aria-hidden
+          />
+        )}
         {removable && !semesterCompleted && (
           <button
             className="absolute top-0 right-0 h-5 w-5 m-1 active:scale-125 transition duration-300 ease-in-out cursor-pointer"

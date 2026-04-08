@@ -146,7 +146,7 @@ export function useWorksheetData() {
         }
     }
     return total;
-  }, [completedStudentCourses]);
+  }, [semestersSorted, getSemesterCredits]);
 
   const completedCourseCount = useMemo(() => {
   return completedStudentCourses.length;
