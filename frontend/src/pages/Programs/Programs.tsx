@@ -27,7 +27,7 @@ import {
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
 
-import { Plus } from "lucide-react";
+import { Plus, Check } from "lucide-react";
 
 // ---------- Formatters ----------
 
@@ -209,6 +209,26 @@ function Programs() {
     [appData, templateCache],
   );
 
+  // Add majorExists check
+  const majorExists = useMemo(() => {
+    if (!userData || !selectedMajorInfo || !selectedSpecialization)
+      return false;
+    return (userData.FYP.majors ?? []).some(
+      (m) =>
+        m.major_id === selectedMajorInfo.id &&
+        m.specialization === selectedSpecialization.replace(".mql", ""),
+    );
+  }, [userData?.FYP.majors, selectedMajorInfo?.id, selectedSpecialization]);
+
+  // Add handler
+  const handleAddMajor = async () => {
+    if (!selectedMajorInfo || !selectedSpecialization) return;
+    await addProgram(
+      selectedMajorInfo.id,
+      selectedSpecialization.replace(".mql", ""),
+    );
+  };
+
   // Fetch MQL whenever major or specialization changes
   useEffect(() => {
     if (!selectedMajorInfo || !selectedSpecialization) {
@@ -320,14 +340,18 @@ function Programs() {
             <section className="relative min-w-0 min-h-screen flex flex-col bg-white border-2 border-gray-200 p-6 rounded-xl shadow-md">
               {isAuthenticated && (
                 <button
-                  className="absolute top-6 right-6 rounded-full w-8 h-8 flex items-center justify-center text-center text-xl leading-none z-10 transition duration-300 ease-in-out bg-brand-blue text-white hover:scale-110"
-                  aria-label="Add"
-                  title="Add major"
-                  onClick={() => {
-                    // TODO: wire up addProgram once MQL parsing is implemented
-                  }}
+                  className={`absolute top-6 right-6 rounded-full w-8 h-8 flex items-center justify-center text-center text-xl leading-none z-10 transition duration-300 ease-in-out
+      ${
+        majorExists
+          ? "bg-green-500 text-white cursor-default"
+          : "bg-brand-blue text-white hover:scale-110 cursor-pointer"
+      }`}
+                  aria-label={majorExists ? "Added" : "Add"}
+                  title={majorExists ? "Already added" : "Add major"}
+                  onClick={handleAddMajor}
+                  disabled={majorExists}
                 >
-                  <Plus size={18} />
+                  {majorExists ? <Check size={18} /> : <Plus size={18} />}
                 </button>
               )}
 

@@ -4,6 +4,8 @@ import { useWorksheetManager } from "@/hooks/useWorksheetManager";
 import { apiCreateSemester, apiDeleteSemester } from "@/api/semesters";
 import {apiAddCourse, apiRemoveCourse } from "@/api/courses";
 import { apiUpdateSemester } from "@/api/semesters";
+import { apiAddMajor, apiRemoveMajor, type UserMajor } from "@/api/user_info";
+
 
 import type { Course, StudentCourse, StudentSemester } from "@/types/type-user";
 import type { MajorProgress } from "../types/type-program";
@@ -218,90 +220,55 @@ export function useWorksheetActions() {
   );
 
   const addProgram = useCallback(
-    (program: MajorProgress | null) => {
-      if (!activeWorksheetId) return { ok: false as const, error: "No active worksheet." };
-      if (!program) return { ok: false as const, error: "Program is null." };
+  async (majorId: string, specialization: string = "") => {
+    try {
+      const created = await apiAddMajor({ major_id: majorId, specialization });
 
       setUserData((prev) => {
         if (!prev) return prev;
-
-        const dp2 = prev.FYP.degreeProgress2 ?? [];
-
-        const newDegreeProgress2 = dp2.map((entry) => {
-          if (entry.worksheetID !== activeWorksheetId) return entry;
-          const exists = entry.majors.some((m) => m.id === program.id);
-          if (exists) return entry;
-          return { ...entry, majors: [...entry.majors, program] };
-        });
-
-        const hasEntry = dp2.some((e) => e.worksheetID === activeWorksheetId);
-        const finalDegreeProgress2 = hasEntry
-          ? newDegreeProgress2
-          : [...dp2, { worksheetID: activeWorksheetId, majors: [program] } as any];
-
-        const majorNum = prev.FYP.statCount?.majorNum ?? 0;
-        const certificateNum = prev.FYP.statCount?.certificateNum ?? 0;
-
+        const already = prev.FYP.majors?.some((m) => m.id === created.id);
+        if (already) return prev;
         return {
           ...prev,
           FYP: {
             ...prev.FYP,
-            statCount: {
-              ...prev.FYP.statCount,
-              majorNum: isMajorType(program.info.degreeType) ? majorNum + 1 : majorNum,
-              certificateNum: isCertificateType(program.info.degreeType)
-                ? certificateNum + 1
-                : certificateNum,
-            },
-            degreeProgress2: finalDegreeProgress2,
+            majors: [...(prev.FYP.majors ?? []), created],
           },
         };
       });
 
       return { ok: true as const };
-    },
-    [activeWorksheetId, setUserData]
-  );
+    } catch (e) {
+      return { ok: false as const, error: "Failed to add major." };
+    }
+  },
+  [setUserData]
+);
+
 
   const removeProgram = useCallback(
-    (program: MajorProgress) => {
-      if (!activeWorksheetId) return { ok: false as const, error: "No active worksheet." };
+  async (majorRowId: number) => {
+    try {
+      await apiRemoveMajor(majorRowId);
 
       setUserData((prev) => {
         if (!prev) return prev;
-
-        const dp2 = prev.FYP.degreeProgress2 ?? [];
-
-        const newDegreeProgress2 = dp2.map((entry) => {
-          if (entry.worksheetID !== activeWorksheetId) return entry;
-          return { ...entry, majors: entry.majors.filter((m) => m.id !== program.id) };
-        });
-
-        const majorNum = prev.FYP.statCount?.majorNum ?? 0;
-        const certificateNum = prev.FYP.statCount?.certificateNum ?? 0;
-
         return {
           ...prev,
           FYP: {
             ...prev.FYP,
-            statCount: {
-              ...prev.FYP.statCount,
-              majorNum: isMajorType(program.info.degreeType)
-                ? Math.max(0, majorNum - 1)
-                : majorNum,
-              certificateNum: isCertificateType(program.info.degreeType)
-                ? Math.max(0, certificateNum - 1)
-                : certificateNum,
-            },
-            degreeProgress2: newDegreeProgress2,
+            majors: (prev.FYP.majors ?? []).filter((m) => m.id !== majorRowId),
           },
         };
       });
 
       return { ok: true as const };
-    },
-    [activeWorksheetId, setUserData]
-  );
+    } catch (e) {
+      return { ok: false as const, error: "Failed to remove major." };
+    }
+  },
+  [setUserData]
+);
 
   return {
     addSemester,

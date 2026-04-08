@@ -50,7 +50,8 @@ INSTALLED_APPS = [
     'authentication',
     'worksheets',
     'majors',
-    'courses'
+    'courses',
+    'user_data',
 ]
 
 MIDDLEWARE = [
