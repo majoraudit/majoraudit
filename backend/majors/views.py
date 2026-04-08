@@ -104,7 +104,7 @@ class MajorIDMQLView(MajorOpView):
         except Exception as e:
             raise ParseError(f"Malformed MQL: {e}")
 
-        return Response(result)
+        return Response(json.loads(result))  # parse the string into a dict before returning
         
 
 @api_view(['POST'])

@@ -1,6 +1,6 @@
 // import { apiUrl } from "../constants";
 
-function getCsrfToken(): string {
+export function getCsrfToken(): string {
   const match = document.cookie.match(/csrftoken=([^;]+)/);
   return match ? match[1] : "";
 }
