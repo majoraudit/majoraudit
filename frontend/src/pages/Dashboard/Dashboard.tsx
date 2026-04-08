@@ -165,7 +165,6 @@ function Dashboard() {
     declaredMajors.forEach((m) => preloadMajorData(m.major_id));
     if (degreeMajor) preloadMajorData("general");
   }, []);
-
   useEffect(() => {
     if (activeTab === "degree") {
       if (degreeMajor) loadMajorData("general");

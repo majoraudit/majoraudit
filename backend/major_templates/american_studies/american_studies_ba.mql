@@ -1,18 +1,13 @@
-SELECT 1 FROM [TAG_DEPT("YC AMST Early Americas", "AMST")] : "Gateway Course with Early Americas Attribute" : 2;
+SELECT 1 FROM [TAG_DEPT("YC AMST Early Americas", AMST)] : "Gateway Course with Early Americas Attribute" : 2;
 
-SELECT 2 FROM [TAG_DEPT("YC AMST Cultural Hist/Studies", "AMST"), TAG_DEPT("YC AMST Cultural Hist/Studies", "AMST") ] : "Gateway Courses in Cultural History/Cultural Studies" : 2;
+SELECT 2 FROM [TAG_DEPT("YC AMST Cultural Hist/Studies", AMST), TAG_DEPT("YC AMST Cultural Hist/Studies", AMST)] : "Gateway Courses in Cultural History/Cultural Studies" : 2;
 
-SELECT 1 FROM [
-    TAG_DEPT("YC AMST Survey of Am Lit", "AMST")
-] : "Gateway Course: Broad Survey in American Literature" : 2;
+SELECT 1 FROM [TAG_DEPT("YC AMST Survey of Am Lit", AMST)] : "Gateway Course: Broad Survey in American Literature" : 2;
 
-SELECT 1 FROM [
-    PLACEMENT("AMST")
-    //DEPT("AMST")
-] : "Preparatory Course in Area of Concentration" : 3;
+SELECT 1 FROM [PLACEMENT("Preparatory Course in Area of Concentration")] : "Preparatory Course in Area of Concentration" : 3;
 
-SELECT 2 FROM [TAG_DEPT("YC AMST Junior Seminars", "AMST"), TAG_DEPT("YC AMST Junior Seminars", "AMST")] : "Junior Seminars (2 total; 1 in Area of Concentration)" : 3;
+SELECT 2 FROM [TAG_DEPT("YC AMST Junior Seminars", AMST), TAG_DEPT("YC AMST Junior Seminars", AMST)] : "Junior Seminars" : 3;
 
-SELECT 5 FROM PLACEMENT("Courses in Area of Concentration (5 total; 1 must cover non-U.S. perspective)") : "Courses in Area of Concentration (5 total; 1 must cover non-U.S. perspective)" : 4;
+SELECT 5 FROM [PLACEMENT("Area of Concentration 1"), PLACEMENT("Area of Concentration 2"), PLACEMENT("Area of Concentration 3"), PLACEMENT("Area of Concentration 4"), PLACEMENT("Area of Concentration 5")] : "Courses in Area of Concentration" : 4;
 
-SELECT 1 FROM [TAG_DEPT("YC AMST Senior Seminars", "AMST"), CLASS(AMST 4491)] : "Senior Requirement (Senior Seminar or AMST 4491 Senior Project)" : 1;
+SELECT 1 FROM [TAG_DEPT("YC AMST Senior Seminars", AMST), CLASS(AMST 4491)] : "Senior Requirement" : 1;

@@ -1,3 +1,5 @@
+import DOMPurify from 'dompurify';
+
 import { useUser } from "@/contexts/UserContext";
 import { useApp } from "@/contexts/AppContext";
 
@@ -522,8 +524,7 @@ function Programs() {
                 <h2 className="text-gray-700 font-semibold text-sm mb-2">
                   ABOUT
                 </h2>
-                <p className="text-gray-600 text-sm leading-relaxed whitespace-pre-line">
-                  {selectedMajorInfo.about}
+                <p className="text-gray-600 text-sm leading-relaxed whitespace-pre-line" dangerouslySetInnerHTML={{__html: DOMPurify.sanitize(selectedMajorInfo.about, {USE_PROFILES: {html: true}}) }}>
                 </p>
               </div>
 
