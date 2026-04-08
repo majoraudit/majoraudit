@@ -4,11 +4,10 @@ import { useWorksheetManager } from "@/hooks/useWorksheetManager";
 import { apiCreateSemester, apiDeleteSemester } from "@/api/semesters";
 import {apiAddCourse, apiRemoveCourse } from "@/api/courses";
 import { apiUpdateSemester } from "@/api/semesters";
-import { apiAddMajor, apiRemoveMajor, type UserMajor } from "@/api/user_info";
+import { apiAddMajor, apiRemoveMajor } from "@/api/user_info";
 
 
 import type { Course, StudentCourse, StudentSemester } from "@/types/type-user";
-import type { MajorProgress } from "../types/type-program";
 
 /**
  * Hook that mutates the active worksheet inside userData.
