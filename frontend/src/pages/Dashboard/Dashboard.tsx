@@ -134,10 +134,37 @@ function Dashboard() {
     [majorInfoCache, mqlCache],
   );
 
+  const preloadMajorData = useCallback(
+    async (majorId: string) => {
+      try {
+        // Only populate caches, don't touch active state
+        if (!majorInfoCache[majorId]) {
+          const info = await apiFetchMajorTemplate(majorId);
+          setMajorInfoCache((prev) => ({ ...prev, [majorId]: info }));
+
+          const firstSpec = info.specializations?.[0];
+          if (firstSpec) {
+            const specName = firstSpec.replace(".mql", "");
+            const cacheKey = `${majorId}/${specName}`;
+            if (!mqlCache[cacheKey]) {
+              const raw = await apiFetchMajorMQL(majorId, specName);
+              const mql = typeof raw === "string" ? JSON.parse(raw) : raw;
+              setMqlCache((prev) => ({ ...prev, [cacheKey]: mql }));
+            }
+          }
+        }
+      } catch (e) {
+        // Silent fail — preloading is best effort
+      }
+    },
+    [majorInfoCache, mqlCache],
+  );
+
+  // Preload all declared majors silently on mount
   useEffect(() => {
-    declaredMajors.forEach((m) => loadMajorData(m.major_id));
-    if (degreeMajor) loadMajorData("general");
-  }, []); //
+    declaredMajors.forEach((m) => preloadMajorData(m.major_id));
+    if (degreeMajor) preloadMajorData("general");
+  }, []);
 
   useEffect(() => {
     if (activeTab === "degree") {
