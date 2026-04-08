@@ -1,1 +1,1 @@
-from solver import Solver
+from .solver import Solver, API_LATEST
