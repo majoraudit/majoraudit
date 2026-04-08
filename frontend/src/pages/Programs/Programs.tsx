@@ -16,7 +16,7 @@ import {
   apiFetchMajorMQL,
   apiRunAudit,
 } from "@/api/majors";
-import type { AuditResult, SelectedCourse } from "@/api/majors";
+import type { AuditResult } from "@/api/majors";
 
 import type {
   MQLQueryFile,
@@ -245,9 +245,8 @@ function Programs() {
       setAuditResult(null);
       try {
         const result = await apiRunAudit(
-          majorId,
-          specialization,
           uniqueCourses,
+          appData!.course_database.getAllCourses(),
           mql,
         );
         setAuditResult(result);
