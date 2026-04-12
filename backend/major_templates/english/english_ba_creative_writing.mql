@@ -1,0 +1,39 @@
+SELECT 3 FROM [
+  CLASS(ENGL 1025),
+  CLASS(ENGL 1026),
+  CLASS(ENGL 1027),
+  CLASS(ENGL 1028)
+] : "Foundational Courses" : 2;
+
+SELECT 1 FROM [
+  TAG("YC ENGL Medieval")
+] : "Medieval Period" : 2;
+
+SELECT 1 FROM [
+  TAG("YC ENGL Renaissance")
+] : "Renaissance Period" : 2;
+
+SELECT 1 FROM [
+  TAG("YC ENGL 18th/19th Century")
+] : "18th/19th Century" : 2;
+
+SELECT 1 FROM [
+  TAG("YC ENGL 20th/21st Century")
+] : "20th/21st Century" : 2;
+
+SELECT 1 FROM [
+  TAG("YC ENGL Junior Seminar")
+] : "Junior Seminar" : 3;
+
+SELECT 4 FROM [
+  TAG("YC ENGL Creative Writing")
+] : "Creative Writing" : 3;
+
+SELECT 1 FROM [
+  TAG("YC ENGL Senior Seminar"),
+  CLASS(ENGL 4100)
+] : "Senior Seminar or Senior Essay" : 67;
+
+SELECT 1 FROM [
+  CLASS(ENGL 4400)
+] : "Senior Project" : 68;
