@@ -1,4 +1,4 @@
-import type { MajorTemplate,  MajorProgress, GroupItemTemplate, GroupItemProgress, CourseItemTemplateType, CourseItemProgressType} from "../types/type-program";
+import type { MajorTemplate,  MajorProgress, GroupItemProgress, CourseItemTemplateType, CourseItemProgressType} from "../types/type-program";
 import type { StudentCourse, Worksheet} from "../types/type-user";
 
 import { CourseDatabase } from "./CourseDatabase";
@@ -14,9 +14,9 @@ export async function loadMajorTemplates(json_file : string)
         if (!response.ok)
             throw new Error(`File not found: ${json_file}`);
         
-        const major_templates = await response.json();
+        const major_templates = (await response.json()) as MajorTemplate[];
 
-        const major_templates_normalized = major_templates.map((major_template: any) => ({
+        const major_templates_normalized = major_templates.map((major_template) => ({
            ...major_template,
        }));
 
@@ -72,6 +72,9 @@ export class MajorProcessor {
   private getCourseKey(course: StudentCourse): string {
     // Stable identifier for "consume once" semantics
     // season + primary code usually suffices; add CRN if you have it
+    if (course.manualFulfillInfo?.manualFulfill) {
+      return `${this.getPrimaryCode(course)}@${course.term ?? "?"}#manual:${course.manualFulfillInfo.groupIdx}:${course.manualFulfillInfo.itemIdx}`;
+    }
     return `${this.getPrimaryCode(course)}@${course.term ?? "?"}`;
   }
 
@@ -85,6 +88,16 @@ export class MajorProcessor {
   private courseHasCategory(course: StudentCourse, categories: string[]): boolean {
     // `course.course.dist` looks like distribution/attributes
     return course.course.dist?.some((d: string) => categories.includes(d)) ?? false;
+  }
+
+  private getOptionalCount(req: CourseItemTemplateType): number | undefined {
+    return "count" in req && typeof req.count === "number" ? req.count : undefined;
+  }
+
+  private getOptionalMinCount(req: CourseItemTemplateType): number | undefined {
+    return "minCount" in req && typeof req.minCount === "number"
+      ? req.minCount
+      : undefined;
   }
 
   /** ------------------------------
@@ -196,8 +209,19 @@ export class MajorProcessor {
       case "category-choice": return this.matchCategoryChoice(req, available);
       case "designation-choice": return this.matchDesignationChoice(req, available);
       default:
-        throw new Error(`Unknown requirement type: ${(req as any).type}`);
+        throw new Error("Unknown requirement type");
     }
+  }
+
+  public getMatchingCoursesForRequirement(
+    req: CourseItemTemplateType,
+    available: StudentCourse[],
+  ): StudentCourse[] {
+    const candidateIdxs = this.getCandidates(req, available);
+    if (candidateIdxs.length === 0) return [];
+
+    const sortedIdxs = this.chooseBest(candidateIdxs, available, candidateIdxs.length);
+    return sortedIdxs.map((idx) => available[idx]);
   }
 
   /** Pick 'take' courses from candidate indices, preferring:
@@ -249,16 +273,16 @@ export class MajorProcessor {
         return 1;
 
       case "multi-choice":
-        return Math.max(1, (req as any).count ?? 1);
+        return Math.max(1, this.getOptionalCount(req) ?? 1);
 
       case "combo-choice":
-        return (req as any).minCount ?? req.courseCodes.length;
+        return this.getOptionalMinCount(req) ?? req.courseCodes.length;
 
       case "range-choice":
       case "level-choice":
       case "category-choice":
       case "designation-choice":
-        return Math.max(1, (req as any).count ?? 1);
+        return Math.max(1, this.getOptionalCount(req) ?? 1);
 
       default:
         return 1;
@@ -277,7 +301,9 @@ export class MajorProcessor {
 
     // mark down the courses that were manually added by the user in a list
     const manuallyAddedCourses = allCourses.filter(c => c.manualFulfillInfo?.manualFulfill);
-    manuallyAddedCourses.forEach(c => {
+    const overriddenCourses = allCourses.filter(c => c.requirementOverrideInfo);
+
+    [...manuallyAddedCourses, ...overriddenCourses].forEach(c => {
       consumed.add(this.getCourseKey(c));
     });
 
@@ -291,12 +317,16 @@ export class MajorProcessor {
           c.manualFulfillInfo?.groupIdx === gi && 
           c.manualFulfillInfo?.itemIdx === ii
         );
+        const wasOverridden = overriddenCourses.some(c =>
+          c.requirementOverrideInfo?.groupIdx === gi &&
+          c.requirementOverrideInfo?.itemIdx === ii
+        );
 
-        if(!wasManuallyFulfilled) {
+        if(!wasManuallyFulfilled && !wasOverridden) {
           heap.push({ weight, groupIdx: gi, itemIdx: ii, req: item });
         }
         else {
-          heap.push({ weight: 100, groupIdx: gi, itemIdx: ii, req: item }); // manually fulfilled items get lowest priority
+          heap.push({ weight: 100, groupIdx: gi, itemIdx: ii, req: item }); // pinned items get lowest priority
         }
       });
     });
@@ -328,10 +358,20 @@ export class MajorProcessor {
         c.manualFulfillInfo?.groupIdx === groupIdx && 
         c.manualFulfillInfo?.itemIdx === itemIdx
       );
+      const overriddenCourse = overriddenCourses.find(c =>
+        c.requirementOverrideInfo?.groupIdx === groupIdx &&
+        c.requirementOverrideInfo?.itemIdx === itemIdx
+      );
       
       if(manual) {
         itemsProgress[groupIdx][itemIdx].isCompleted = true;
         itemsProgress[groupIdx][itemIdx].completedCourses.push(manual);
+        continue;
+      }
+
+      if(overriddenCourse) {
+        itemsProgress[groupIdx][itemIdx].isCompleted = true;
+        itemsProgress[groupIdx][itemIdx].completedCourses.push(overriddenCourse);
         continue;
       }
 
@@ -394,7 +434,11 @@ export class MajorProcessor {
         requiredNum: r.requiredNum,
         courseItems: r.courseItems.map(ci => {
           // Strip progress fields to get template
-          const { isCompleted, completedCourses, ...rest } = ci;
+          const rest = Object.fromEntries(
+            Object.entries(ci).filter(
+              ([key]) => key !== "isCompleted" && key !== "completedCourses",
+            ),
+          );
           return rest as CourseItemTemplateType;
         }),
       })),

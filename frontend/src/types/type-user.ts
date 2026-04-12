@@ -1,5 +1,5 @@
 
-import {type MajorTemplate, type MajorProgress} from "./type-program";
+import {type MajorProgress} from "./type-program";
 
 export interface Course {
   id: number;
@@ -15,7 +15,8 @@ export interface StudentCourse {
   course: Course; 	
 	term: number; 		// 202401
   status: string; 	// "DA_COMPLETE" | "DA_PROSPECT" | "MA_VALID" | "MA_HYPOTHETICAL"
-  manualFulfillInfo?: {manualFulfill: boolean, groupIdx: Number, itemIdx: Number}; // whether this course was manually added by the user
+  manualFulfillInfo?: {manualFulfill: boolean, groupIdx: number, itemIdx: number}; // whether this course was manually added by the user
+  requirementOverrideInfo?: {groupIdx: number, itemIdx: number}; // pin an existing completed course to a specific requirement item
 }
 
 // 01 - spring, 02 - summer, 03 - fall
