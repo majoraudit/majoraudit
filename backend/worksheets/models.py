@@ -37,7 +37,7 @@ class UserWorksheetClass(models.Model):
     class Meta:
         constraints = [
             models.CheckConstraint(
-                check=(
+                condition=(
                     models.Q(course__isnull=False, course_instance__isnull=True) |
                     models.Q(course__isnull=True,
                              course_instance__isnull=False)
