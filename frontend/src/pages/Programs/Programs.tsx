@@ -287,8 +287,7 @@ function Programs() {
       return false;
     const spec = selectedSpecialization.replace(".mql", "");
     return (activeWorksheet.majors ?? []).some(
-      (m) =>
-        m.major_id === selectedMajorInfo.id && m.specialization === spec,
+      (m) => m.major_id === selectedMajorInfo.id && m.specialization === spec,
     );
   }, [activeWorksheet?.majors, selectedMajorInfo?.id, selectedSpecialization]);
 
@@ -456,31 +455,34 @@ function Programs() {
               </div>
 
               {selectedMajorInfo.specializations?.length > 0 && (
-                <div className="mt-4 flex items-center gap-1">
-                  <span className="text-sm font-medium text-gray-600 mr-2">
+                <div className="mt-4 flex items-center gap-2">
+                  <span className="text-sm font-medium text-gray-600">
                     Degree:
                   </span>
-                  <div className="flex rounded-md overflow-hidden border border-gray-300">
-                    {selectedMajorInfo.specializations.map((spec, i) => {
-                      const label = specializationLabel(
-                        spec,
-                        selectedMajorInfo.id,
-                      );
-                      const isActive = selectedSpecialization === spec;
-                      return (
-                        <button
+                  <DropdownMenu>
+                    <DropdownMenuTrigger className="flex items-center gap-2 px-3 py-1.5 border border-gray-300 rounded-md bg-white text-sm font-medium shadow-sm hover:bg-gray-50">
+                      <span>
+                        {selectedSpecialization
+                          ? specializationLabel(
+                              selectedSpecialization,
+                              selectedMajorInfo.id,
+                            )
+                          : "Select degree"}
+                      </span>
+                      <span className="text-gray-400 text-xs">▼</span>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="start" sideOffset={6}>
+                      {selectedMajorInfo.specializations.map((spec) => (
+                        <DropdownMenuItem
                           key={spec}
-                          type="button"
+                          className={`text-sm cursor-pointer ${selectedSpecialization === spec ? "bg-gray-100 font-medium" : ""}`}
                           onClick={() => setSelectedSpecialization(spec)}
-                          className={`px-3 py-1 text-sm font-medium transition-colors duration-150 cursor-pointer
-                            ${i > 0 ? "border-l border-gray-300" : ""}
-                            ${isActive ? "bg-brand-blue text-white" : "bg-white text-gray-700 hover:bg-gray-50"}`}
                         >
-                          {label}
-                        </button>
-                      );
-                    })}
-                  </div>
+                          {specializationLabel(spec, selectedMajorInfo.id)}
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
               )}
 
