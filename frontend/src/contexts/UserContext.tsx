@@ -7,7 +7,7 @@ import React, { useState, createContext, useContext, useEffect } from "react";
 import { initialUserData } from "../data/mock_initial_user_data";
 import { fetchProfile } from "@/api/auth";
 import { apiGetWorksheets } from "@/api/worksheets";
-import { apiGetMajors, apiGetUserInfo } from "@/api/user_info";
+import { apiListWorksheetMajors } from "@/api/worksheetMajors";
 
 type UserContextType = {
   userData: User | undefined;
@@ -35,20 +35,26 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
 
   useEffect(() => {
     const init = async () => {
-      // Fetch real profile
+      // Fetch profile (now carries class_year, intended_language_code,
+      // language_requirement directly off CustomUser).
       const profile = await fetchProfile();
       if (!profile) return;
 
-      // Fetch full nested worksheets from backend
-      const [backendWorksheets, majors, userInfo] = await Promise.all([
-        apiGetWorksheets(),
-        apiGetMajors(),
-        apiGetUserInfo(),
-      ]);
-      // Map full nested backend shape into frontend Worksheet shape
-      const worksheets: FrontendWorksheet[] = backendWorksheets.map((w) => ({
+      // Fetch nested worksheets from backend.
+      const backendWorksheets = await apiGetWorksheets();
+
+      // For each worksheet, fetch its WorksheetMajor rows in parallel.
+      const worksheetMajorsByIdx = await Promise.all(
+        backendWorksheets.map((w) =>
+          apiListWorksheetMajors(w.id).catch(() => []),
+        ),
+      );
+
+      // Map full nested backend shape into frontend Worksheet shape.
+      const worksheets: FrontendWorksheet[] = backendWorksheets.map((w, i) => ({
         id: String(w.id),
         name: w.name,
+        majors: worksheetMajorsByIdx[i],
         studentSemesters: (w.semesters ?? [])
           .map((s): StudentSemester & { _rawClasses?: any[] } => ({
             id: s.id,
@@ -70,17 +76,14 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
         first_name: profile.first_name,
         last_name: profile.last_name,
         netID: profile.email.split("@")[0],
-        classYear: userInfo.class_year
-          ? String(userInfo.class_year)
-          : undefined,
-        intendedMajorId: userInfo.intended_major_id || undefined,
-        intendedLanguageCode: userInfo.intended_language_code || undefined,
+        classYear:
+          profile.class_year != null ? String(profile.class_year) : undefined,
+        intendedLanguageCode: profile.intended_language_code || undefined,
         FYP: {
           ...(prev ?? initialUserData).FYP,
           worksheets,
           activeWorksheetID,
-          languageRequirement: userInfo.language_requirement || "L1",
-          majors, // ← store declared majors
+          languageRequirement: profile.language_requirement || "L1",
         },
       }));
     };

@@ -4,7 +4,11 @@ import { useWorksheetManager } from "@/hooks/useWorksheetManager";
 import { apiCreateSemester, apiDeleteSemester } from "@/api/semesters";
 import {apiAddCourse, apiRemoveCourse } from "@/api/courses";
 import { apiUpdateSemester } from "@/api/semesters";
-import { apiAddMajor, apiRemoveMajor } from "@/api/user_info";
+import {
+  apiAddWorksheetMajor,
+  apiListWorksheetMajors,
+  apiRemoveWorksheetMajor,
+} from "@/api/worksheetMajors";
 
 
 import type { Course, StudentCourse, StudentSemester } from "@/types/type-user";
@@ -218,56 +222,69 @@ export function useWorksheetActions() {
     [canMutate, activeWorksheetId, worksheet, updateActiveWorksheet]
   );
 
-  const addProgram = useCallback(
-  async (majorId: string, specialization: string = "") => {
+  /**
+   * Refresh the active worksheet's `majors` list from the backend after
+   * an add/remove. Keeps the local Worksheet object in sync without
+   * requiring optimistic merges.
+   */
+  const refreshActiveWorksheetMajors = useCallback(async () => {
+    if (!activeWorksheetId) return;
     try {
-      const created = await apiAddMajor({ major_id: majorId, specialization });
-
+      const majors = await apiListWorksheetMajors(parseInt(activeWorksheetId));
       setUserData((prev) => {
         if (!prev) return prev;
-        const already = prev.FYP.majors?.some((m) => m.id === created.id);
-        if (already) return prev;
         return {
           ...prev,
           FYP: {
             ...prev.FYP,
-            majors: [...(prev.FYP.majors ?? []), created],
+            worksheets: prev.FYP.worksheets.map((w) =>
+              w.id === activeWorksheetId ? { ...w, majors } : w,
+            ),
           },
         };
       });
-
-      return { ok: true as const };
     } catch (e) {
-      return { ok: false as const, error: "Failed to add major." };
+      console.error("Failed to refresh worksheet majors", e);
     }
-  },
-  [setUserData]
-);
+  }, [activeWorksheetId, setUserData]);
 
+  const addProgram = useCallback(
+    async (majorId: string, specialization: string = "") => {
+      if (!activeWorksheetId) {
+        return { ok: false as const, error: "No active worksheet." };
+      }
+      try {
+        await apiAddWorksheetMajor(parseInt(activeWorksheetId), {
+          major_id: majorId,
+          specialization,
+        });
+        await refreshActiveWorksheetMajors();
+        return { ok: true as const };
+      } catch (e: any) {
+        return { ok: false as const, error: String(e?.message ?? e) };
+      }
+    },
+    [activeWorksheetId, refreshActiveWorksheetMajors],
+  );
 
   const removeProgram = useCallback(
-  async (majorRowId: number) => {
-    try {
-      await apiRemoveMajor(majorRowId);
-
-      setUserData((prev) => {
-        if (!prev) return prev;
-        return {
-          ...prev,
-          FYP: {
-            ...prev.FYP,
-            majors: (prev.FYP.majors ?? []).filter((m) => m.id !== majorRowId),
-          },
-        };
-      });
-
-      return { ok: true as const };
-    } catch (e) {
-      return { ok: false as const, error: "Failed to remove major." };
-    }
-  },
-  [setUserData]
-);
+    async (worksheetMajorId: number) => {
+      if (!activeWorksheetId) {
+        return { ok: false as const, error: "No active worksheet." };
+      }
+      try {
+        await apiRemoveWorksheetMajor(
+          parseInt(activeWorksheetId),
+          worksheetMajorId,
+        );
+        await refreshActiveWorksheetMajors();
+        return { ok: true as const };
+      } catch (e: any) {
+        return { ok: false as const, error: String(e?.message ?? e) };
+      }
+    },
+    [activeWorksheetId, refreshActiveWorksheetMajors],
+  );
 
   return {
     addSemester,

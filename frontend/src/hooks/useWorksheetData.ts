@@ -153,10 +153,10 @@ export function useWorksheetData() {
 }, [completedStudentCourses]);
 
 const majorCount = useMemo(() => {
-  return (userData?.FYP?.majors ?? []).filter(
-    (m) => m.major_id !== "general"
-  ).length - 1;
-}, [userData?.FYP?.majors]);
+  return (activeWorksheet?.majors ?? []).filter(
+    (m) => m.major_id !== "general_degree",
+  ).length;
+}, [activeWorksheet?.majors]);
 
 const certificateCount = useMemo(() => {
   return 0; // TODO: implement when certificates are added

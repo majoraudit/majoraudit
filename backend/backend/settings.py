@@ -51,7 +51,6 @@ INSTALLED_APPS = [
     'worksheets',
     'majors',
     'courses',
-    'user_data',
 ]
 
 MIDDLEWARE = [

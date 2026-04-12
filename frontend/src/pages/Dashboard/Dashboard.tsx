@@ -1,4 +1,4 @@
-import type { UserMajor } from "@/api/user_info";
+import type { WorksheetMajor } from "@/api/worksheetMajors";
 import type { AuditResult } from "@/api/majors";
 
 import { useUser } from "@/contexts/UserContext";
@@ -47,7 +47,7 @@ function Dashboard() {
   const { userData } = useUser();
   const { appData } = useApp();
 
-  const { worksheets, activeWorksheetId, setActiveWorksheet } =
+  const { worksheets, activeWorksheetId, activeWorksheet, setActiveWorksheet } =
     useWorksheetManager();
   const { removeProgram } = useWorksheetActions();
   const {
@@ -78,20 +78,21 @@ function Dashboard() {
   const [auditResult, setAuditResult] = useState<AuditResult | null>(null);
   const [isLoadingAudit, setIsLoadingAudit] = useState(false);
 
-  const degreeMajor: UserMajor | null = useMemo(() => {
-    return (
-      userData?.FYP?.majors?.find((m) => m.major_id === "general_degree") ??
-      null
-    );
-  }, [userData?.FYP?.majors]);
+  const worksheetMajors = activeWorksheet?.majors ?? [];
 
-  const declaredMajors: UserMajor[] = useMemo(() => {
-    return (userData?.FYP?.majors ?? []).filter(
+  const degreeMajor: WorksheetMajor | null = useMemo(() => {
+    return (
+      worksheetMajors.find((m) => m.major_id === "general_degree") ?? null
+    );
+  }, [worksheetMajors]);
+
+  const declaredMajors: WorksheetMajor[] = useMemo(() => {
+    return worksheetMajors.filter(
       (m) => m.major_id !== "general_degree",
     );
-  }, [userData?.FYP?.majors]);
+  }, [worksheetMajors]);
 
-  const activeMajor: UserMajor | null = useMemo(() => {
+  const activeMajor: WorksheetMajor | null = useMemo(() => {
     if (activeTab !== "major") return null;
     return declaredMajors[selectedMajorIndex] ?? null;
   }, [activeTab, selectedMajorIndex, declaredMajors]);
@@ -254,6 +255,7 @@ function Dashboard() {
 
   return (
     <div className="h-[calc(100vh-5rem)] w-full flex flex-col bg-gray-50 p-6 gap-4 overflow-y-auto">
+      {/* Widgets temporarily disabled
       <DashboardInsightGrid
         activeWorksheetId={activeWorksheetId}
         graduationCreditsRequired={graduationCreditsRequired}
@@ -265,6 +267,7 @@ function Dashboard() {
         auditProgramMetrics={auditProgramMetrics}
         activeProgramName={displayName}
       />
+      */}
 
       <section className="bg-white rounded-lg shadow p-4 w-full flex flex-col flex-1 min-h-[26rem]">
         <div className="flex flex-row items-center border-b mb-2">

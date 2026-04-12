@@ -5,4 +5,6 @@ from django.contrib.auth.models import AbstractUser
 
 
 class CustomUser(AbstractUser):
-    pass
+    class_year = models.PositiveSmallIntegerField(null=True, blank=True)
+    intended_language_code = models.CharField(max_length=10, blank=True, default="")
+    language_requirement = models.CharField(max_length=10, blank=True, default="")

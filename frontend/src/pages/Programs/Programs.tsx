@@ -283,14 +283,14 @@ function Programs() {
   );
 
   const majorExists = useMemo(() => {
-    if (!userData || !selectedMajorInfo || !selectedSpecialization)
+    if (!activeWorksheet || !selectedMajorInfo || !selectedSpecialization)
       return false;
-    return (userData.FYP.majors ?? []).some(
+    const spec = selectedSpecialization.replace(".mql", "");
+    return (activeWorksheet.majors ?? []).some(
       (m) =>
-        m.major_id === selectedMajorInfo.id &&
-        m.specialization === selectedSpecialization.replace(".mql", ""),
+        m.major_id === selectedMajorInfo.id && m.specialization === spec,
     );
-  }, [userData?.FYP.majors, selectedMajorInfo?.id, selectedSpecialization]);
+  }, [activeWorksheet?.majors, selectedMajorInfo?.id, selectedSpecialization]);
 
   const handleAddMajor = async () => {
     if (!selectedMajorInfo || !selectedSpecialization) return;

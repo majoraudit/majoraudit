@@ -12,6 +12,8 @@ from django.views.decorators.http import require_http_methods
 from django.utils.decorators import method_decorator
 from django.views import View
 
+from django.shortcuts import get_object_or_404
+from rest_framework import generics, permissions
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -20,6 +22,9 @@ from rest_framework.exceptions import ValidationError, NotFound, ParseError
 import pylibmql
 
 from .engine import Solver, API_LATEST
+from .serializers import WorksheetMajorSerializer
+from worksheets.models import UserWorksheet, WorksheetMajor
+from worksheets.permissions import IsOwnerPermission
 
 logger = logging.getLogger(__name__)
 
@@ -707,3 +712,51 @@ async def solve_requirements_async(request):
     except Exception as e:
         logger.error(f"Error in solve_requirements_async: {str(e)}", exc_info=True)
         return create_error_response(f"Internal server error: {str(e)}", status_code=500)
+
+
+# ---------------------------------------------------------------------------
+# WorksheetMajor CRUD — which (major, specialization) pairs are selected
+# for a given worksheet. Mounted under /api/worksheets/<worksheet_pk>/majors/.
+# ---------------------------------------------------------------------------
+
+class WorksheetMajorListCreateView(generics.ListCreateAPIView):
+    """
+    GET  /api/worksheets/<worksheet_pk>/majors/  → list this worksheet's majors
+    POST /api/worksheets/<worksheet_pk>/majors/  → add a (major_id, specialization)
+    """
+    serializer_class = WorksheetMajorSerializer
+    permission_classes = [permissions.IsAuthenticated, IsOwnerPermission]
+
+    def get_serializer_context(self):
+        ctx = super().get_serializer_context()
+        ctx['worksheet_pk'] = self.kwargs.get('worksheet_pk')
+        return ctx
+
+    def get_queryset(self):
+        return WorksheetMajor.objects.filter(
+            worksheet_id=self.kwargs['worksheet_pk'],
+            worksheet__user=self.request.user,
+        )
+
+    def perform_create(self, serializer):
+        worksheet = get_object_or_404(
+            UserWorksheet,
+            pk=self.kwargs['worksheet_pk'],
+            user=self.request.user,
+        )
+        serializer.save(worksheet=worksheet)
+
+
+class WorksheetMajorDetailView(generics.RetrieveDestroyAPIView):
+    """
+    GET    /api/worksheets/<worksheet_pk>/majors/<pk>/
+    DELETE /api/worksheets/<worksheet_pk>/majors/<pk>/
+    """
+    serializer_class = WorksheetMajorSerializer
+    permission_classes = [permissions.IsAuthenticated, IsOwnerPermission]
+
+    def get_queryset(self):
+        return WorksheetMajor.objects.filter(
+            worksheet_id=self.kwargs['worksheet_pk'],
+            worksheet__user=self.request.user,
+        )

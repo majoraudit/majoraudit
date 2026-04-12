@@ -80,16 +80,18 @@ let matchingEval;
 if (matchResult.ok) {
   matchingEval = matchResult.data;
 } else {
-  throw matchResult
-  // // Build a best-effort matching_eval using all courses as candidates
-  // // for every requirement — solver will figure out what fits
-  // matchingEval = {
-  //   results: mqlData.requirements.map((req) => ({
-  //     requirement: req,
-  //     selectedCourses: [courseListForMatcher], // all courses as candidates
-  //   })),
-  //   allSelectedCourses: [courseListForMatcher],
-  // };
+  // Some requirements couldn't find matching courses in the catalog
+  // (e.g. tags/dists that don't exist in the loaded course data).
+  // Build a fallback with empty selections so the solver can still
+  // run and report those requirements as unsatisfied instead of crashing.
+  console.warn("MQL matcher returned errors, using fallback:", matchResult.error);
+  matchingEval = {
+    results: mqlData.requirements.map((req) => ({
+      requirement: req,
+      selectedCourses: [] as any[],
+    })),
+    allSelectedCourses: [] as any[],
+  };
 }
  
 // const courseSet = new Set(courses.map((c) => ({
