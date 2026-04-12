@@ -37,7 +37,7 @@ class UserWorksheetClass(models.Model):
     class Meta:
         constraints = [
             models.CheckConstraint(
-                check=(
+                condition=(
                     models.Q(course__isnull=False, course_instance__isnull=True) |
                     models.Q(course__isnull=True,
                              course_instance__isnull=False)
@@ -45,3 +45,28 @@ class UserWorksheetClass(models.Model):
                 name="usercourse_exactly_one_fk"
             )
         ]
+
+
+class WorksheetMajor(models.Model):
+    """
+    A major (with specialization) selected for a specific worksheet.
+
+    `major_id` is a string matching the folder name under
+    `backend/major_templates/` (e.g. "computer_science"). `specialization`
+    is the slug used to identify a specific MQL file under that folder
+    (e.g. "computer_science_ba", "computer_science_bs"). Together they
+    identify a single .mql file.
+    """
+    worksheet = models.ForeignKey(
+        UserWorksheet,
+        on_delete=models.CASCADE,
+        related_name='worksheet_majors',
+    )
+    major_id = models.CharField(max_length=100)
+    specialization = models.CharField(max_length=100, blank=True, default="")
+
+    class Meta:
+        unique_together = [('worksheet', 'major_id', 'specialization')]
+
+    def __str__(self):
+        return f"{self.major_id}/{self.specialization} (ws={self.worksheet_id})"

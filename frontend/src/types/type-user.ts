@@ -1,5 +1,6 @@
 
 import {type MajorTemplate, type MajorProgress} from "./type-program";
+import type { WorksheetMajor } from "@/api/worksheetMajors";
 
 export interface Course {
   id: string;
@@ -14,7 +15,7 @@ export interface Course {
 
 export interface StudentCourse {
   worksheetClassId?: number;
-  course: Course; 	
+  course: Course;
 	term: number; 		// 202401
   status: string; 	// "DA_COMPLETE" | "DA_PROSPECT" | "MA_VALID" | "MA_HYPOTHETICAL"
   manualFulfillInfo?: {manualFulfill: boolean, groupIdx: Number, itemIdx: Number}; // whether this course was manually added by the user
@@ -33,42 +34,21 @@ export interface Worksheet {
   id: string;
   name: string;
   studentSemesters: StudentSemester[];
-}
-
-interface ProgramStats 
-{
-  majorNum: number;
-  certificateNum: number;
+  /** Majors selected for this worksheet, fetched from /api/worksheets/<id>/majors/. */
+  majors?: WorksheetMajor[];
 }
 
 export interface FYP {
-	languageRequirement: string;
-	//studentSemesters: StudentSemester[];
-
-  // shows degree, major, certificate requirements
-  // degreeConfigurations: MajorRequirement[];
-
-  degreeProgress: MajorProgress[];
-  degreeProgress2:
-    {
-      worksheetID: string;
-      majors: MajorProgress[];
-    }[];
-  statCount: ProgramStats; // how many majors added, how many certificates added
-
-	//degreeConfigurations: DegreeConfiguration[][];
-	//degreeDeclarations: StudentDegree[];
-  worksheets: Worksheet[]; 
+  worksheets: Worksheet[];
   activeWorksheetID: string;
+  languageRequirement: string;
 }
 
 export interface User {
 	first_name: string;
   last_name: string;
 	netID: string;
-	//onboard: boolean;
-	classYear?: string; 
-	intendedMajorId?: string;
+	classYear?: string;
 	intendedLanguageCode?: string;
 	FYP: FYP;
 }

@@ -1,6 +1,11 @@
-SELECT 1 FROM [] : "Humanities" : 3
-SELECT 1 FROM [] : "Social Sciences" : 2
-SELECT 4 FROM [] : "African Language" : 1
-SELECT 1 FROM [] : "Research Methods" : 1
-SELECT 4 FROM [] : "Area of Focus" : 1
-SELECT 1 FROM [] : "Senior Essay" : 1
+SELECT 1 FROM [CLASS(AFST 4491)] : "Senior Essay" : 5;
+
+SELECT 1 FROM [CLASS(AFST 5505)] : "Research Methods" : 4;
+
+SELECT 1 FROM [RANGE(AFST 1000, AFST 9999)] : "Humanities Course in African Studies" : 3;
+
+SELECT 1 FROM [RANGE(AFST 1000, AFST 9999)] : "Social Science Course in African Studies" : 3;
+
+SELECT 4 FROM [RANGE(AFST 1000, AFST 9999), RANGE(AFST 1000, AFST 9999), RANGE(AFST 1000, AFST 9999), RANGE(AFST 1000, AFST 9999)] : "Area of Focus" : 2;
+
+SELECT 4 FROM [RANGE(SWAH 1000, SWAH 9999), RANGE(SWAH 1000, SWAH 9999), RANGE(SWAH 1000, SWAH 9999), RANGE(SWAH 1000, SWAH 9999)] : "African Language Requirement" : 2;

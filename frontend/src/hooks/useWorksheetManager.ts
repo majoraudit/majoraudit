@@ -120,10 +120,6 @@ export function useWorksheetManager(): UseWorksheetManagerReturn {
       // Create on the backend first to get the real ID
       const newWs = await apiCreateWorksheet({ name: finalName });
 
-      const pastDegreeProgress = userData.FYP.degreeProgress2 ?? [];
-      const mainWsMajors =
-        pastDegreeProgress.find((dp) => dp.worksheetID === mainId)?.majors ?? [];
-
       const frontendWs = {
         id: String(newWs.id),
         name: newWs.name,
@@ -136,10 +132,6 @@ export function useWorksheetManager(): UseWorksheetManagerReturn {
           ...userData.FYP,
           worksheets: [...worksheets, frontendWs],
           activeWorksheetID: frontendWs.id,
-          degreeProgress2: [
-            ...pastDegreeProgress,
-            { worksheetID: frontendWs.id, majors: [...mainWsMajors] },
-          ],
         },
       });
 
@@ -193,9 +185,7 @@ export function useWorksheetManager(): UseWorksheetManagerReturn {
       await apiDeleteWorksheet(parseInt(id));
 
       const nextList = worksheets.filter((w) => w.id !== id);
-      const newDegreeProgress = (userData.FYP.degreeProgress2 ?? []).filter(
-        (dp) => dp.worksheetID !== id
-      );
+      
 
       let nextActiveId = userData.FYP.activeWorksheetID;
       if (nextActiveId === id) nextActiveId = mainId;
@@ -206,7 +196,6 @@ export function useWorksheetManager(): UseWorksheetManagerReturn {
           ...userData.FYP,
           worksheets: nextList,
           activeWorksheetID: nextActiveId,
-          degreeProgress2: newDegreeProgress,
         },
       });
     },

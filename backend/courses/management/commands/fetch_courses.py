@@ -45,7 +45,7 @@ class Command(BaseCommand):
                 flag_text = flag_item["flag"]["flag_text"]
                 tag, _ = CourseTag.objects.get_or_create(name=flag_text)
                 course_tags.append(tag)
-            course.course_tag.set(course_tags)
+            course.course_tags.set(course_tags)
 
             listings = item["listings"]
             course_codes = []

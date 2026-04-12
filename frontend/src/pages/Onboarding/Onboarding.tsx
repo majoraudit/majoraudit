@@ -3,9 +3,11 @@ import { useNavigate } from "react-router-dom";
 import { useUser } from "@/contexts/UserContext";
 import { useWorksheetManager } from "@/hooks/useWorksheetManager";
 import { apiCreateSemester } from "@/api/semesters";
+import { apiUpdateProfile } from "@/api/auth";
+import { apiAddWorksheetMajor } from "@/api/worksheetMajors";
+
 import {
   CLASS_YEARS,
-  UNDERGRAD_MAJORS,
   LANGUAGE_SUBJECTS,
   LANGUAGE_LEVELS,
 } from "@/constants/onboarding";
@@ -50,9 +52,6 @@ function Onboarding() {
   const [first_name, setFirst_name] = useState(userData?.first_name ?? "");
   const [last_name, setLast_name] = useState(userData?.last_name ?? "");
   const [classYear, setClassYear] = useState(userData?.classYear ?? "");
-  const [intendedMajorId, setIntendedMajorId] = useState(
-    userData?.intendedMajorId ?? "",
-  );
   const [intendedLanguageCode, setIntendedLanguageCode] = useState(
     userData?.intendedLanguageCode ?? "",
   );
@@ -64,11 +63,32 @@ function Onboarding() {
     e.preventDefault();
     if (!userData) return;
 
-    // 1. Create worksheet — returns real ID directly, no state read needed
+    // 1. Save profile fields to backend (CustomUser).
+    try {
+      await apiUpdateProfile({
+        class_year: classYear ? parseInt(classYear) : null,
+        intended_language_code: intendedLanguageCode || "",
+        language_requirement: languageLevel,
+      });
+    } catch (err) {
+      console.error("Failed to save profile during onboarding", err);
+    }
+
+    // 2. Create the Main Worksheet — needed before we can attach majors.
     const newWorksheet = await createWorksheet("Main Worksheet");
     if (!newWorksheet) return;
 
-    // 2. Create semesters directly via API using the returned ID
+    // 3. Auto-attach the general_degree major to the new worksheet.
+    try {
+      await apiAddWorksheetMajor(parseInt(newWorksheet.id), {
+        major_id: "general_degree",
+        specialization: "",
+      });
+    } catch (err) {
+      console.error("Failed to add general_degree to new worksheet", err);
+    }
+
+    // 4. Create semesters via API using the new worksheet ID.
     const semesterTemplates = classYear
       ? generateSemesters(parseInt(classYear))
       : [];
@@ -83,7 +103,7 @@ function Onboarding() {
       ),
     );
 
-    // 3. Map into frontend shape
+    // 5. Map into frontend shape
     const studentSemesters: StudentSemester[] = createdSemesters.map(
       (s, i) => ({
         id: s.id,
@@ -97,7 +117,7 @@ function Onboarding() {
       }),
     );
 
-    // 4. Patch semesters + profile fields in one setUserData call
+    // 6. Patch semesters + profile fields in one setUserData call.
     setUserData((prev) => {
       if (!prev) return prev;
       return {
@@ -105,7 +125,6 @@ function Onboarding() {
         first_name: first_name.trim() || prev.first_name,
         last_name: last_name.trim() || prev.last_name,
         classYear: classYear || undefined,
-        intendedMajorId: intendedMajorId || undefined,
         intendedLanguageCode: intendedLanguageCode || undefined,
         FYP: {
           ...prev.FYP,
@@ -164,23 +183,6 @@ function Onboarding() {
             {CLASS_YEARS.map((y) => (
               <option key={y} value={y}>
                 {y}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1">
-            Major
-          </label>
-          <select
-            value={intendedMajorId}
-            onChange={(e) => setIntendedMajorId(e.target.value)}
-            className="w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 focus:border-brand-blue focus:outline-none focus:ring-1 focus:ring-brand-blue"
-          >
-            <option value="">Select major</option>
-            {UNDERGRAD_MAJORS.map((major) => (
-              <option key={major} value={major}>
-                {major}
               </option>
             ))}
           </select>

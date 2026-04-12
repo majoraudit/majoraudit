@@ -4,9 +4,14 @@ import { useWorksheetManager } from "@/hooks/useWorksheetManager";
 import { apiCreateSemester, apiDeleteSemester } from "@/api/semesters";
 import {apiAddCourse, apiRemoveCourse } from "@/api/courses";
 import { apiUpdateSemester } from "@/api/semesters";
+import {
+  apiAddWorksheetMajor,
+  apiListWorksheetMajors,
+  apiRemoveWorksheetMajor,
+} from "@/api/worksheetMajors";
+
 
 import type { Course, StudentCourse, StudentSemester } from "@/types/type-user";
-import type { MajorProgress } from "../types/type-program";
 
 /**
  * Hook that mutates the active worksheet inside userData.
@@ -217,90 +222,68 @@ export function useWorksheetActions() {
     [canMutate, activeWorksheetId, worksheet, updateActiveWorksheet]
   );
 
-  const addProgram = useCallback(
-    (program: MajorProgress | null) => {
-      if (!activeWorksheetId) return { ok: false as const, error: "No active worksheet." };
-      if (!program) return { ok: false as const, error: "Program is null." };
-
+  /**
+   * Refresh the active worksheet's `majors` list from the backend after
+   * an add/remove. Keeps the local Worksheet object in sync without
+   * requiring optimistic merges.
+   */
+  const refreshActiveWorksheetMajors = useCallback(async () => {
+    if (!activeWorksheetId) return;
+    try {
+      const majors = await apiListWorksheetMajors(parseInt(activeWorksheetId));
       setUserData((prev) => {
         if (!prev) return prev;
-
-        const dp2 = prev.FYP.degreeProgress2 ?? [];
-
-        const newDegreeProgress2 = dp2.map((entry) => {
-          if (entry.worksheetID !== activeWorksheetId) return entry;
-          const exists = entry.majors.some((m) => m.id === program.id);
-          if (exists) return entry;
-          return { ...entry, majors: [...entry.majors, program] };
-        });
-
-        const hasEntry = dp2.some((e) => e.worksheetID === activeWorksheetId);
-        const finalDegreeProgress2 = hasEntry
-          ? newDegreeProgress2
-          : [...dp2, { worksheetID: activeWorksheetId, majors: [program] } as any];
-
-        const majorNum = prev.FYP.statCount?.majorNum ?? 0;
-        const certificateNum = prev.FYP.statCount?.certificateNum ?? 0;
-
         return {
           ...prev,
           FYP: {
             ...prev.FYP,
-            statCount: {
-              ...prev.FYP.statCount,
-              majorNum: isMajorType(program.info.degreeType) ? majorNum + 1 : majorNum,
-              certificateNum: isCertificateType(program.info.degreeType)
-                ? certificateNum + 1
-                : certificateNum,
-            },
-            degreeProgress2: finalDegreeProgress2,
+            worksheets: prev.FYP.worksheets.map((w) =>
+              w.id === activeWorksheetId ? { ...w, majors } : w,
+            ),
           },
         };
       });
+    } catch (e) {
+      console.error("Failed to refresh worksheet majors", e);
+    }
+  }, [activeWorksheetId, setUserData]);
 
-      return { ok: true as const };
+  const addProgram = useCallback(
+    async (majorId: string, specialization: string = "") => {
+      if (!activeWorksheetId) {
+        return { ok: false as const, error: "No active worksheet." };
+      }
+      try {
+        await apiAddWorksheetMajor(parseInt(activeWorksheetId), {
+          major_id: majorId,
+          specialization,
+        });
+        await refreshActiveWorksheetMajors();
+        return { ok: true as const };
+      } catch (e: any) {
+        return { ok: false as const, error: String(e?.message ?? e) };
+      }
     },
-    [activeWorksheetId, setUserData]
+    [activeWorksheetId, refreshActiveWorksheetMajors],
   );
 
   const removeProgram = useCallback(
-    (program: MajorProgress) => {
-      if (!activeWorksheetId) return { ok: false as const, error: "No active worksheet." };
-
-      setUserData((prev) => {
-        if (!prev) return prev;
-
-        const dp2 = prev.FYP.degreeProgress2 ?? [];
-
-        const newDegreeProgress2 = dp2.map((entry) => {
-          if (entry.worksheetID !== activeWorksheetId) return entry;
-          return { ...entry, majors: entry.majors.filter((m) => m.id !== program.id) };
-        });
-
-        const majorNum = prev.FYP.statCount?.majorNum ?? 0;
-        const certificateNum = prev.FYP.statCount?.certificateNum ?? 0;
-
-        return {
-          ...prev,
-          FYP: {
-            ...prev.FYP,
-            statCount: {
-              ...prev.FYP.statCount,
-              majorNum: isMajorType(program.info.degreeType)
-                ? Math.max(0, majorNum - 1)
-                : majorNum,
-              certificateNum: isCertificateType(program.info.degreeType)
-                ? Math.max(0, certificateNum - 1)
-                : certificateNum,
-            },
-            degreeProgress2: newDegreeProgress2,
-          },
-        };
-      });
-
-      return { ok: true as const };
+    async (worksheetMajorId: number) => {
+      if (!activeWorksheetId) {
+        return { ok: false as const, error: "No active worksheet." };
+      }
+      try {
+        await apiRemoveWorksheetMajor(
+          parseInt(activeWorksheetId),
+          worksheetMajorId,
+        );
+        await refreshActiveWorksheetMajors();
+        return { ok: true as const };
+      } catch (e: any) {
+        return { ok: false as const, error: String(e?.message ?? e) };
+      }
     },
-    [activeWorksheetId, setUserData]
+    [activeWorksheetId, refreshActiveWorksheetMajors],
   );
 
   return {
