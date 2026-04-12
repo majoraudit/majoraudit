@@ -3,7 +3,7 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 from django.contrib.auth import get_user_model
-from .models import UserWorksheet, UserWorksheetSemester, UserWorksheetClass
+from .models import UserWorksheet, UserWorksheetSemester, UserWorksheetClass, WorksheetMajor
 from courses.models import Course
 
 # Create your tests here.
@@ -329,7 +329,7 @@ class ClassPermissionTests(APITestCase):
             'semester_pk': self.user1_semester.pk
         })
         response = self.client.post(url, {
-            'course': self.course.pk,
+            'course': self.course.external_id,
             'creditdf': True
         }, secure=True)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -341,7 +341,7 @@ class ClassPermissionTests(APITestCase):
             'semester_pk': self.user2_semester.pk
         })
         response = self.client.post(url, {
-            'course': self.course.pk,
+            'course': self.course.external_id,
             'creditdf': True
         }, secure=True)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
@@ -430,3 +430,157 @@ class ClassPermissionTests(APITestCase):
         })
         response = self.client.get(url, secure=True)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+
+class WorksheetMajorPermissionTests(APITestCase):
+    """Test permissions for WorksheetMajor endpoints."""
+
+    def setUp(self):
+        self.user1 = User.objects.create_user(
+            username='user1', password='testpass123'
+        )
+        self.user2 = User.objects.create_user(
+            username='user2', password='testpass123'
+        )
+        self.user1_worksheet = UserWorksheet.objects.create(
+            user=self.user1, name='User1 Worksheet'
+        )
+        self.user2_worksheet = UserWorksheet.objects.create(
+            user=self.user2, name='User2 Worksheet'
+        )
+        self.user1_major = WorksheetMajor.objects.create(
+            worksheet=self.user1_worksheet,
+            major_id='computer_science',
+            specialization='computer_science_ba',
+        )
+        self.user2_major = WorksheetMajor.objects.create(
+            worksheet=self.user2_worksheet,
+            major_id='mathematics',
+            specialization='mathematics_ba',
+        )
+
+    def test_unauthenticated_cannot_list_majors(self):
+        url = reverse('ws-major-list', kwargs={
+            'worksheet_pk': self.user1_worksheet.pk
+        })
+        response = self.client.get(url, secure=True)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_user_can_list_majors_in_own_worksheet(self):
+        self.client.force_authenticate(user=self.user1)
+        url = reverse('ws-major-list', kwargs={
+            'worksheet_pk': self.user1_worksheet.pk
+        })
+        response = self.client.get(url, secure=True)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0]['major_id'], 'computer_science')
+
+    def test_user_cannot_list_majors_in_other_users_worksheet(self):
+        self.client.force_authenticate(user=self.user1)
+        url = reverse('ws-major-list', kwargs={
+            'worksheet_pk': self.user2_worksheet.pk
+        })
+        response = self.client.get(url, secure=True)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 0)
+
+    def test_user_can_add_major_to_own_worksheet(self):
+        self.client.force_authenticate(user=self.user1)
+        url = reverse('ws-major-list', kwargs={
+            'worksheet_pk': self.user1_worksheet.pk
+        })
+        response = self.client.post(url, {
+            'major_id': 'economics',
+            'specialization': 'economics_ba',
+        }, format='json', secure=True)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertTrue(
+            WorksheetMajor.objects.filter(
+                worksheet=self.user1_worksheet,
+                major_id='economics',
+            ).exists()
+        )
+
+    def test_user_cannot_add_major_to_other_users_worksheet(self):
+        self.client.force_authenticate(user=self.user1)
+        url = reverse('ws-major-list', kwargs={
+            'worksheet_pk': self.user2_worksheet.pk
+        })
+        response = self.client.post(url, {
+            'major_id': 'economics',
+            'specialization': 'economics_ba',
+        }, format='json', secure=True)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_cannot_add_duplicate_major(self):
+        self.client.force_authenticate(user=self.user1)
+        url = reverse('ws-major-list', kwargs={
+            'worksheet_pk': self.user1_worksheet.pk
+        })
+        response = self.client.post(url, {
+            'major_id': 'computer_science',
+            'specialization': 'computer_science_ba',
+        }, format='json', secure=True)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_can_add_same_major_different_specialization(self):
+        self.client.force_authenticate(user=self.user1)
+        url = reverse('ws-major-list', kwargs={
+            'worksheet_pk': self.user1_worksheet.pk
+        })
+        response = self.client.post(url, {
+            'major_id': 'computer_science',
+            'specialization': 'computer_science_bs',
+        }, format='json', secure=True)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(
+            WorksheetMajor.objects.filter(
+                worksheet=self.user1_worksheet,
+                major_id='computer_science',
+            ).count(),
+            2,
+        )
+
+    def test_user_can_retrieve_own_major(self):
+        self.client.force_authenticate(user=self.user1)
+        url = reverse('ws-major-detail', kwargs={
+            'worksheet_pk': self.user1_worksheet.pk,
+            'pk': self.user1_major.pk,
+        })
+        response = self.client.get(url, secure=True)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['major_id'], 'computer_science')
+
+    def test_user_cannot_retrieve_other_users_major(self):
+        self.client.force_authenticate(user=self.user1)
+        url = reverse('ws-major-detail', kwargs={
+            'worksheet_pk': self.user2_worksheet.pk,
+            'pk': self.user2_major.pk,
+        })
+        response = self.client.get(url, secure=True)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_user_can_delete_own_major(self):
+        self.client.force_authenticate(user=self.user1)
+        url = reverse('ws-major-detail', kwargs={
+            'worksheet_pk': self.user1_worksheet.pk,
+            'pk': self.user1_major.pk,
+        })
+        response = self.client.delete(url, secure=True)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertFalse(
+            WorksheetMajor.objects.filter(pk=self.user1_major.pk).exists()
+        )
+
+    def test_user_cannot_delete_other_users_major(self):
+        self.client.force_authenticate(user=self.user1)
+        url = reverse('ws-major-detail', kwargs={
+            'worksheet_pk': self.user2_worksheet.pk,
+            'pk': self.user2_major.pk,
+        })
+        response = self.client.delete(url, secure=True)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertTrue(
+            WorksheetMajor.objects.filter(pk=self.user2_major.pk).exists()
+        )

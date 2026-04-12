@@ -1,8 +1,15 @@
 from django.urls import path
-from .views import MajorListView, MajorIDView, check_major_status
+from . import views
 
 urlpatterns = [
-    path('', MajorListView.as_view(), name='major-list'),
-    path('check/', check_major_status, name='check-major-status'),
-    path('<str:major_id>/', MajorIDView.as_view(), name='major-id'),
+    path('', views.MajorListView.as_view(), name='major-list'),
+    path('check/', views.check_major_status, name='check-major-status'),
+    path('solve/', views.solve_requirements, name='solve'),
+    path('solve/detailed/', views.solve_requirements_detailed, name='solve_detailed'),
+    path('solver/', views.SolverView.as_view(), name='solver'),
+    path('solver/batch/', views.BatchSolverView.as_view(), name='batch_solver'),
+    
+    # Dynamic routes last
+    path('<str:major_id>/', views.MajorIDView.as_view(), name='major-id'),
+    path('<str:major_id>/mql/', views.MajorIDMQLView.as_view(), name='major-id-mql'),
 ]

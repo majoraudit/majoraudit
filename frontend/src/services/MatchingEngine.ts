@@ -190,7 +190,7 @@ export class QueryMatcher extends QueryMatchingEngine<MatchingError> {
 
             for (const maybeSplit of course.codes.map(code => code.split(' '))) {
                 if (!maybeSplit || maybeSplit.length != 2) {
-                    console.warn(course);
+                    // console.warn(course);
                     return [];
                 } // soft error
 

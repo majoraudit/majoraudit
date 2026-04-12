@@ -1,6 +1,6 @@
 // import { apiUrl } from "../constants";
 
-function getCsrfToken(): string {
+export function getCsrfToken(): string {
   const match = document.cookie.match(/csrftoken=([^;]+)/);
   return match ? match[1] : "";
 }
@@ -36,6 +36,13 @@ class ApiClient {
   async put(endpoint: string, data?: any): Promise<Response> {
     return this.request(endpoint, {
       method: "PUT",
+      body: data ? JSON.stringify(data) : undefined,
+    });
+  }
+
+  async patch(endpoint: string, data?: any): Promise<Response> {
+    return this.request(endpoint, {
+      method: "PATCH",
       body: data ? JSON.stringify(data) : undefined,
     });
   }

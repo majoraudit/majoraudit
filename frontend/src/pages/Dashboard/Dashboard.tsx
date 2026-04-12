@@ -1,5 +1,5 @@
-import { formatC_P_UP } from "@/utils/formatHelpers";
-import type { MajorProgress } from "../../types/type-program";
+import type { WorksheetMajor } from "@/api/worksheetMajors";
+import type { AuditResult } from "@/api/majors";
 
 import { useUser } from "@/contexts/UserContext";
 import { useApp } from "@/contexts/AppContext";
@@ -8,16 +8,20 @@ import MajorRequirementList from "./components/MajorRequirementList";
 import MajorRequirementGraph from "./components/MajorRequirementGraph";
 import DashboardInsightGrid from "./components/DashboardInsightGrid";
 
-import checkIcon from "./assets/check.svg";
 import trashcan from "./assets/trashcan.svg";
 
-import { useMemo, useEffect } from "react";
-import { Navigate } from "react-router-dom";
+import { useMemo, useEffect, useState, useCallback } from "react";
 
 import { useWorksheetManager } from "@/hooks/useWorksheetManager";
 import { useWorksheetActions } from "@/hooks/useWorksheetActions";
 import { useWorksheetData } from "@/hooks/useWorksheetData";
-import { useProgramNavigation } from "./hooks/useProgramNavigation";
+import {
+  apiFetchMajorTemplate,
+  apiFetchMajorMQL,
+  apiRunAudit,
+} from "@/api/majors";
+
+import type { MQLQueryFile } from "@/types/schema/mql/mql";
 
 import {
   DropdownMenu,
@@ -26,11 +30,24 @@ import {
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
 
+interface MajorInfo {
+  name: string;
+  id: string;
+  abbr: string;
+  discipline: string;
+  rating: number;
+  workload: number;
+  students: number;
+  specializations: string[];
+}
+
+type ActiveTab = "degree" | "major";
+
 function Dashboard() {
-  const { userData, setUserData } = useUser();
+  const { userData } = useUser();
   const { appData } = useApp();
 
-  const { worksheets, activeWorksheetId, setActiveWorksheet } =
+  const { worksheets, activeWorksheetId, activeWorksheet, setActiveWorksheet } =
     useWorksheetManager();
   const { removeProgram } = useWorksheetActions();
   const {
@@ -40,381 +57,375 @@ function Dashboard() {
     allStudentCourses,
     semesters,
     majorCount,
-    certificateCount,
+    uniqueCourses,
   } = useWorksheetData();
 
   const graduationCreditsRequired = 36;
-
-  const activeMajorProgress: MajorProgress[] = useMemo(() => {
-    if (!userData) return [];
-    const dP = userData.FYP.degreeProgress2.find(
-      (w) => w.worksheetID === activeWorksheetId,
-    );
-    return dP?.majors ?? [];
-  }, [userData, activeWorksheetId]);
-
-  const totalCompletedCredits = completedCredits;
-
-  const totalPlannedCredits = totalCredits - completedCredits;
-
   const totalCompletedCourses = completedCourseCount;
-  const creditsRemaining = Math.max(
-    0,
-    graduationCreditsRequired - totalCompletedCredits - totalPlannedCredits,
+
+  const [activeTab, setActiveTab] = useState<ActiveTab>("degree");
+  const [selectedMajorIndex, setSelectedMajorIndex] = useState(0);
+
+  const [majorInfoCache, setMajorInfoCache] = useState<
+    Record<string, MajorInfo>
+  >({});
+  const [mqlCache, setMqlCache] = useState<Record<string, MQLQueryFile>>({});
+  const [activeMajorInfo, setActiveMajorInfo] = useState<MajorInfo | null>(
+    null,
+  );
+  const [activeMqlData, setActiveMqlData] = useState<MQLQueryFile | null>(null);
+  const [isLoadingMajor, setIsLoadingMajor] = useState(false);
+  const [auditResult, setAuditResult] = useState<AuditResult | null>(null);
+  const [isLoadingAudit, setIsLoadingAudit] = useState(false);
+
+  const worksheetMajors = activeWorksheet?.majors ?? [];
+
+  const degreeMajor: WorksheetMajor | null = useMemo(() => {
+    return (
+      worksheetMajors.find((m) => m.major_id === "general_degree") ?? null
+    );
+  }, [worksheetMajors]);
+
+  const declaredMajors: WorksheetMajor[] = useMemo(() => {
+    return worksheetMajors.filter(
+      (m) => m.major_id !== "general_degree",
+    );
+  }, [worksheetMajors]);
+
+  const activeMajor: WorksheetMajor | null = useMemo(() => {
+    if (activeTab !== "major") return null;
+    return declaredMajors[selectedMajorIndex] ?? null;
+  }, [activeTab, selectedMajorIndex, declaredMajors]);
+
+  // ---------- Audit ----------
+  const runAudit = useCallback(
+    async (mql: MQLQueryFile) => {
+      if (!appData) return;
+      setIsLoadingAudit(true);
+      setAuditResult(null);
+      try {
+        const result = await apiRunAudit(
+          uniqueCourses,
+          appData.course_database.getAllCourses(),
+          mql,
+        );
+        setAuditResult(result);
+      } catch (e) {
+        console.error("Audit failed:", e);
+      } finally {
+        setIsLoadingAudit(false);
+      }
+    },
+    [uniqueCourses, appData],
   );
 
-  const nav = useProgramNavigation({ majorCount, certificateCount });
+  // ---------- Load major data ----------
+  const loadMajorData = useCallback(
+    async (majorId: string) => {
+      setIsLoadingMajor(true);
+      setAuditResult(null);
+      try {
+        const infoPromise = majorInfoCache[majorId]
+          ? Promise.resolve(majorInfoCache[majorId])
+          : apiFetchMajorTemplate(majorId);
 
-  const activeProgram = useMemo(() => {
-    if (nav.activeTab === "degree") return activeMajorProgress[0];
-    return activeMajorProgress[nav.activeIndex] ?? null;
-  }, [nav.activeTab, nav.activeIndex, activeMajorProgress]);
+        const info = await infoPromise;
+        if (!majorInfoCache[majorId]) {
+          setMajorInfoCache((prev) => ({ ...prev, [majorId]: info }));
+        }
+        setActiveMajorInfo(info);
 
-  const degreeProgram = useMemo(() => {
-    return activeMajorProgress[0] ?? null;
-  }, [activeMajorProgress]);
+        const firstSpec = info.specializations?.[0];
+        if (!firstSpec) {
+          setActiveMqlData(null);
+          return;
+        }
 
-  const activeProgramCompletedGroups =
-    activeProgram?.totalCompletedRequirementGroups ?? 0;
-  const activeProgramInProgressGroups =
-    activeProgram?.requirements.filter(
-      (group) => !group.isCompleted && group.completedNum > 0,
-    ).length ?? 0;
-  const activeProgramRemainingGroups = Math.max(
-    0,
-    (activeProgram?.totalRequirementGroups ?? 0) -
-      activeProgramCompletedGroups -
-      activeProgramInProgressGroups,
+        const specName = firstSpec.replace(".mql", "");
+        const cacheKey = `${majorId}/${specName}`;
+
+        const mqlPromise = mqlCache[cacheKey]
+          ? Promise.resolve(mqlCache[cacheKey])
+          : apiFetchMajorMQL(majorId, specName).then((raw) =>
+              typeof raw === "string" ? JSON.parse(raw) : raw,
+            );
+
+        const mql = await mqlPromise;
+        if (!mqlCache[cacheKey]) {
+          setMqlCache((prev) => ({ ...prev, [cacheKey]: mql }));
+        }
+        setActiveMqlData(mql);
+        runAudit(mql);
+      } catch (e) {
+        console.error("Failed to load major data:", e);
+        setActiveMqlData(null);
+      } finally {
+        setIsLoadingMajor(false);
+      }
+    },
+    [majorInfoCache, mqlCache, runAudit],
   );
 
-  const handleRemoveMajor = () => {
-    console.log("Removing major/certificate...");
-    if (!userData) return;
-
-    // Compute the next user snapshot after removal
-    const res = removeProgram(activeProgram);
-    if (!res.ok) {
-      return;
-    }
-    nav.afterRemove({
-      majorCount: majorCount,
-      certificateCount: certificateCount,
-    });
-  };
+  const preloadMajorData = useCallback(
+    async (majorId: string) => {
+      try {
+        if (!majorInfoCache[majorId]) {
+          const info = await apiFetchMajorTemplate(majorId);
+          setMajorInfoCache((prev) => ({ ...prev, [majorId]: info }));
+          const firstSpec = info.specializations?.[0];
+          if (firstSpec) {
+            const specName = firstSpec.replace(".mql", "");
+            const cacheKey = `${majorId}/${specName}`;
+            if (!mqlCache[cacheKey]) {
+              const raw = await apiFetchMajorMQL(majorId, specName);
+              const mql = typeof raw === "string" ? JSON.parse(raw) : raw;
+              setMqlCache((prev) => ({ ...prev, [cacheKey]: mql }));
+            }
+          }
+        }
+      } catch (e) {
+        /* silent fail */
+      }
+    },
+    [majorInfoCache, mqlCache],
+  );
 
   useEffect(() => {
-    if (!appData?.major_processor) return;
+    declaredMajors.forEach((m) => preloadMajorData(m.major_id));
+    if (degreeMajor) preloadMajorData("general_degree");
+  }, []);
 
-    setUserData((currentUserData) => {
-      if (
-        !currentUserData?.FYP?.degreeProgress2 ||
-        !currentUserData?.FYP?.worksheets
-      ) {
-        return currentUserData;
+  useEffect(() => {
+    if (activeTab === "degree") {
+      if (degreeMajor) loadMajorData("general_degree");
+      else {
+        setActiveMajorInfo(null);
+        setActiveMqlData(null);
+        setAuditResult(null);
       }
+      return;
+    }
+    if (!activeMajor) {
+      setActiveMajorInfo(null);
+      setActiveMqlData(null);
+      setAuditResult(null);
+      return;
+    }
+    loadMajorData(activeMajor.major_id);
+  }, [activeMajor?.major_id, activeTab, degreeMajor?.id]);
 
-      const updatedDegreeProgress2 = currentUserData.FYP.degreeProgress2.map(
-        (entry) => {
-          const worksheet = currentUserData.FYP.worksheets.find(
-            (ws) => ws.id === entry.worksheetID,
-          );
-          if (!worksheet) return entry;
-          const updatedMajors = entry.majors
-            .map((major) =>
-              appData.major_processor.updateMajorProgress(major, worksheet),
-            )
-            .filter((m): m is MajorProgress => m !== undefined);
+  // Re-run audit when worksheet courses change
+  useEffect(() => {
+    if (!activeMqlData) return;
+    runAudit(activeMqlData);
+  }, [activeWorksheetId, uniqueCourses.length]);
 
-          return {
-            ...entry,
-            majors: updatedMajors,
-          };
-        },
-      );
+  useEffect(() => {
+    if (selectedMajorIndex >= declaredMajors.length) {
+      setSelectedMajorIndex(Math.max(0, declaredMajors.length - 1));
+    }
+  }, [declaredMajors.length]);
 
-      return {
-        ...currentUserData,
-        FYP: {
-          ...currentUserData.FYP,
-          degreeProgress2: updatedDegreeProgress2,
-        },
-      };
-    });
-  }, [
-    userData?.FYP?.worksheets,
-    appData?.major_processor,
-    activeWorksheetId,
-    setUserData,
-  ]);
+  const handleRemoveMajor = async () => {
+    if (!activeMajor) return;
+    await removeProgram(activeMajor.id);
+    if (selectedMajorIndex >= declaredMajors.length - 1) {
+      setSelectedMajorIndex(Math.max(0, selectedMajorIndex - 1));
+    }
+    if (declaredMajors.length <= 1) setActiveTab("degree");
+  };
+
+  const displayName = useMemo(() => {
+    if (activeTab === "degree")
+      return activeMajorInfo?.name ?? "General Degree Requirements";
+    return activeMajorInfo?.name ?? activeMajor?.major_id ?? "";
+  }, [activeTab, activeMajorInfo, activeMajor]);
+
+  const auditProgramMetrics = useMemo(() => {
+    if (!auditResult) return { completed: 0, total: 0, inProgress: 0 };
+    const total = auditResult.per_requirement.length;
+    const completed = auditResult.per_requirement.filter(
+      (r) => r.satisfied,
+    ).length;
+    const inProgress = auditResult.per_requirement.filter(
+      (r) => !r.satisfied && r.selected.length > 0,
+    ).length;
+    return { completed, total, inProgress };
+  }, [auditResult]);
 
   return (
-    <>
-      <div className=" h-[calc(100vh-5rem)] w-full flex flex-col bg-gray-50 p-6 gap-4 overflow-y-auto">
-        {/* Requirements Progress */}
-        {/*<section className="grid lg:grid-cols-2 md:grid-cols-1 sm:grid-cols-1 w-full gap-4">
-          <div className="bg-white rounded-lg shadow p-6">
-            <h3 className="text-md font-semibold mb-2">
-              General Progress (Credits)
-            </h3>
+    <div className="h-[calc(100vh-5rem)] w-full flex flex-col bg-gray-50 p-6 gap-4 overflow-y-auto">
+      {/* Widgets temporarily disabled
+      <DashboardInsightGrid
+        activeWorksheetId={activeWorksheetId}
+        graduationCreditsRequired={graduationCreditsRequired}
+        totalCredits={totalCredits}
+        completedCredits={completedCredits}
+        completedCourseCount={totalCompletedCourses}
+        totalCourseCount={allStudentCourses.length}
+        semesters={semesters}
+        auditProgramMetrics={auditProgramMetrics}
+        activeProgramName={displayName}
+      />
+      */}
 
-            <div className="mb-4 h-3 w-full flex overflow-hidden justify-center">
-              <div
-                style={{
-                  width: `${
-                    (totalCompletedCredits / graduationCreditsRequired) * 100
-                  }%`,
-                }}
-                className="rounded-lg bg-green-700 transition-all duration-500 ease-out"
-              />
-              <div
-                style={{
-                  width: `${
-                    (totalPlannedCredits / graduationCreditsRequired) * 100
-                  }%`,
-                }}
-                className="rounded-lg bg-yellow-500 transition-all duration-500 ease-out"
-              />
-              <div
-                style={{
-                  width: `${
-                    ((graduationCreditsRequired -
-                      totalCompletedCredits -
-                      totalPlannedCredits) /
-                      graduationCreditsRequired) *
-                    100
-                  }%`,
-                }}
-                className="rounded-lg bg-gray-300 transition-all duration-500 ease-out"
-              />
-            </div>
+      <section className="bg-white rounded-lg shadow p-4 w-full flex flex-col flex-1 min-h-[26rem]">
+        <div className="flex flex-row items-center border-b mb-2">
+          <div className="flex gap-4">
+            <button
+              className={`py-2 px-4 font-medium ${activeTab === "degree" ? "border-b-2 border-blue-600 text-blue-600" : "text-gray-500"}`}
+              onClick={() => setActiveTab("degree")}
+            >
+              Degree
+            </button>
+            <button
+              className={`py-2 px-4 font-medium ${activeTab === "major" ? "border-b-2 border-blue-600 text-blue-600" : "text-gray-500"} ${majorCount === 0 ? "opacity-50 cursor-not-allowed" : ""}`}
+              onClick={() => setActiveTab("major")}
+              disabled={majorCount === 0}
+            >
+              Major{" "}
+              {majorCount > 1 && `(${selectedMajorIndex + 1}/${majorCount})`}
+            </button>
 
-            {formatC_P_UP(
-              totalCompletedCredits,
-              totalPlannedCredits,
-              creditsRemaining,
-            )}
-          </div>
-
-          <div className="bg-white rounded-lg shadow p-6">
-            <h3 className="text-md font-semibold mb-2">Active Program Progress</h3>
-
-            <div className="mb-4 h-3 w-full flex overflow-hidden">
-              <div
-                style={{
-                  width: `${
-                    activeProgram && activeProgram.totalRequirementGroups > 0
-                      ? (activeProgramCompletedGroups /
-                          activeProgram.totalRequirementGroups) *
-                        100
-                      : 0
-                  }%`,
-                }}
-                className="rounded-lg bg-green-700 transition-all duration-500 ease-out"
-              />
-              <div
-                style={{
-                  width: `${
-                    activeProgram && activeProgram.totalRequirementGroups > 0
-                      ? (activeProgramInProgressGroups /
-                          activeProgram.totalRequirementGroups) *
-                        100
-                      : 0
-                  }%`,
-                }}
-                className="rounded-lg bg-yellow-500 transition-all duration-500 ease-out"
-              />
-              <div
-                style={{
-                  width: `${
-                    activeProgram && activeProgram.totalRequirementGroups > 0
-                      ? (activeProgramRemainingGroups /
-                          activeProgram.totalRequirementGroups) *
-                        100
-                      : 100
-                  }%`,
-                }}
-                className="rounded-lg bg-gray-300 transition-all duration-500 ease-out"
-              />
-            </div>
-
-            {formatC_P_UP(
-              activeProgramCompletedGroups,
-              activeProgramInProgressGroups,
-              activeProgramRemainingGroups,
-            )}
-          </div>
-        </section>*/}
-
-        <DashboardInsightGrid
-          activeWorksheetId={activeWorksheetId}
-          graduationCreditsRequired={graduationCreditsRequired}
-          totalCredits={totalCredits}
-          completedCredits={completedCredits}
-          completedCourseCount={totalCompletedCourses}
-          totalCourseCount={allStudentCourses.length}
-          semesters={semesters}
-          activeProgram={activeProgram}
-          degreeProgram={degreeProgram}
-        />
-
-        {/* Major List and Major Graph container */}
-        <section className="bg-white rounded-lg border border-slate-200 shadow-sm p-4 w-full flex flex-col flex-1 min-h-[26rem]">
-          <div className="flex flex-row items-center border-b mb-2">
-            <div className="flex gap-4">
-              <button
-                className={`py-2 px-4 font-medium ${
-                  nav.activeTab === "degree"
-                    ? "border-b-2 border-blue-600 text-blue-600"
-                    : "text-gray-500"
-                }`}
-                onClick={() => nav.goToTab("degree")}
-              >
-                Degree
-              </button>
-              <button
-                className={`py-2 px-4 font-medium ${
-                  nav.activeTab === "major"
-                    ? "border-b-2 border-blue-600 text-blue-600"
-                    : "text-gray-500"
-                } ${majorCount === 0 ? "opacity-50 cursor-not-allowed" : ""}`}
-                onClick={() => nav.goToTab("major")}
-                disabled={majorCount === 0}
-              >
-                Major{" "}
-                {majorCount > 1 &&
-                  `(${nav.selectedMajorIndex + 1}/${majorCount})`}
-              </button>
-              <button
-                className={`py-2 px-4 font-medium ${
-                  nav.activeTab === "certificate"
-                    ? "border-b-2 border-blue-600 text-blue-600"
-                    : "text-gray-500"
-                } ${
-                  certificateCount === 0 ? "opacity-50 cursor-not-allowed" : ""
-                }`}
-                onClick={() => nav.goToTab("certificate")}
-                disabled={certificateCount === 0}
-              >
-                Certificates{" "}
-                {certificateCount > 1 &&
-                  `(${nav.selectedCertificateIndex + 1}/${certificateCount})`}
-              </button>
-
-              <DropdownMenu>
-                <DropdownMenuTrigger className="max-w-[16rem] px-3 py-2 flex items-center gap-2 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500">
-                  <span className="text-gray-700 truncate">
-                    {worksheets.find((w) => w.id === activeWorksheetId)?.name ??
-                      "Select worksheet"}
-                  </span>
-                  <span className="text-gray-400 text-xs">▼</span>
-                </DropdownMenuTrigger>
-
-                <DropdownMenuContent
-                  className="max-w-[16rem]"
-                  align="end"
-                  sideOffset={6}
-                >
-                  {worksheets.map((w) => (
-                    <DropdownMenuItem
-                      key={w.id}
-                      className={`text-sm cursor-pointer ${
-                        w.id === activeWorksheetId
-                          ? "bg-gray-100 font-medium"
-                          : ""
-                      }`}
-                      onClick={() => setActiveWorksheet(w.id)}
-                    >
-                      <span className="truncate block">{w.name}</span>
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-
-            {/* Navigation and Title */}
-            <div className="flex-1 flex justify-center items-center gap-4">
-              {/* Previous button for majors/certificates */}
-              {((nav.activeTab === "major" && majorCount > 1) ||
-                (nav.activeTab === "certificate" && certificateCount > 1)) && (
-                <button
-                  onClick={() => nav.prev()}
-                  disabled={
-                    (nav.activeTab === "major" &&
-                      nav.selectedMajorIndex === 0) ||
-                    (nav.activeTab === "certificate" &&
-                      nav.selectedCertificateIndex === 0)
-                  }
-                  className="p-2 rounded-md bg-gray-100 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  ←
-                </button>
-              )}
-
-              {/* Program name */}
-              <div>
-                <span className="font-bold text-2xl">
-                  {activeProgram?.name || "Loading..."}
+            <DropdownMenu>
+              <DropdownMenuTrigger className="max-w-[16rem] px-3 py-2 flex items-center gap-2 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500">
+                <span className="text-gray-700 truncate">
+                  {worksheets.find((w) => w.id === activeWorksheetId)?.name ??
+                    "Select worksheet"}
                 </span>
-              </div>
-
-              {/* Next button for majors/certificates */}
-              {((nav.activeTab === "major" && majorCount > 1) ||
-                (nav.activeTab === "certificate" && certificateCount > 1)) && (
-                <button
-                  onClick={() => nav.next()}
-                  disabled={
-                    (nav.activeTab === "major" &&
-                      nav.selectedMajorIndex === majorCount - 1) ||
-                    (nav.activeTab === "certificate" &&
-                      nav.selectedCertificateIndex === certificateCount - 1)
-                  }
-                  className="p-2 rounded-md bg-gray-100 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  →
-                </button>
-              )}
-            </div>
-
-            {/* Trash only for majors/certificates */}
-            {(nav.activeTab === "major" || nav.activeTab === "certificate") &&
-              activeProgram && (
-                <div className="ml-auto py-2 px-4">
-                  <button
-                    onClick={handleRemoveMajor}
-                    aria-label="Remove program"
-                    title="Remove from worksheet"
+                <span className="text-gray-400 text-xs">▼</span>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                className="max-w-[16rem]"
+                align="end"
+                sideOffset={6}
+              >
+                {worksheets.map((w) => (
+                  <DropdownMenuItem
+                    key={w.id}
+                    className={`text-sm cursor-pointer ${w.id === activeWorksheetId ? "bg-gray-100 font-medium" : ""}`}
+                    onClick={() => setActiveWorksheet(w.id)}
                   >
-                    <img
-                      src={trashcan}
-                      alt="Remove"
-                      className="h-5 w-5 float-right active:scale-125 transition duration-300 ease-in-out"
-                    />
-                  </button>
-                </div>
-              )}
+                    <span className="truncate block">{w.name}</span>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
 
-          {/* NEW: List + Graph row */}
-          <div className="flex flex-row flex-1 gap-4 min-h-0  p-0 mt-2">
-            {/* LEFT: MajorRequirementList */}
-            <div className="flex flex-col w-[26rem] flex-shrink-0 h-full min-h-full bg-white border-gray-200 border-2 shadow overflow-hidden">
-              {activeProgram ? (
-                <MajorRequirementList major_progress={activeProgram} />
-              ) : (
-                <div>Loading degree requirements...</div>
+          <div className="flex-1 flex justify-center items-center gap-4">
+            {activeTab === "major" && majorCount > 1 && (
+              <button
+                onClick={() => setSelectedMajorIndex((i) => Math.max(0, i - 1))}
+                disabled={selectedMajorIndex === 0}
+                className="p-2 rounded-md bg-gray-100 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                ←
+              </button>
+            )}
+
+            <div className="flex flex-col items-center">
+              <span className="font-bold text-2xl">
+                {displayName}
+                {activeTab === "major" && activeMajor?.specialization && (
+                  <span className="text-gray-500 font-normal text-lg ml-2">
+                    (
+                    {activeMajor.specialization
+                      .replace(`${activeMajor.major_id}_`, "")
+                      .replace(".mql", "")
+                      .split("_")
+                      .map((s) => s.toUpperCase())
+                      .join("/")}
+                    )
+                  </span>
+                )}
+              </span>
+              {auditResult && !isLoadingAudit && (
+                <span
+                  className={`text-xs font-medium mt-0.5 px-2 py-0.5 rounded-full ${
+                    auditProgramMetrics.completed === auditProgramMetrics.total
+                      ? "bg-green-100 text-green-700"
+                      : "bg-yellow-100 text-yellow-700"
+                  }`}
+                >
+                  {auditProgramMetrics.completed}/{auditProgramMetrics.total}{" "}
+                  requirements satisfied
+                </span>
+              )}
+              {isLoadingAudit && (
+                <span className="text-xs text-gray-400 mt-0.5">
+                  Running audit...
+                </span>
               )}
             </div>
-            <div className="flex flex-col flex-1 h-full min-h-0 bg-white border-gray-200 border-2 p-2 shadow overflow-hidden min-w-0">
-              {activeProgram ? (
-                <MajorRequirementGraph major_progress={activeProgram} />
-              ) : (
-                <div>Loading degree requirements...</div>
-              )}
-            </div>
+
+            {activeTab === "major" && majorCount > 1 && (
+              <button
+                onClick={() =>
+                  setSelectedMajorIndex((i) => Math.min(majorCount - 1, i + 1))
+                }
+                disabled={selectedMajorIndex === majorCount - 1}
+                className="p-2 rounded-md bg-gray-100 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                →
+              </button>
+            )}
           </div>
-        </section>
-      </div>
-    </>
+
+          {activeTab === "major" && activeMajor && (
+            <div className="ml-auto py-2 px-4">
+              <button
+                onClick={handleRemoveMajor}
+                aria-label="Remove major"
+                title="Remove major"
+              >
+                <img
+                  src={trashcan}
+                  alt="Remove"
+                  className="h-5 w-5 float-right active:scale-125 transition duration-300 ease-in-out"
+                />
+              </button>
+            </div>
+          )}
+        </div>
+
+        <div className="flex flex-row flex-1 gap-4 min-h-0 p-0 mt-2">
+          <div className="flex flex-col w-[26rem] flex-shrink-0 h-full min-h-full bg-white border-gray-200 border-2 shadow overflow-hidden">
+            {isLoadingMajor ? (
+              <div className="text-gray-400 text-sm flex items-center justify-center flex-1">
+                Loading requirements...
+              </div>
+            ) : activeMqlData ? (
+              <MajorRequirementList
+                mqlData={activeMqlData}
+                auditResult={auditResult}
+              />
+            ) : (
+              <div className="text-gray-400 text-sm flex items-center justify-center flex-1">
+                No requirements available.
+              </div>
+            )}
+          </div>
+
+          <div className="flex flex-col flex-1 h-full min-h-0 bg-white border-gray-200 border-2 p-2 shadow overflow-hidden min-w-0">
+            {isLoadingMajor ? (
+              <div className="text-gray-400 text-sm flex items-center justify-center flex-1">
+                Loading...
+              </div>
+            ) : activeMqlData ? (
+              <MajorRequirementGraph
+                mqlData={activeMqlData}
+                auditResult={auditResult}
+              />
+            ) : (
+              <div className="text-gray-400 text-sm flex items-center justify-center flex-1">
+                No requirements available.
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
+    </div>
   );
 }
 

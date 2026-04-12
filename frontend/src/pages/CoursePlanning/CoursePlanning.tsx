@@ -676,12 +676,6 @@ function CoursePlanning() {
               </DropdownMenu>
             </div>
           </div>
-
-          <p className="text-gray-500 font-medium mt-1">
-            Welcome to your Course Planning page! Create new semesters, drag
-            Yale courses from the sidebar, and create custom courses by clicking
-            on the +!
-          </p>
         </header>
 
         <hr className="border-gray-200 border-t-3" />

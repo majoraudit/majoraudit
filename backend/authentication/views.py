@@ -1,16 +1,17 @@
-from django.shortcuts import render
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from .models import CustomUser
+from rest_framework import generics, permissions
 
-# Create your views here.
+from .serializers import ProfileSerializer
 
-class ProfileView(APIView):
-    def get(self, request):
-        u = request.user
-        return Response({
-            "id": u.username,
-            "email": u.email,
-            "first_name": u.first_name,
-            "last_name": u.last_name,
-        })
+
+class ProfileView(generics.RetrieveUpdateAPIView):
+    """
+    GET   /api/auth/profile/ → return the current user's profile
+    PATCH /api/auth/profile/ → update editable fields (class_year,
+                               intended_language_code, language_requirement)
+    """
+    serializer_class = ProfileSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    http_method_names = ['get', 'patch', 'head', 'options']
+
+    def get_object(self):
+        return self.request.user

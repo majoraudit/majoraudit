@@ -153,12 +153,14 @@ export function useWorksheetData() {
 }, [completedStudentCourses]);
 
 const majorCount = useMemo(() => {
-  return activeWorksheet ? (userData?.FYP?.statCount?.majorNum ?? 0) : 0;
-}, [userData?.FYP?.statCount?.majorNum, activeWorksheet]);
+  return (activeWorksheet?.majors ?? []).filter(
+    (m) => m.major_id !== "general_degree",
+  ).length;
+}, [activeWorksheet?.majors]);
 
 const certificateCount = useMemo(() => {
-  return activeWorksheet ? (userData?.FYP?.statCount?.certificateNum ?? 0) : 0;
-}, [userData?.FYP?.statCount?.certificateNum, activeWorksheet]);
+  return 0; // TODO: implement when certificates are added
+}, []);
 
   return {
     // raw worksheet
