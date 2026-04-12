@@ -1,5 +1,5 @@
 SELECT 11 FROM [
-  DEPT("MENG")
+  RANGE(MENG 1000, MENG 9999)
 ] : "MENG Electives" : 2;
 
 SELECT 1 FROM [
