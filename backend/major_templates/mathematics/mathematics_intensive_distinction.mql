@@ -9,21 +9,13 @@ SELECT 3 FROM [
   SELECT 1 FROM [CLASS(MATH 3020), CLASS(MATH 1200)]
 ] : "Introductory Sequence" : 3;
 
-SELECT 6 FROM [
+SELECT 4 FROM [
   CLASS(MATH 3050),
   CLASS(MATH 3100),
   CLASS(MATH 3500),
-  RANGE(MATH 2250 , MATH 9999),
-  RANGE(MATH 2250 , MATH 9999),
   RANGE(MATH 2250 , MATH 9999)
-] : "Core Classes" : 6;
+] : "Core Classes (Including Courses for Distinction)" : 4;
 
 SELECT 2 FROM [RANGE(MATH 5000 , MATH 5999)] : "Graduate-Level Courses" : 2;
 
 SELECT 1 FROM [RANGE(MATH 4800 , MATH 4890), CLASS(MATH 4750)] : "Senior Requirement" : 1;
-
-SELECT 3 FROM [
-  CLASS(MATH 3050),
-  CLASS(MATH 3100),
-  CLASS(MATH 3500)
-] : "Courses Required for Distinction" : 3;

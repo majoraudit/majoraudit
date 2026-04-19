@@ -1,13 +1,13 @@
 SELECT 1 FROM [
   CLASS(ITAL 1300),
-  TAG("Equivalent Placement or Credit")
+  TAG("Equivalent Course or Credit")
 ] : "Prerequisites" : 1;
 
 SELECT 8 FROM [
   CLASS(ITAL 1400),
   SELECT 1 FROM [CLASS(ITAL 1500), CLASS(ITAL 1510)],
   SELECT 1 FROM [CLASS(ITAL 4162), CLASS(ITAL 4172)],
-  SELECT 1 FROM [CLASS(ITAL 1310), TAG("Equivalent Dante Course")],
+  SELECT 1 FROM [CLASS(ITAL 1310), TAG("Equivalent Course")],
   RANGE(ITAL 1400 , ITAL 9999),
   RANGE(ITAL 1400 , ITAL 9999),
   RANGE(ITAL 1400 , ITAL 9999),
