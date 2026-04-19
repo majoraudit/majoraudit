@@ -1,13 +1,11 @@
-SELECT 1 FROM [CLASS(ANTH 4091), CLASS(ANTH 4071)] : "Senior Essay" : 5;
+SELECT 3 FROM [
+    TAG("YC ANTH Biological"),
+    TAG("YC ANTH Archaeology"),
+    SELECT 1 FROM [TAG("YC ANTH Sociocultural"), TAG("YC ANTH Linguistic")]
+] : "Intro/Intermediate Course in Each Subfield" : 3;
 
-SELECT 1 FROM [RANGE(ANTH 1000, ANTH 2999)] : "Introductory/Intermediate Course - Subfield 1 (Evolution/Biological)" : 3;
+SELECT 3 FROM [RANGE(ANTH 3000, ANTH 4000), RANGE(ANTH 3000, ANTH 4000), RANGE(ANTH 3000, ANTH 4000)] : "Advanced ANTH Courses (3000-4000 level)" : 4;
 
-SELECT 1 FROM [RANGE(ANTH 1000, ANTH 2999)] : "Introductory/Intermediate Course - Subfield 2 (Archaeological)" : 3;
+SELECT 5 FROM [RANGE(ANTH 1000, ANTH 9999), RANGE(ANTH 1000, ANTH 9999), RANGE(ANTH 1000, ANTH 9999), RANGE(ANTH 1000, ANTH 9999), RANGE(ANTH 1000, ANTH 9999)] : "Remaining ANTH Electives" : 1;
 
-SELECT 1 FROM [RANGE(ANTH 1000, ANTH 2999)] : "Introductory/Intermediate Course - Subfield 3 (Sociocultural/Linguistic)" : 3;
-
-SELECT 3 FROM [RANGE(ANTH 3000, ANTH 4000), RANGE(ANTH 3000, ANTH 4000), RANGE(ANTH 3000, ANTH 4000)] : "Advanced Courses" : 4;
-
-SELECT 4 FROM [RANGE(ANTH 1000, ANTH 9999), RANGE(ANTH 1000, ANTH 9999), RANGE(ANTH 1000, ANTH 9999), RANGE(ANTH 1000, ANTH 9999)] : "Remaining Electives" : 2;
-
-SELECT 3 FROM [RANGE(ANTH 1000, ANTH 9999), RANGE(ANTH 1000, ANTH 9999), RANGE(ANTH 1000, ANTH 9999)] : "Cognate Courses (up to 3 outside departments)" : 1;
+SELECT 1 FROM [PLACEMENT("Senior essay in advanced seminar"), CLASS(ANTH 4091), PLACEMENT("Yearlong essay begun in ANTH 4071 and completed in ANTH 4091")] : "Senior Requirement" : 5;
