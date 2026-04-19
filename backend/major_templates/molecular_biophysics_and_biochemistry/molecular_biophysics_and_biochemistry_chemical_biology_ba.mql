@@ -1,39 +1,101 @@
-
-SELECT 7 FROM [
+SELECT 2 FROM [
   CLASS(BIOL 1010),
-  CLASS(BIOL 1020),
-  CLASS(CHEM 1610),
-  CLASS(CHEM 1650),
-  CLASS(CHEM 2200),
-  CLASS(CHEM 2220L),
-  CLASS(MATH 1120),
-  CLASS(MATH 1150)
-] : "Prerequisites" : 7;
+  CLASS(BIOL 1020)
+] : "Biology Prerequisites" : 10;
 
-SELECT 6 FROM [
-  CLASS(PHYS 1700),
-  CLASS(PHYS 1710),
-  CLASS(MB&B 2750),
-  CLASS(MB&B 3000),
-  CLASS(MB&B 3010),
-  CLASS(CHEM 1750),
-  PLACEMENT("Chemical Biology Concentration"),
-  TAG("YC CHEM Intermediate Courses"),
-  TAG("YC MB&B Practical Skills"),
-  TAG("YC MB&B Science & Society")
-] : "Core Classes" : 6;
+SELECT 4 FROM [
+  SELECT 1 FROM [
+    CLASS(CHEM 1610),
+    CLASS(CHEM 1630)
+  ],
+  SELECT 1 FROM [
+    CLASS(CHEM 1650),
+    CLASS(CHEM 1670)
+  ],
+  CLASS(CHEM 1340L),
+  CLASS(CHEM 1360L)
+] : "General Chemistry Prerequisites" : 9;  
+
+SELECT 4 FROM [
+  SELECT 1 FROM [
+    CLASS(CHEM 1740),
+    CLASS(CHEM 2200)
+  ],
+  SELECT 1 FROM [
+    CLASS(CHEM 1750),
+    CLASS(CHEM 2210)
+  ],
+  CLASS(CHEM 2220L),
+  CLASS(CHEM 2230L)
+] : "Organic Chemistry Prerequisites" : 8;
 
 SELECT 2 FROM [
-  TAG("YC MB&B Elective"),
-  TAG("YC MB&B Practical Skills"),
-  RANGE(MB&B 2000 , MB&B 9999),
-  RANGE(CHEM 2000 , CHEM 9999),
-  RANGE(PHYS 2000 , PHYS 9999),
-  RANGE(S&DS 2000 , S&DS 9999),
-  RANGE(CPSC 2000 , CPSC 9999)
-] : "Electives" : 2;
+  CLASS(MATH 1120),
+  SELECT 1 FROM [
+    CLASS(MATH 1150),
+    CLASS(MATH 1160)
+  ]
+] : "Calculus Prerequisites" : 7;
+
+SELECT 3 FROM [
+  SELECT 1 FROM [
+    CLASS(MB&B 2750),
+    CLASS(CHEM 3320)
+  ],
+  SELECT 1 FROM [
+    CLASS(PHYS 1700),
+    CLASS(PHYS 1800),
+    CLASS(PHYS 2000),
+    CLASS(PHYS 2600)
+  ],
+  SELECT 1 FROM [
+    CLASS(PHYS 1710),
+    CLASS(PHYS 1810),
+    CLASS(PHYS 2010),
+    CLASS(PHYS 2610)
+  ]
+] : "Biophysics Requirements" : 6;
+
+SELECT 3 FROM [
+  CLASS(MB&B 3000),
+  CLASS(MB&B 3010),
+  SELECT 1 FROM [
+    CLASS(CHEM 1750),
+    RANGE(CHEM 2000 , CHEM 9999)
+  ]
+] : "Biochemistry Requirements" : 5;
+
+SELECT 1 FROM [
+  TAG("2000+ elective in cell-based biology")
+] : "Cell Biology Requirement" : 5;
+
+SELECT 1 FROM [
+  CLASS(MB&B 2680),
+  PLACEMENT("Other Science and Society courses based on petiton")
+] : "Science and Society Core Requirement" : 4;
+
+SELECT 1 FROM [
+  PLACEMENT("Physics/Biochemistry Lab or Critical Tools based on petition")
+] : "Practical Skills Requirement" : 3;
+
+SELECT 1 FROM [
+  CLASS(MB&B 4700),
+  CLASS(MB&B 3640),
+  TAG("Course based undergraduate research")
+] : "Research in Chemical Biology Requirement" : 2;
+
+SELECT 1 FROM [
+  CLASS(MB&B 4430),
+  CLASS(CHEM 4190),
+  PLACEMENT("Other based on petition")
+] : "Advanced Chemical Biology Requirement" : 2;
+
+SELECT 1 FROM [ 
+  RANGE_TAG(MB&B 2000 , MB&B 9999, "Seminar or Lecture")
+] : "Elective Course" : 2;
 
 SELECT 1 FROM [
   CLASS(MB&B 4900),
   CLASS(MB&B 4910)
 ] : "Senior Requirement" : 1;
+
