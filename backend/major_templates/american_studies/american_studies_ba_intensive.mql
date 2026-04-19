@@ -1,0 +1,25 @@
+SELECT 1 FROM [TAG("YC AMST Early Americas")] : "Gateway Course: Early Americas" : 3;
+
+SELECT 2 FROM [TAG("YC AMST Cultural Hist/Studies"), TAG("YC AMST Cultural Hist/Studies")] : "Gateway Courses: Cultural History/Cultural Studies" : 3;
+
+SELECT 1 FROM [TAG("YC AMST Survey of Am Lit")] : "Gateway Course: Survey of American Literature" : 3;
+
+SELECT 1 FROM [PLACEMENT("Preparatory Gateway Course in Area of Concentration")] : "Gateway Course: Prep for Area of Concentration" : 3;
+
+SELECT 2 FROM [TAG("YC AMST Junior Seminars"), TAG("YC AMST Junior Seminars")] : "Junior Seminars" : 4;
+
+SELECT 1 FROM [TAG("YC AMST Junior Seminars"), RANGE(AMST 3000, AMST 3999)] : "Junior Seminar in Area of Concentration" : 4;
+
+SELECT 1 FROM [PLACEMENT("Concentration Course with Non-U.S. Perspective")] : "Concentration Course: Non-U.S. Perspective" : 4;
+
+SELECT 3 FROM [
+    SELECT 1 FROM [RANGE(AMST 1000, AMST 9999), PLACEMENT("Concentration Course from Another Discipline")],
+    SELECT 1 FROM [RANGE(AMST 1000, AMST 9999), PLACEMENT("Concentration Course from Another Discipline")],
+    SELECT 1 FROM [RANGE(AMST 1000, AMST 9999), PLACEMENT("Concentration Course from Another Discipline")]
+] : "Area of Concentration Courses" : 2;
+
+SELECT 2 FROM [RANGE(AMST 1000, AMST 9999), RANGE(AMST 1000, AMST 9999)] : "AMST Electives" : 1;
+
+SELECT 1 FROM [CLASS(AMST 4493)] : "Intensive Major: First Term (counts toward concentration)" : 5;
+
+SELECT 1 FROM [CLASS(AMST 4494)] : "Intensive Major: Second Term" : 5;

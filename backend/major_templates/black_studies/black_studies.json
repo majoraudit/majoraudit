@@ -1,6 +1,6 @@
 {
-    "name": "African American Studies",
-    "id":"african_american_studies",
+    "name": "Black Studies",
+    "id":"black_studies",
     "abbr": "AFAM",
     "degreeTypes": [
         ["ba"]
@@ -17,6 +17,6 @@
     "catalogLink": "https://catalog.yale.edu/ycps/subjects-of-instruction/african-american-studies/",
     "websiteLink": "https://afamstudies.yale.edu/",
     "specializations": [
-        "african_american_studies_ba.mql"
+        "black_studies_ba.mql"
     ]
 }
