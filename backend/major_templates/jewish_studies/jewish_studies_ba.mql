@@ -18,4 +18,4 @@ SELECT 8 FROM [
   PLACEMENT("Jewish Thought")
 ] : "Electives" : 8;
 
-SELECT 1 FROM [CLASS(JDST 4491), CLASS(JDST 4492)] : "Senior Requirement" : 1;
+SELECT 2 FROM [CLASS(JDST 4491), CLASS(JDST 4492)] : "Senior Requirement" : 1;

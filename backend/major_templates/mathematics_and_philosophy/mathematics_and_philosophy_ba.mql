@@ -3,23 +3,23 @@ SELECT 1 FROM [
   TAG("Equivalent Placement or Credit")
 ] : "Prerequisites" : 1;
 
-SELECT 7 FROM [
+SELECT 10 FROM [
   CLASS(MATH 2700),
   CLASS(PHIL 2267),
   CLASS(PHIL 4427),
   RANGE(MATH 2220 , MATH 4690),
   RANGE(MATH 2220 , MATH 4690),
   RANGE(MATH 2220 , MATH 4690),
-  TAG("YC PHIL Logic")
-] : "Core Classes" : 7;
-
-SELECT 3 FROM [
   TAG("YC PHIL Logic"),
   TAG("YC PHIL Metaphysics&Epistemol"),
   TAG("YC PHIL Ethics & Value Theory"),
+  TAG("YC PHIL Logic")
+] : "Core Classes" : 10;
+
+SELECT 1 FROM [
   RANGE(PHIL 1000 , PHIL 4999),
   RANGE(MATH 2220 , MATH 4690)
-] : "Electives" : 3;
+] : "Electives" : 1;
 
 SELECT 1 FROM [
   RANGE(MATH 4800 , MATH 4890),

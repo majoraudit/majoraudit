@@ -11,12 +11,12 @@ SELECT 3 FROM [
 
 SELECT 6 FROM [
   CLASS(MATH 3500),
-  SELECT 1 FROM [CLASS(MATH 3050), CLASS(MATH 3100)],
-  TAG("YC MATH Distribution"),
-  TAG("YC MATH Distribution"),
-  TAG("YC MATH Distribution"),
-  RANGE(MATH 2250 , MATH 9999)
-] : "Core Classes" : 6;
+  CLASS(MATH 3050),
+  CLASS(MATH 3100),
+  RANGE(MATH 2250 , MATH 5999),
+  RANGE(MATH 2250 , MATH 5999),
+  RANGE(MATH 2250 , MATH 5999),
+] : "Core Classes (Including Courses for Distinction)" : 6;
 
 SELECT 2 FROM [
   CLASS(ASTR 4180),
@@ -33,9 +33,3 @@ SELECT 2 FROM [
 ] : "Advanced Physical Sciences" : 2;
 
 SELECT 1 FROM [RANGE(MATH 4800 , MATH 4890), CLASS(MATH 4750)] : "Senior Requirement" : 1;
-
-SELECT 3 FROM [
-  CLASS(MATH 3050),
-  CLASS(MATH 3100),
-  CLASS(MATH 3500)
-] : "Courses Required for Distinction" : 3;
