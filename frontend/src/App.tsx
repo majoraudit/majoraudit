@@ -8,6 +8,7 @@ import Onboarding from "@/pages/Onboarding/Onboarding";
 import Programs from "@/pages/Programs/Programs";
 import About from "@/pages/About/About";
 import PrivacyTerms from "./pages/PrivacyTerms/PrivacyTerms";
+import ReleaseNotes from "./pages/ReleaseNotes/ReleaseNotes";
 import Navbar from "@/components/shared-components/Navbar";
 import Footer from "@/components/shared-components/Footer";
 import {
@@ -47,6 +48,7 @@ function App() {
               />
               <Route path="/about" element={<About />} />
               <Route path="/privacy-terms" element={<PrivacyTerms />} />
+              <Route path="/release-notes" element={<ReleaseNotes />} />
             </Routes>
           </main>
           <Footer />
