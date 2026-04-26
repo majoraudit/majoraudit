@@ -1,7 +1,0 @@
-SELECT 2 FROM [RANGE(PLSC 1000 , PLSC 1999)] : "Intro Courses" : 1
-SELECT 2 FROM [RANGE(PLSC 2000 , PLSC 2999)] : "Core Lectures" : 2
-SELECT 1 FROM [RANGE(PLSC 2000 , PLSC 4999)] : "Methodology / Formal Theory" : 3
-SELECT 7 FROM [RANGE(PLSC 2000 , PLSC 4999)] : "Interdisciplinary Concentration" : 4
-SELECT 4 FROM [RANGE(PLSC 2000 , PLSC 4999)] : "Outside Concentration Subfields" : 5
-SELECT 2 FROM [RANGE(PLSC 3000 , PLSC 4999)] : "Seminars" : 6
-SELECT 1 FROM [CLASS(PLSC 4900), CLASS(PLSC 4901)] : "Senior Requirement" : 7

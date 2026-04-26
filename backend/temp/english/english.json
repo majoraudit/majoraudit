@@ -1,9 +1,9 @@
 {
-    "name": "English Language and Literature",
+    "name": "English",
     "id":"english",
     "abbr": "ENGL",
     "degreeTypes": [
-        ["ba"]
+        ["standard", "creative_writing"], ["ba"]
     ],
     "courses": -1,
     "rating": -1,
@@ -17,6 +17,6 @@
     "catalogLink": "https://catalog.yale.edu/ycps/subjects-of-instruction/english-language-literature/",
     "websiteLink": "http://english.yale.edu/undergraduate-program",
     "specializations": [
-        "global_affairs_ba.mql"
+        "english_ba_creative_writing.mql"
     ]
 }

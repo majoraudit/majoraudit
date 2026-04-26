@@ -1,4 +1,0 @@
-SELECT 1 FROM CLASS(PORT 1300) : "The prerequisite for the major is PORT 1300 or the equivalent" : 3;
-SELECT 5 FROM [RANGE(PORT 2000 , PORT 4999)] : "Portuguese Lit/Culture" : 1;
-SELECT 5 FROM [RANGE(PORT 2000 , PORT 4999), RANGE(ANTH 2000 , ANTH 4999), RANGE(HIST 2000 , HIST 4999), RANGE(HSAR 2000 , HSAR 4999)] : "Electives" : 2;
-SELECT 1 FROM [CLASS(PORT 4910), CLASS(PORT 4920)] : "Senior Requirement" : 3;

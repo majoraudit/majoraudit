@@ -1,9 +1,0 @@
-SELECT 7 FROM [
-  DEPT("MENG")
-] : "MENG Electives" : 2;
-
-SELECT 1 FROM [
-  CLASS(MENG 4991),
-  CLASS(MENG 4992),
-  RANGE(MENG 4000, MENG 4999)
-] : "Senior Project" : 1;

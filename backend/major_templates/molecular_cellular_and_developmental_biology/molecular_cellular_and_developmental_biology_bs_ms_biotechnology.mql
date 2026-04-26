@@ -1,8 +1,0 @@
-SELECT 3 FROM [CLASS(MCDB 2000), CLASS(MCDB 2020), CLASS(MCDB 2050), CLASS(MCDB 2100), CLASS(MCDB 2900), CLASS(MCDB 3000), CLASS(MB&B 3000)] : "Core Classes" : 1;
-SELECT 1 FROM [CLASS(MCDB 3700)] : "Biotechnology Concentration Required Course" : 2;
-SELECT 1 FROM [TAG("YC MCDB Biotechnology Concentration Elective"), RANGE(MCDB 5000, MCDB 9999)] : "Concentration Graduate Elective" : 3;
-SELECT 3 FROM [RANGE(MCDB 5000, MCDB 9999), TAG("YC MCDB Graduate Seminar")] : "Additional Graduate-Level Electives" : 4;
-SELECT 2 FROM [RANGE(MCDB 2000, MCDB 3999)] : "Labs" : 5;
-SELECT 1 FROM [CLASS(MCDB 5850)] : "Junior Year Research Course" : 6;
-SELECT 2 FROM [CLASS(MCDB 5950), CLASS(MCDB 5960)] : "Senior Year Research Courses" : 7;
-

@@ -1,8 +1,0 @@
-SELECT 2 FROM [RANGE(PLSC 1000 , PLSC 1999)] : "Intro Courses" : 1
-SELECT 2 FROM [RANGE(PLSC 2000 , PLSC 2999)] : "Core Lectures" : 2
-SELECT 1 FROM [RANGE(PLSC 2000 , PLSC 4999)] : "Methodology / Formal Theory" : 3
-SELECT 4 FROM [RANGE(PLSC 2000 , PLSC 4999)] : "Subfield Courses" : 4
-SELECT 2 FROM [RANGE(PLSC 3000 , PLSC 4999)] : "Seminars" : 5
-SELECT 4 FROM [RANGE(PLSC 2000 , PLSC 4999)] : "Additional Electives" : 6
-SELECT 1 FROM [CLASS(PLSC 4900)] : "Junior Intensive Seminar" : 7
-SELECT 2 FROM [CLASS(PLSC 4901), CLASS(PLSC 4903)] : "Intensive Senior Essay" : 8
