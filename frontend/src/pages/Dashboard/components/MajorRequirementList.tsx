@@ -143,9 +143,9 @@ function MajorRequirementList({
     : {};
 
   const tabs = [
-    { id: "requirements" as const, label: "Requirements 📋" },
-    { id: "progress" as const, label: "Progress 📈" },
-    { id: "reminders" as const, label: "Reminders 🔔" },
+    { id: "requirements" as const, label: "Requirements" },
+    { id: "progress" as const, label: "Progress" },
+    { id: "reminders" as const, label: "Reminders" },
   ];
 
   return (

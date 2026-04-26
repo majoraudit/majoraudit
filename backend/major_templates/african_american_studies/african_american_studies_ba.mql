@@ -1,8 +1,0 @@
-SELECT 1 FROM [CLASS(AFAM 1160)] : "African American History I" : 1;
-SELECT 1 FROM [CLASS(AFAM 1162)] : "African American History II" : 1;
-SELECT 1 FROM [DIST_DEPT("Hu", "AFAM")] : "Humanities Course in AFAM Literature" : 2;
-SELECT 1 FROM [DIST_DEPT("So", "AFAM")] : "Social Science Course" : 2;
-SELECT 1 FROM [CLASS(AFAM 4310)] : "Junior Seminar" : 3;
-SELECT 1 FROM [CLASS(AFAM 4380)] : "Senior Colloquium" : 4;
-SELECT 1 FROM [CLASS(AFAM 4391)] : "Senior Essay" : 4;
-SELECT 5 FROM [RANGE(AFAM 1000, AFAM 9999), RANGE(AFAM 1000, AFAM 9999), RANGE(AFAM 1000, AFAM 9999), RANGE(AFAM 1000, AFAM 9999), RANGE(AFAM 1000, AFAM 9999)] : "Area of Focus Electives" : 2;

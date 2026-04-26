@@ -67,7 +67,7 @@ function Profile() {
     <div className="mx-auto max-w-md px-6 py-12">
       <h1 className="text-2xl font-bold text-slate-900 mb-1">Your profile</h1>
       <p className="text-slate-600 mb-6 text-sm">
-        Change your details below. Updates are saved locally.
+        Change your details below.
       </p>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
