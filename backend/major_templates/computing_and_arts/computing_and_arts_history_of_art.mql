@@ -1,11 +1,10 @@
-SELECT 1 FROM [CLASS(CPSC 1001)] : "Prerequisite" : 1;
 SELECT 6 FROM [
-    CLASS(CPSC 2010), 
+    CLASS(CPSC 2010),
     SELECT 1 FROM [
         CLASS(CPSC 2020),
         CLASS(MATH 2440)
-    ], 
-    CLASS(CPSC 2230), 
+    ],
+    CLASS(CPSC 2230),
     SELECT 1 FROM [
         CLASS(CPSC 4780),
         CLASS(CPSC 4790)
@@ -18,19 +17,19 @@ SELECT 6 FROM [
         CLASS(CPSC 4780),
         CLASS(CPSC 4790)
     ],
-    TAG("YC CPAR HSAR CS Elective")
-] : "Computer Science Courses" : 2;
+    RANGE(CPSC 2000, CPSC 9999)
+] : "Computer Science Courses" : 1;
 
 SELECT 6 FROM [
-    RANGE(HSAR 1000, HSAR 1999), 
-    RANGE(HSAR 2000, HSAR 4999), 
-    RANGE(HSAR 2000, HSAR 4999), 
-    PLACEMENT("Studio Art Course"), 
-    CLASS(HSAR 4401), 
+    RANGE(HSAR 1000, HSAR 1999),
+    RANGE(HSAR 2000, HSAR 4999),
+    RANGE(HSAR 2000, HSAR 4999),
+    PLACEMENT("Studio Art Course"),
+    CLASS(HSAR 4401),
     PLACEMENT("4000-level HSAR Seminar")
 ] : "History of Art Courses" : 2;
 
 SELECT 2 FROM [
-    CLASS(CPSC 4900), 
+    CLASS(CPSC 4900),
     CLASS(HSAR 4499)
-] : "Senior Requirements" : 1;
+] : "Senior Requirements" : 3;

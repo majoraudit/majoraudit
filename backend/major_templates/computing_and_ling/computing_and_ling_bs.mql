@@ -7,12 +7,73 @@ SELECT 3 FROM [
     ],
     PLACEMENT("DUS Approval for Programming"),
     RANGE(LING 1000, LING 1999)
-] : "Prerequisites" : 1;
+] : "Prerequisites" : 4;
 
-SELECT 2 FROM [SELECT 1 FROM [CLASS(MATH 2440), CLASS(LING 2249), CLASS(CPSC 2020)], SELECT 1 FROM[CLASS(MATH 2220), CLASS(MATH 2250)]] : "Math Requirement" : 2;
-SELECT 2 FROM [SELECT 2 FROM [SELECT 1 FROM [CLASS(S&DS 2400), CLASS(S&DS 2410)], CLASS(S&DS 2420)], SELECT 2 FROM [CLASS(S&DS 2380), SELECT 1 FROM [CLASS(S&DS 2300), RANGE(S&DS 2420, S&DS 9999)]]] : "Statistics Core Courses" : 2;
-SELECT 3 FROM [CLASS(LING 2320), CLASS(LING 2530), CLASS(LING 2630)] : "Linguistics Requirement" : 2;
-SELECT 2 FROM [CLASS(CPSC 2010), CLASS(CPSC 2230)] : "Computation Core Courses" : 2;
-SELECT 3 FROM [SELECT 1 FROM [CLASS(LING 3350), CLASS(LING 3540), CLASS(LING 3640)], SELECT 1 FROM [CLASS(CPSC 4770), CLASS(LING 2270)], SELECT 1 FROM [CLASS(S&DS 2650), CLASS(S&DS 3650), CLASS(CPSC 3810)]] : "Advanced Course Requirement" : 2;
-SELECT 2 FROM [TAG("YC CPLI Elective in CP & Ling"), TAG("YC CPLI Elective in CP & Ling"), PLACEMENT("DUS Approved Course"), PLACEMENT("DUS Approved Course")] : "Electives" : 3;
-SELECT 2 FROM [CLASS(CSLI 4900), PLACEMENT("Semester of Working on Senior Project")] : "Senior Capstone Seminar" : 1;
+SELECT 2 FROM [
+    SELECT 1 FROM [
+        CLASS(MATH 2440),
+        CLASS(LING 2249),
+        CLASS(CPSC 2020)
+    ],
+    SELECT 1 FROM [
+        CLASS(MATH 2220),
+        CLASS(MATH 2250)
+    ]
+] : "Math Requirement" : 2;
+
+SELECT 2 FROM [
+    SELECT 2 FROM [
+        SELECT 1 FROM [
+            CLASS(S&DS 2400),
+            CLASS(S&DS 2410)
+        ],
+        CLASS(S&DS 2420)
+    ],
+    SELECT 2 FROM [
+        CLASS(S&DS 2380),
+        SELECT 1 FROM [
+            CLASS(S&DS 2300),
+            RANGE(S&DS 2420, S&DS 9999)
+        ]
+    ]
+] : "Statistics Core Courses" : 2;
+
+SELECT 3 FROM [
+    CLASS(LING 2320),
+    CLASS(LING 2530),
+    CLASS(LING 2630)
+] : "Linguistics Requirement" : 2;
+
+SELECT 2 FROM [
+    CLASS(CPSC 2010),
+    CLASS(CPSC 2230)
+] : "Computation Core Courses" : 2;
+
+SELECT 3 FROM [
+    SELECT 1 FROM [
+        CLASS(LING 3350),
+        CLASS(LING 3540),
+        CLASS(LING 3640)
+    ],
+    SELECT 1 FROM [
+        CLASS(CPSC 4770),
+        CLASS(LING 2270)
+    ],
+    SELECT 1 FROM [
+        CLASS(S&DS 2650),
+        CLASS(S&DS 3650),
+        CLASS(CPSC 3810)
+    ]
+] : "Advanced Course Requirement" : 2;
+
+SELECT 2 FROM [
+    TAG("YC CPLI Elective in CP & Ling"),
+    TAG("YC CPLI Elective in CP & Ling"),
+    PLACEMENT("DUS Approved Course"),
+    PLACEMENT("DUS Approved Course")
+] : "Electives" : 1;
+
+SELECT 2 FROM [
+    CLASS(CSLI 4900),
+    PLACEMENT("Semester of Working on Senior Project")
+] : "Senior Capstone Seminar" : 3;

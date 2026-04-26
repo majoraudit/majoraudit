@@ -1,0 +1,44 @@
+SELECT 2 FROM [
+    CLASS(TDPS 1000),
+    CLASS(TDPS 1001)
+] : "Prerequisites" : 4;
+
+SELECT 6 FROM [
+    CLASS(CPSC 2010),
+    SELECT 1 FROM [
+        CLASS(CPSC 2020),
+        CLASS(MATH 2440)
+    ],
+    CLASS(CPSC 2230),
+    SELECT 1 FROM [
+        CLASS(CPSC 4310),
+        CLASS(CPSC 4320)
+    ],
+    SELECT 1 FROM [
+        CLASS(CPSC 4780),
+        CLASS(CPSC 4790),
+        CLASS(CPSC 4840)
+    ],
+    RANGE(CPSC 2000, CPSC 9999)
+] : "Computer Science Courses" : 1;
+
+SELECT 6 FROM [
+    TAG("YC TDPS Artistic Practice"),
+    TAG("YC TDPS Histories"),
+    TAG("YC TDPS Performance Theory"),
+    TAG("YC TDPS Interarts"),
+    SELECT 2 FROM [
+        TAG("YC TDPS Artistic Practice"),
+        TAG("YC TDPS Histories"),
+        TAG("YC TDPS Performance Theory"),
+        TAG("YC TDPS Interarts")
+    ]
+] : "Theater, Dance, and Performance Studies Courses" : 2;
+
+SELECT 2 FROM [
+    CLASS(CPSC 4900),
+    SELECT 1 FROM [
+        CLASS(TDPS 4701),
+        RANGE(TDPS 4900, TDPS 4902)
+    ]
+] : "Senior Requirements" : 3;

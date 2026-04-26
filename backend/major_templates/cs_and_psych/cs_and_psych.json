@@ -10,9 +10,10 @@
     "workload": -1,
     "discipline": "Interdisciplinary",
     "students": -1,
-    "about": "The combined major in Computer Science and Psychology is designed for students interested in the intersection of computation and human cognition. The program provides a strong foundation in both computer science and psychology, with core courses in algorithms, data structures, systems programming, cognitive psychology, perception, and neuroscience. Students explore topics at the interface of the two fields, such as artificial intelligence, human-computer interaction, computational modeling of cognition, and machine learning. The major prepares students for careers in technology, user experience research, cognitive science, and graduate study in related fields.",
+    "about": "Computer Science and Psychology is an interdepartmental major designed for students interested in integrating work in these two fields. Each area provides tools and theories that can be applied to problems in the other. Examples of this interaction include cognitive science, artificial intelligence, and biological perception.",
     "dus": [
-        ["TBD", "TBD"]
+        ["Theodore Kim", "theodore.kim@yale.edu"],
+        ["Yarrow Dunham", "yarrow.dunham@yale.edu"]
     ],
     "catalogLink": "https://catalog.yale.edu/ycps/subjects-of-instruction/computer-science-psychology/",
     "websiteLink": "https://engineering.yale.edu/academic-study/departments/computer-science",
