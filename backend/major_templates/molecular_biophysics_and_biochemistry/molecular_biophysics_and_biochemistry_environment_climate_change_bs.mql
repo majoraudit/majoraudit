@@ -1,37 +1,133 @@
-
-SELECT 7 FROM [
+SELECT 2 FROM [
   CLASS(BIOL 1010),
-  CLASS(BIOL 1020),
-  CLASS(CHEM 1610),
-  CLASS(CHEM 1650),
-  CLASS(CHEM 2200),
-  CLASS(CHEM 2220L),
-  CLASS(MATH 1120),
-  CLASS(MATH 1150)
-] : "Prerequisites" : 7;
+  CLASS(BIOL 1020)
+] : "Biology Prerequisites" : 10;
 
-SELECT 6 FROM [
-  CLASS(PHYS 1700),
-  CLASS(PHYS 1710),
-  CLASS(MB&B 2750),
-  CLASS(MB&B 3000),
-  CLASS(MB&B 3010),
-  CLASS(CHEM 1750),
-  PLACEMENT("Environment Climate Change Concentration"),
-  TAG("YC CHEM Intermediate Courses"),
-  TAG("YC MB&B Practical Skills"),
-  TAG("YC MB&B Science & Society")
-] : "Core Classes" : 6;
+SELECT 4 FROM [
+  SELECT 1 FROM [
+    CLASS(CHEM 1610),
+    CLASS(CHEM 1630)
+  ],
+  SELECT 1 FROM [
+    CLASS(CHEM 1650),
+    CLASS(CHEM 1670)
+  ],
+  CLASS(CHEM 1340L),
+  CLASS(CHEM 1360L)
+] : "General Chemistry Prerequisites" : 9;  
 
 SELECT 2 FROM [
-  TAG("YC MB&B Elective"),
-  TAG("YC MB&B Practical Skills"),
-  RANGE(MB&B 2000 , MB&B 9999),
-  RANGE(CHEM 2000 , CHEM 9999),
-  RANGE(PHYS 2000 , PHYS 9999),
-  RANGE(S&DS 2000 , S&DS 9999),
-  RANGE(CPSC 2000 , CPSC 9999)
-] : "Electives" : 2;
+  SELECT 1 FROM [
+    CLASS(CHEM 1740),
+    CLASS(CHEM 2200)
+  ],
+  CLASS(CHEM 2220L)
+] : "Organic Chemistry Prerequisites" : 8;
+
+SELECT 2 FROM [
+  CLASS(MATH 1120),
+  SELECT 1 FROM [
+    CLASS(MATH 1150),
+    CLASS(MATH 1160)
+  ]
+] : "Calculus Prerequisites" : 7;
+
+SELECT 4 FROM [
+  SELECT 1 FROM [
+    CLASS(MB&B 2750),
+    CLASS(CHEM 3320)
+  ],
+  SELECT 1 FROM [
+    CLASS(PHYS 1700),
+    CLASS(PHYS 1800),
+    CLASS(PHYS 2000),
+    CLASS(PHYS 2600)
+  ],
+  SELECT 1 FROM [
+    CLASS(PHYS 1710),
+    CLASS(PHYS 1810),
+    CLASS(PHYS 2010),
+    CLASS(PHYS 2610)
+  ],
+  TAG("3000+ course in physical sciences, mathematics, statistics or computer science")
+] : "Biophysics Requirements" : 6;
+
+SELECT 3 FROM [
+  CLASS(MB&B 3000),
+  CLASS(MB&B 3010),
+  SELECT 1 FROM [
+    CLASS(CHEM 1750),
+    RANGE(CHEM 2000 , CHEM 9999)
+  ]
+] : "Biochemistry Requirements" : 5;
+
+SELECT 1 FROM [
+  CLASS(MB&B 2680),
+  PLACEMENT("Other Science and Society courses based on petiton")
+] : "Science and Society Core Requirement" : 4;
+
+SELECT 2 FROM [
+  PLACEMENT("Physics/Biochemistry Lab or Critical Tools with DUS approval"),
+  PLACEMENT("Physics/Biochemistry Lab or Critical Tools with DUS approval")
+] : "Practical Skills Requirement" : 3;
+
+SELECT 1 FROM [
+  CLASS(MATH 1200),
+  CLASS(MATH 1210),
+  RANGE(MATH 2220 , MATH 9999),
+  RANGE(S&DS 1000 , S&DS 9999),
+  RANGE(CPSC 1001 , CPSC 9999)
+] : "Math, Statistics or Computer Science Requirement" : 3;
+
+SELECT 6 FROM [
+  SELECT 1 FROM [
+    CLASS(EVST 3620),
+    CLASS(EPS 3100),
+    CLASS(EPS 3230),
+    CLASS(EPS 3350),
+    CLASS(CHEM 3320),
+    CLASS(CHEM 3330)
+  ],
+  SELECT 1 FROM [
+    CLASS(CENG 1200),
+    CLASS(EVST 2200),
+    CLASS(EVST 2550),
+    CLASS(EPS 1010),
+    CLASS(EPS 1250),
+    CLASS(EPS 1400),
+    CLASS(EPS 2320),
+    CLASS(EPS 2610)
+  ],
+  SELECT 1 FROM [
+    CLASS(EVST 3307),
+    CLASS(EPS 3100),
+    CLASS(CHEM 2520),
+    CLASS(ENVE 4380)
+  ],
+  SELECT 2 FROM [
+    CLASS(MB&B 3650),
+    CLASS(ENVE 4640),
+    CLASS(EVST 4005),
+    CLASS(EPS 3550),
+    CLASS(ENVE 4100),
+    CLASS(EPS 3230),
+    CLASS(ENVE 3600),
+    CLASS(ENVE 4380)
+  ],
+  SELECT 1 FROM [
+    CLASS(BIOL 1040),
+    CLASS(EEB 2225),
+    CLASS(ANTH 2667)
+  ]
+] : "Additional Requirements" : 3;
+
+SELECT 2 FROM [ 
+  RANGE_TAG(MB&B 2000 , MB&B 9999, "Seminar or Lecture"),
+  SELECT 1 FROM [
+    RANGE_TAG(MB&B 2000 , MB&B 9999, "Seminar or Lecture"),
+    TAG("Lecture course in STEM")
+  ]
+] : "Elective Courses" : 2;
 
 SELECT 1 FROM [
   CLASS(MB&B 4900),
