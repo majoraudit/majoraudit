@@ -194,6 +194,12 @@ CAS_VERSION = 2
 CAS_REDIRECT_URL = FRONTEND_URL
 CAS_LOGOUT_REDIRECT_URL = FRONTEND_URL
 
+# Dev-only CAS settings
+if DEBUG:
+    CAS_STORE_NEXT = True  # keep ?next= in the session, not in the service URL
+    CAS_ROOT_PROXIED_AS = "https://localhost:5173"  # public URL the browser sees via the Vite proxy
+
+
 # Yalies Settings
 
 YALIES_URL = os.getenv('YALIES_URL')
