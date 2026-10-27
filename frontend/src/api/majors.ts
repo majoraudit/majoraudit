@@ -1,24 +1,25 @@
-import { getCsrfToken } from "./apiClient";
+import { fetchCsrfToken } from "./apiClient";
 import { type Course } from "@/types/type-user";
 import { MQLMatcher } from "@/services/MatchingEngine";
 import { type MQLQueryFile } from "@/types/schema/mql/mql";
 import { type CourseList } from "@/types/schema/courses/courses";
+import { apiUrl } from "@/constants";
 
 
 export async function apiFetchMajorTemplatesList(): Promise<string[]> {
-  const res = await fetch("/api/majors/", { credentials: "include" });
+  const res = await fetch(`${apiUrl}/majors/`, { credentials: "include" });
   if (!res.ok) throw new Error("Failed to fetch major list");
   return res.json();
 }
 
 export async function apiFetchMajorTemplate(majorId: string) {
-  const res = await fetch(`/api/majors/${majorId}/`, { credentials: "include" });
+  const res = await fetch(`${apiUrl}/majors/${majorId}/`, { credentials: "include" });
   if (!res.ok) throw new Error(`Failed to fetch major template ${majorId}`);
   return res.json();
 }
 
 export async function apiFetchMajorMQL(majorId: string, majorSpecification: string) {
-  const url = `/api/majors/${majorId}/mql?specialization=${majorSpecification}`;
+  const url = `${apiUrl}/majors/${majorId}/mql?specialization=${majorSpecification}`;
   console.log("Fetching MQL:", url);
   const res = await fetch(url, { credentials: "include" });
   const body = await res.json();
@@ -65,6 +66,7 @@ export async function apiRunAudit(
   courseCatalog: Course[],
   mqlData: MQLQueryFile,
 ): Promise<AuditResult> {
+  const csrfToken = await fetchCsrfToken();
   // 1. Run local matching to produce matching_eval
   const courseListForMatcher = courseCatalog.map((c) => ({
   ...c,
@@ -141,12 +143,12 @@ console.log(matchingEval);
 
 
   // 2. Send matching_eval to solver
-  const res = await fetch("/api/majors/solve/", {
+  const res = await fetch(`${apiUrl}/majors/solve/`, {
     method: "POST",
     credentials: "include",
     headers: {
       "Content-Type": "application/json",
-      "X-CSRFToken": getCsrfToken(),
+      "X-CSRFToken": csrfToken,
     },
     body: JSON.stringify({
       matching_eval: matchingEval,

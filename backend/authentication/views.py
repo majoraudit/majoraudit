@@ -1,6 +1,15 @@
+from django.http import JsonResponse
+from django.middleware.csrf import get_token
+from django.views.decorators.http import require_GET
 from rest_framework import generics, permissions
 
 from .serializers import ProfileSerializer
+
+
+@require_GET
+def csrf_token(request):
+    """Return a CSRF token that cross-origin frontends can read from JSON."""
+    return JsonResponse({"csrfToken": get_token(request)})
 
 
 class ProfileView(generics.RetrieveUpdateAPIView):

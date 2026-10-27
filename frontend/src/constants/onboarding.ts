@@ -1,4 +1,22 @@
-export const CLASS_YEARS = ["2026", "2027", "2028", "2029"] as const;
+export const CLASS_YEARS = getClassYears().map(d => d.getFullYear().toString())
+
+// export const CLASS_YEARS = [
+//   "2026", "2027", "2028", "2029"
+// ] as const;
+
+function getClassYears(now: Date = new Date()): [Date, Date, Date, Date] {
+  // Academic year rolls over on Jun 1: on/after Jun 1 of year Y the earliest
+  // valid class is Y+1; before it, the earliest valid class is Y.
+  const rollover = new Date(now.getFullYear(), 5, 1); // month 5 = June
+  const first = now >= rollover ? now.getFullYear() + 1 : now.getFullYear();
+
+  return [0, 1, 2, 3].map((i) => new Date(first + i, 5, 1)) as [
+    Date,
+    Date,
+    Date,
+    Date,
+  ];
+}
 
 export const UNDERGRAD_MAJORS: string[] = [
   "African American Studies (B.A.)",

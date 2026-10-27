@@ -1,0 +1,36 @@
+# Production-like integration stack. It contains no source mounts and runs the
+# built frontend through Nginx and the backend through Gunicorn.
+services:
+  backend:
+    build:
+      context: ./backend
+      target: production
+    env_file:
+      - ${ENV_FILE:-.env}
+    environment:
+      DATABASE_PATH: /data/db.sqlite3
+      STATIC_ROOT: /static
+    volumes:
+      - backend-data:/data
+      - django-static:/static
+    expose:
+      - "8000"
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      target: production
+      args:
+        VITE_BACKEND_API_URL: ${VITE_BACKEND_API_URL:-}
+    depends_on:
+      - backend
+    volumes:
+      - django-static:/var/www/django-static:ro
+    ports:
+      - "${APP_PORT:-5173}:443"
+    restart: unless-stopped
+
+volumes:
+  backend-data:
+  django-static:

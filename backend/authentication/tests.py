@@ -1,9 +1,61 @@
+from unittest.mock import Mock, patch
+
+from django.test import TestCase, override_settings
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
+
+
+@override_settings(
+    YALIES_URL='https://api.yalies.example/v2/',
+    YALIES_API_KEY='test-key',
+)
+class YaliesSignalTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username='testuser')
+
+    @patch('authentication.signals.requests.post')
+    def test_empty_result_does_not_interrupt_login(self, post):
+        response = Mock()
+        response.json.return_value = []
+        post.return_value = response
+
+        from authentication.signals import update_user_from_yalies
+        update_user_from_yalies(sender=None, user=self.user)
+
+        self.user.refresh_from_db()
+        self.assertEqual(self.user.first_name, '')
+        self.assertEqual(self.user.last_name, '')
+        self.assertEqual(self.user.email, '')
+
+    @patch('authentication.signals.requests.post')
+    def test_valid_result_updates_profile(self, post):
+        response = Mock()
+        response.json.return_value = [{
+            'first_name': 'Alice',
+            'last_name': 'Smith',
+            'email': 'alice@example.com',
+        }]
+        post.return_value = response
+
+        from authentication.signals import update_user_from_yalies
+        update_user_from_yalies(sender=None, user=self.user)
+
+        self.user.refresh_from_db()
+        self.assertEqual(self.user.first_name, 'Alice')
+        self.assertEqual(self.user.last_name, 'Smith')
+        self.assertEqual(self.user.email, 'alice@example.com')
+
+    @override_settings(YALIES_API_KEY='')
+    @patch('authentication.signals.requests.post')
+    def test_missing_configuration_skips_request(self, post):
+        from authentication.signals import update_user_from_yalies
+        update_user_from_yalies(sender=None, user=self.user)
+
+        post.assert_not_called()
 
 
 class ProfileTests(APITestCase):

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 
 import { type Course } from "@/types/type-user";
 import DistributionOutput from "@/components/shared-components/DistributionOutput";
+import { apiUrl } from "@/constants";
 
 interface CourseTableProfessor {
   professor: {
@@ -183,7 +184,7 @@ function CourseDetailsModal({
         const query = new URLSearchParams({
           course_code: courseCode as string,
         });
-        const response = await fetch(`/api/courses/coursetable/?${query}`, {
+        const response = await fetch(`${apiUrl}/courses/coursetable/?${query}`, {
           credentials: "include",
           signal: controller.signal,
         });
