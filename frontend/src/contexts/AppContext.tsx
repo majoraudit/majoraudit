@@ -11,6 +11,7 @@ import { useUser } from "./UserContext";
 import { type StudentCourse } from "@/types/type-user";
 
 import { apiFetchMajorTemplatesList } from "@/api/majors";
+import { apiUrl } from "@/constants";
 
 type AppContextType = {
   appData: AppData | undefined;
@@ -20,7 +21,7 @@ type AppContextType = {
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export async function fetchCourses() {
-  const res = await fetch("/api/courses?limit=10000", {
+  const res = await fetch(`${apiUrl}/courses?limit=10000`, {
     credentials: "include",
   });
   if (!res.ok) throw new Error("Courses unavailable - getting json");

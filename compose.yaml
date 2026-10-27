@@ -16,6 +16,8 @@ services:
   frontend:
     build:
       context: ./frontend
+      args:
+        VITE_BACKEND_API_URL: ${VITE_BACKEND_API_URL:-}
     depends_on:
       - backend
     volumes:
