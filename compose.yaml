@@ -1,0 +1,29 @@
+services:
+  backend:
+    build:
+      context: ./backend
+    env_file:
+      - .env
+    environment:
+      DATABASE_PATH: /data/db.sqlite3
+    volumes:
+      - backend-data:/data
+      - django-static:/static
+    expose:
+      - "8000"
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+    depends_on:
+      - backend
+    volumes:
+      - django-static:/var/www/django-static:ro
+    ports:
+      - "${APP_PORT:-5173}:443"
+    restart: unless-stopped
+
+volumes:
+  backend-data:
+  django-static:

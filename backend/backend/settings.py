@@ -25,13 +25,19 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
+SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "unsafe-development-only-key")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv("DJANGO_DEBUG") == "True"
 
-ALLOWED_HOSTS = ["api.majoraudit.co",
-                 "majoraudit.co", "localhost", "127.0.0.1"]
+ALLOWED_HOSTS = [
+    host.strip()
+    for host in os.getenv(
+        "DJANGO_ALLOWED_HOSTS",
+        "api.majoraudit.co,majoraudit.co,localhost,127.0.0.1,backend",
+    ).split(",")
+    if host.strip()
+]
 
 
 # Application definition
@@ -91,13 +97,13 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'NAME': os.getenv('DATABASE_PATH', BASE_DIR / 'db.sqlite3'),
     }
 }
 
 # Convenient Variables
 
-FRONTEND_URL = os.getenv('FRONTEND_URL', 'https://localhost:5173')
+FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:5173')
 AUTH_USER_MODEL = 'authentication.CustomUser'
 
 # Password validation
@@ -134,7 +140,8 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
+STATIC_ROOT = Path(os.getenv('STATIC_ROOT', '/static'))
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
@@ -143,12 +150,13 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Session Settings
 SESSION_ENGINE = "django.contrib.sessions.backends.cached_db"
-SESSION_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = os.getenv('COOKIE_SECURE', 'True').lower() == 'true'
 SESSION_COOKIE_SAMESITE = os.getenv('COOKIE_SAMESITE')
 SESSION_COOKIE_HTTPONLY = True
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False
 SESSION_COOKIE_AGE = 86400
-SECURE_SSL_REDIRECT = True
+SECURE_SSL_REDIRECT = os.getenv('SECURE_SSL_REDIRECT', 'True').lower() == 'true'
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 # REST Framework Settings
 
@@ -164,18 +172,12 @@ REST_FRAMEWORK = {
 # CORS and CSRF Settings
 
 CORS_ALLOW_CREDENTIALS = True
-CORS_ALLOWED_ORIGINS = [
-    "https://localhost:5173",
-    "https://127.0.0.1:5173",
-]
+CORS_ALLOWED_ORIGINS = [FRONTEND_URL]
 
-CSRF_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = os.getenv('COOKIE_SECURE', 'True').lower() == 'true'
 CSRF_COOKIE_HTTPONLY = False # changed this -----------
-CSRF_COOKIE_SAMESITE = 'None'
+CSRF_COOKIE_SAMESITE = os.getenv('COOKIE_SAMESITE', 'None')
 CSRF_TRUSTED_ORIGINS = [
-    "https://localhost:5173",
-    "https://127.0.0.1:5173",
-    "https://localhost:5174",
     FRONTEND_URL,
 ]
 
