@@ -1,12 +1,17 @@
+# Default development stack: source files are bind-mounted and both servers
+# reload automatically. Use compose.prod.yaml for production-like verification.
 services:
   backend:
     build:
       context: ./backend
+      target: development
     env_file:
-      - .env
+      - ${ENV_FILE:-.env}
     environment:
       DATABASE_PATH: /data/db.sqlite3
+      STATIC_ROOT: /static
     volumes:
+      - ./backend:/app
       - backend-data:/data
       - django-static:/static
     expose:
@@ -16,16 +21,19 @@ services:
   frontend:
     build:
       context: ./frontend
-      args:
-        VITE_BACKEND_API_URL: ${VITE_BACKEND_API_URL:-}
+      target: development
+    environment:
+      BACKEND_INTERNAL_URL: http://backend:8000
     depends_on:
       - backend
     volumes:
-      - django-static:/var/www/django-static:ro
+      - ./frontend:/app
+      - frontend-node-modules:/app/node_modules
     ports:
-      - "${APP_PORT:-5173}:443"
+      - "${APP_PORT:-5173}:5173"
     restart: unless-stopped
 
 volumes:
   backend-data:
   django-static:
+  frontend-node-modules:

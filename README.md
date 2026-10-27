@@ -1,6 +1,6 @@
 # Major Audit
 
-## Run with Docker Compose
+## Develop with Docker Compose
 
 The only prerequisites are Docker with Docker Compose and a root-level `.env`
 file.
@@ -9,6 +9,19 @@ file.
 cp .env.example .env
 # Replace DJANGO_SECRET_KEY, set DJANGO_ADMIN_NETID to your Yale NetID, and
 # configure any external API credentials in .env.
+docker compose up --build
+```
+
+This is the default development environment. Vite and Django run inside Docker
+with the repository source mounted into their containers. After the first
+build, edit files normally: frontend changes use Vite hot module replacement
+and backend changes trigger Django's automatic reload. You do not need to
+restart Compose after each source change.
+
+Rebuild when `package.json`, `package-lock.json`, `requirements.txt`, a
+Dockerfile, or Compose configuration changes:
+
+```sh
 docker compose up --build
 ```
 
@@ -46,3 +59,18 @@ docker compose exec backend python manage.py bootstrap_admin YOUR_NETID
 ```
 
 To remove the persisted development database too, run `docker compose down -v`.
+
+## Production-like integration test
+
+The production stack contains no source mounts. It builds the frontend into an
+Nginx image and serves Django with Gunicorn:
+
+```sh
+docker compose -f compose.prod.yaml up --build
+```
+
+Stop it with:
+
+```sh
+docker compose -f compose.prod.yaml down
+```

@@ -1,4 +1,4 @@
-FROM node:22-alpine AS build
+FROM node:22-alpine AS development
 
 WORKDIR /app
 
@@ -9,11 +9,17 @@ COPY package.json package-lock.json ./
 RUN npm ci
 
 COPY . .
+
+EXPOSE 5173
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
+
+FROM development AS build
+
 # The repository's type-check currently reports errors in legacy mock data.
 # Vite still performs the production transpile and asset bundling.
 RUN npx vite build
 
-FROM nginx:1.27-alpine
+FROM nginx:1.27-alpine AS production
 
 RUN apk add --no-cache openssl \
     && mkdir -p /etc/nginx/certs \
