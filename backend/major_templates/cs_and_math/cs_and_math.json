@@ -10,9 +10,11 @@
     "workload": -1,
     "discipline": "Interdisciplinary",
     "students": -1,
-    "about": "The combined major in Computer Science and Mathematics is designed for students interested in the mathematical foundations of computing. The program integrates core courses in both computer science and mathematics, providing a rigorous education that spans algorithms, data structures, systems programming, discrete mathematics, real analysis, abstract algebra, and other foundational topics. The major is particularly well suited for students considering graduate study in computer science, mathematics, or related fields where deep mathematical and computational skills are essential. Students complete a senior project that draws on both disciplines.",
+    "about": "Computer Science and Mathematics is an interdepartmental major for students who are interested in computational mathematics, the use of computers in mathematics, mathematical aspects of algorithm design and analysis, and theoretical foundations of computing.",
     "dus": [
-        ["TBD", "TBD"]
+        ["Theodore Kim", "theodore.kim@yale.edu"],
+        ["Sebastian Hurtado-Salazar", "sebastian.hurtado-salazar@yale.edu"],
+        ["Miki Havlickova", "miki.havlickova@yale.edu"]
     ],
     "catalogLink": "https://catalog.yale.edu/ycps/subjects-of-instruction/computer-science-mathematics/",
     "websiteLink": "https://engineering.yale.edu/academic-study/departments/computer-science",

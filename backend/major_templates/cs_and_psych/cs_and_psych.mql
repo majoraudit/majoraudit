@@ -1,8 +1,51 @@
-SELECT 2 FROM [CLASS(PSYC 1100), PLACEMENT("5 on AP Psych exam")] : "Psych Prerequisite" : 1;
-SELECT 5 FROM [CLASS(CPSC 2010), SELECT 1 FROM [CLASS(CPSC 2020), CLASS(MATH 2440)], CLASS(CPSC 2230), CLASS(CPSC 3230), SELECT 1 FROM [CLASS(CPSC 3650), CLASS(CPSC 3660)]] : "Core CS Classes" : 2;
-SELECT 3 FROM [CLASS(CPSC 3810), CLASS(CPSC 4520), CLASS(CPSC 4530), SELECT 0-3 FROM [RANGE(CPSC 4700, CPSC 4770), RANGE(CPSC 4700, CPSC 4770), RANGE(CPSC 4700, CPSC 4770)], SELECT 0-3 FROM [RANGE(CPSC 4810, 4890), RANGE(CPSC 4810, 4890), RANGE(CPSC 4810, 4890)]] : "CS Electives" : 3;
-SELECT 2 FROM [CLASS(S&DS 1000), CLASS(S&DS 2300)] : "S&DS Requirement" : 2;
+SELECT 1 FROM [
+    CLASS(PSYC 1100),
+    PLACEMENT("5 on AP Psych Exam")
+] : "Psychology Prerequisite" : 4;
+
+SELECT 5 FROM [
+    CLASS(CPSC 2010),
+    SELECT 1 FROM [
+        CLASS(CPSC 2020),
+        CLASS(MATH 2440)
+    ],
+    CLASS(CPSC 2230),
+    CLASS(CPSC 3230),
+    SELECT 1 FROM [
+        CLASS(CPSC 3650),
+        CLASS(CPSC 3660)
+    ]
+] : "Core CS Classes" : 2;
+
+SELECT 3 FROM [
+    CLASS(CPSC 4520),
+    CLASS(CPSC 4530),
+    RANGE(CPSC 4700, CPSC 4770),
+    RANGE(CPSC 4700, CPSC 4770),
+    RANGE(CPSC 4700, CPSC 4770),
+    RANGE(CPSC 4810, CPSC 4890),
+    RANGE(CPSC 4810, CPSC 4890),
+    RANGE(CPSC 4810, CPSC 4890)
+] : "CS Electives" : 1;
+
+SELECT 1 FROM [
+    CLASS(S&DS 1000),
+    CLASS(S&DS 2300)
+] : "S&DS Requirement" : 2;
+
 SELECT 1 FROM [RANGE(PSYC 2100, PSYC 2990)] : "Research Methods Requirement" : 2;
-SELECT 2 FROM [TAG("YC PSYC Social Science Core"), TAG("YC PSYC Social Science")] : "Psychology Social Science Requirement" : 2;
-SELECT 2 FROM [TAG("YC PSYC Natural Science Core"), TAG("YC PSYC Natural Science")] : "Psychology Natural Science Requirement" : 2;
-SELECT 1 FROM [CLASS(CPSC 4900), CLASS(PSYC 4990)] : "Senior Requirement" : 1;
+
+SELECT 2 FROM [
+    TAG("YC PSYC Social Science Core"),
+    TAG("YC PSYC Social Science")
+] : "Psychology Social Science Requirement" : 2;
+
+SELECT 2 FROM [
+    TAG("YC PSYC Natural Science Core"),
+    TAG("YC PSYC Natural Science")
+] : "Psychology Natural Science Requirement" : 2;
+
+SELECT 1 FROM [
+    CLASS(CPSC 4900),
+    CLASS(PSYC 4990)
+] : "Senior Requirement" : 3;

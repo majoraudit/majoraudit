@@ -1,0 +1,26 @@
+{
+    "name": "Computing and the Arts",
+    "id": "computing_and_arts",
+    "abbr": "CPAR",
+    "degreeTypes": [
+        ["ba"]
+    ],
+    "courses": -1,
+    "rating": -1,
+    "workload": -1,
+    "discipline": "Interdisciplinary",
+    "students": -1,
+    "about": "Computing and the Arts is an interdepartmental major designed for students who wish to integrate work in computing with work in one of five arts disciplines: architecture, art, history of art, music, or theater, dance, and performance studies.\nFor students with a computing perspective, issues in these disciplines present interesting and substantive problems: how musicians use computers to compose; the limitations of current software tools used by artists; the types of analyses done by art historians; challenges in designing and using virtual sets in the theater; ways that virtual worlds might help to envision new forms of artistic expression; and lessons that can be learned from trying to create a robotic conductor or performer.\nFor students with an artistic perspective, computing methods offer a systematic approach to achieving their vision. A foundation in computer science allows artists to understand existing computing tools more comprehensively and to use them more effectively. Furthermore, it gives them insight into what fundamentally can and cannot be done with computers, so they can anticipate the future development of new tools for computing in their field.",
+    "dus": [
+        ["Scott Petersen", "scott.petersen@yale.edu"]
+    ],
+    "catalogLink": "https://catalog.yale.edu/ycps/subjects-of-instruction/computing-arts/",
+    "websiteLink": "https://c2.cs.yale.edu/",
+    "specializations": [
+        "computing_and_arts_architecture.mql",
+        "computing_and_arts_art.mql",
+        "computing_and_arts_history_of_art.mql",
+        "computing_and_arts_music.mql",
+        "computing_and_arts_theater_dance_and_performance_studies.mql"
+    ]
+}
