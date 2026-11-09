@@ -238,11 +238,11 @@ export function addMajor(user: User, major: MajorProgress): User {
       statCount: {
         ...user.FYP.statCount,
         majorNum:
-          major.info.degreeType === "major" || major.info.degreeType=== "Major"
+          major.info?.degreeType === "major" || major.info?.degreeType=== "Major"
             ? user.FYP.statCount.majorNum + 1
             : user.FYP.statCount.majorNum,
         certificateNum:
-          major.info.degreeType === "certificate" || major.info.degreeType === "Certificate"
+          major.info?.degreeType === "certificate" || major.info?.degreeType === "Certificate"
             ? user.FYP.statCount.certificateNum + 1
             : user.FYP.statCount.certificateNum,
       },
@@ -268,11 +268,11 @@ export function removeMajor(user: User, major: MajorProgress): User {
       statCount: {
         ...user.FYP.statCount,
         majorNum:
-          major.info.degreeType === "major" || major.info.degreeType === "Major"
+          major.info?.degreeType === "major" || major.info?.degreeType === "Major"
             ? Math.max(0, user.FYP.statCount.majorNum - 1)
             : user.FYP.statCount.majorNum,
         certificateNum:
-          major.info.degreeType === "certificate" || major.info.degreeType === "Certificate"
+          major.info?.degreeType === "certificate" || major.info?.degreeType === "Certificate"
             ? Math.max(0, user.FYP.statCount.certificateNum - 1)
             : user.FYP.statCount.certificateNum,
       },

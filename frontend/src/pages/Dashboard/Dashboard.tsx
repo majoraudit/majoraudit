@@ -1,12 +1,8 @@
 import type { WorksheetMajor } from "@/api/worksheetMajors";
 import type { AuditResult } from "@/api/majors";
 
-import { useUser } from "@/contexts/UserContext";
-import { useApp } from "@/contexts/AppContext";
-
 import MajorRequirementList from "./components/MajorRequirementList";
 import MajorRequirementGraph from "./components/MajorRequirementGraph";
-import DashboardInsightGrid from "./components/DashboardInsightGrid";
 
 import trashcan from "./assets/trashcan.svg";
 
@@ -44,24 +40,10 @@ interface MajorInfo {
 type ActiveTab = "degree" | "major";
 
 function Dashboard() {
-  const { userData } = useUser();
-  const { appData } = useApp();
-
   const { worksheets, activeWorksheetId, activeWorksheet, setActiveWorksheet } =
     useWorksheetManager();
   const { removeProgram } = useWorksheetActions();
-  const {
-    totalCredits,
-    completedCredits,
-    completedCourseCount,
-    allStudentCourses,
-    semesters,
-    majorCount,
-    uniqueCourses,
-  } = useWorksheetData();
-
-  const graduationCreditsRequired = 36;
-  const totalCompletedCourses = completedCourseCount;
+  const { majorCount, uniqueCourses } = useWorksheetData();
 
   const [activeTab, setActiveTab] = useState<ActiveTab>("degree");
   const [selectedMajorIndex, setSelectedMajorIndex] = useState(0);
@@ -78,7 +60,7 @@ function Dashboard() {
   const [auditResult, setAuditResult] = useState<AuditResult | null>(null);
   const [isLoadingAudit, setIsLoadingAudit] = useState(false);
 
-  const worksheetMajors = activeWorksheet?.majors ?? [];
+  const worksheetMajors: WorksheetMajor[] = activeWorksheet?.majors ?? [];
 
   const degreeMajor: WorksheetMajor | null = useMemo(() => {
     return (
@@ -97,18 +79,16 @@ function Dashboard() {
     return declaredMajors[selectedMajorIndex] ?? null;
   }, [activeTab, selectedMajorIndex, declaredMajors]);
 
+  const activeProgram = activeTab === "degree" ? degreeMajor : activeMajor;
+
   // ---------- Audit ----------
   const runAudit = useCallback(
-    async (mql: MQLQueryFile) => {
-      if (!appData) return;
+    async (_mql: MQLQueryFile) => {
+      if (!activeProgram || !activeWorksheetId) return;
       setIsLoadingAudit(true);
       setAuditResult(null);
       try {
-        const result = await apiRunAudit(
-          uniqueCourses,
-          appData.course_database.getAllCourses(),
-          mql,
-        );
+        const result = await apiRunAudit(Number(activeWorksheetId), activeProgram.id);
         setAuditResult(result);
       } catch (e) {
         console.error("Audit failed:", e);
@@ -116,7 +96,7 @@ function Dashboard() {
         setIsLoadingAudit(false);
       }
     },
-    [uniqueCourses, appData],
+    [activeWorksheetId, activeProgram?.id],
   );
 
   // ---------- Load major data ----------
@@ -135,7 +115,9 @@ function Dashboard() {
         }
         setActiveMajorInfo(info);
 
-        const firstSpec = info.specializations?.[0];
+        const firstSpec = activeMajor?.major_id === majorId
+          ? activeMajor.program_id
+          : info.specializations?.[0];
         if (!firstSpec) {
           setActiveMqlData(null);
           return;
@@ -163,7 +145,7 @@ function Dashboard() {
         setIsLoadingMajor(false);
       }
     },
-    [majorInfoCache, mqlCache, runAudit],
+    [majorInfoCache, mqlCache, runAudit, activeMajor?.major_id, activeMajor?.program_id],
   );
 
   const preloadMajorData = useCallback(
@@ -327,10 +309,10 @@ function Dashboard() {
             <div className="flex flex-col items-center">
               <span className="font-bold text-2xl">
                 {displayName}
-                {activeTab === "major" && activeMajor?.specialization && (
+                {activeTab === "major" && activeMajor?.program_id && (
                   <span className="text-gray-500 font-normal text-lg ml-2">
                     (
-                    {activeMajor.specialization
+                    {activeMajor.program_id
                       .replace(`${activeMajor.major_id}_`, "")
                       .replace(".mql", "")
                       .split("_")

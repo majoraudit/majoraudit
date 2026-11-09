@@ -10,6 +10,7 @@ from .views import (
 from majors.views import (
     WorksheetMajorListCreateView,
     WorksheetMajorDetailView,
+    WorksheetMajorAuditView,
 )
 
 urlpatterns = [
@@ -30,4 +31,6 @@ urlpatterns = [
          WorksheetMajorListCreateView.as_view(), name='ws-major-list'),
     path('<int:worksheet_pk>/majors/<int:pk>/',
          WorksheetMajorDetailView.as_view(), name='ws-major-detail'),
+    path('<int:worksheet_pk>/majors/<int:pk>/audit/',
+         WorksheetMajorAuditView.as_view(), name='ws-major-audit'),
 ]

@@ -2,13 +2,17 @@ import { apiClient } from "./apiClient";
 
 export interface WorksheetMajor {
   id: number;
+  catalog_year: string;
   major_id: string;
-  specialization: string;
+  program_id: string;
+  declared_choices: Record<string, unknown>;
+  fact_ids: string[];
 }
 
 export interface WorksheetMajorPayload {
+  catalog_year?: string;
   major_id: string;
-  specialization: string;
+  program_id: string;
 }
 
 // GET /api/worksheets/<worksheetId>/majors/
@@ -49,4 +53,16 @@ export async function apiRemoveWorksheetMajor(
   if (!res.ok) {
     throw new Error(`Failed to remove worksheet major (${res.status})`);
   }
+}
+
+export async function apiUpdateWorksheetMajor(
+  worksheetId: number,
+  worksheetMajorId: number,
+  payload: Partial<Pick<WorksheetMajor, "declared_choices" | "fact_ids">>,
+): Promise<WorksheetMajor> {
+  const res = await apiClient.patch(
+    `/worksheets/${worksheetId}/majors/${worksheetMajorId}/`, payload,
+  );
+  if (!res.ok) throw new Error(`Failed to update worksheet major (${res.status})`);
+  return res.json();
 }

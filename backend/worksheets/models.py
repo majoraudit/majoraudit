@@ -27,6 +27,12 @@ class UserWorksheetClass(models.Model):
     course_instance = models.ForeignKey(
         CourseInstance, null=True, blank=True, on_delete=models.CASCADE)
     creditdf = models.BooleanField(default=False)
+    grade = models.CharField(max_length=8, null=True, blank=True)
+    grading_mode = models.CharField(max_length=24, blank=True, default="letter")
+    graduate_grade = models.CharField(max_length=24, null=True, blank=True)
+    source = models.CharField(max_length=24, default="yale")
+    enrolled_course_code = models.CharField(max_length=24, blank=True, default="")
+    year_of_study_override = models.PositiveSmallIntegerField(null=True, blank=True)
 
     def clean(self):
         if bool(self.course) == bool(self.course_instance):
@@ -51,11 +57,7 @@ class WorksheetMajor(models.Model):
     """
     A major (with specialization) selected for a specific worksheet.
 
-    `major_id` is a string matching the folder name under
-    `backend/major_templates/` (e.g. "computer_science"). `specialization`
-    is the slug used to identify a specific MQL file under that folder
-    (e.g. "computer_science_ba", "computer_science_bs"). Together they
-    identify a single .mql file.
+    A catalog-backed program selected for a worksheet.
     """
     worksheet = models.ForeignKey(
         UserWorksheet,
@@ -63,10 +65,24 @@ class WorksheetMajor(models.Model):
         related_name='worksheet_majors',
     )
     major_id = models.CharField(max_length=100)
-    specialization = models.CharField(max_length=100, blank=True, default="")
+    catalog_year = models.CharField(max_length=20, default="2026-2027")
+    program_id = models.CharField(max_length=100)
+    declared_choices = models.JSONField(default=dict, blank=True)
+    fact_ids = models.JSONField(default=list, blank=True)
 
     class Meta:
-        unique_together = [('worksheet', 'major_id', 'specialization')]
+        unique_together = [('worksheet', 'catalog_year', 'major_id', 'program_id')]
 
     def __str__(self):
-        return f"{self.major_id}/{self.specialization} (ws={self.worksheet_id})"
+        return f"{self.catalog_year}/{self.major_id}/{self.program_id} (ws={self.worksheet_id})"
+
+
+class WorksheetMajorAttemptApproval(models.Model):
+    worksheet_major = models.ForeignKey(
+        WorksheetMajor, on_delete=models.CASCADE, related_name="attempt_approvals"
+    )
+    worksheet_class = models.ForeignKey(UserWorksheetClass, on_delete=models.CASCADE)
+    approved_for = models.JSONField(default=list, blank=True)
+
+    class Meta:
+        unique_together = [('worksheet_major', 'worksheet_class')]

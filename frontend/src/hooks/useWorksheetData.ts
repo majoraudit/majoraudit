@@ -2,6 +2,7 @@ import { useMemo, useCallback } from "react";
 import type { Course, StudentCourse, StudentSemester, Worksheet } from "@/types/type-user";
 import { useWorksheetManager } from "@/hooks/useWorksheetManager";
 import { useUser } from "@/contexts/UserContext";
+import type { WorksheetMajor } from "@/api/worksheetMajors";
 
 /**
  * Try to get numeric credits from a course.
@@ -153,7 +154,7 @@ export function useWorksheetData() {
 }, [completedStudentCourses]);
 
 const majorCount = useMemo(() => {
-  return (activeWorksheet?.majors ?? []).filter(
+  return ((activeWorksheet?.majors ?? []) as WorksheetMajor[]).filter(
     (m) => m.major_id !== "general_degree",
   ).length;
 }, [activeWorksheet?.majors]);

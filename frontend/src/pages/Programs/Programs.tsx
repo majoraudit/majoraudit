@@ -19,6 +19,8 @@ import {
   apiRunAudit,
 } from "@/api/majors";
 import type { AuditResult } from "@/api/majors";
+import type { WorksheetMajor } from "@/api/worksheetMajors";
+import { apiUpdateWorksheetMajor } from "@/api/worksheetMajors";
 
 import type {
   MQLQueryFile,
@@ -50,7 +52,7 @@ function formatQuantity(q: Quantity): string {
 
 function formatSelector(sel: Selector): string {
   if ("Class" in sel) return formatClass(sel.Class);
-  if ("Placement" in sel) return `Placement: ${sel.Placement}`;
+  if ("Placement" in sel) return sel.Placement;
   if ("Tag" in sel) return `Tag: ${sel.Tag}`;
   if ("TagCode" in sel) return `${sel.TagCode.tag}: ${sel.TagCode.code}`;
   if ("Dist" in sel) return `Distribution: ${sel.Dist}`;
@@ -204,6 +206,7 @@ function Programs() {
   const { isAuthenticated } = useAuth();
   const { worksheets, activeWorksheetId, activeWorksheet } =
     useWorksheetManager();
+  const worksheetMajors: WorksheetMajor[] = activeWorksheet?.majors ?? [];
   const { addProgram } = useWorksheetActions();
   const { uniqueCourses } = useWorksheetData();
 
@@ -242,15 +245,15 @@ function Programs() {
   }, [sortedMajors, searchTerm]);
 
   const runAudit = useCallback(
-    async (majorId: string, specialization: string, mql: MQLQueryFile) => {
+    async (majorId: string, specialization: string, _mql: MQLQueryFile) => {
+      const selected = worksheetMajors.find(
+        (item) => item.major_id === majorId && item.program_id === specialization,
+      );
+      if (!selected || !activeWorksheetId) return;
       setIsLoadingAudit(true);
       setAuditResult(null);
       try {
-        const result = await apiRunAudit(
-          uniqueCourses,
-          appData!.course_database.getAllCourses(),
-          mql,
-        );
+        const result = await apiRunAudit(Number(activeWorksheetId), selected.id);
         setAuditResult(result);
       } catch (e) {
         console.error("Audit failed:", e);
@@ -258,7 +261,7 @@ function Programs() {
         setIsLoadingAudit(false);
       }
     },
-    [uniqueCourses],
+    [worksheetMajors, activeWorksheetId],
   );
 
   const handleSelectMajor = useCallback(
@@ -286,10 +289,40 @@ function Programs() {
     if (!activeWorksheet || !selectedMajorInfo || !selectedSpecialization)
       return false;
     const spec = selectedSpecialization.replace(".mql", "");
-    return (activeWorksheet.majors ?? []).some(
-      (m) => m.major_id === selectedMajorInfo.id && m.specialization === spec,
+    return worksheetMajors.some(
+      (m) => m.major_id === selectedMajorInfo.id && m.program_id === spec,
     );
-  }, [activeWorksheet?.majors, selectedMajorInfo?.id, selectedSpecialization]);
+  }, [worksheetMajors, selectedMajorInfo?.id, selectedSpecialization]);
+
+  const selectedWorksheetMajor = useMemo(() => {
+    if (!selectedMajorInfo || !selectedSpecialization) return undefined;
+    return worksheetMajors.find(
+      (item) => item.major_id === selectedMajorInfo.id && item.program_id === selectedSpecialization,
+    );
+  }, [worksheetMajors, selectedMajorInfo?.id, selectedSpecialization]);
+
+  const saveProgramConfiguration = async (
+    declaredChoices: Record<string, unknown>,
+    factIds: string[],
+  ) => {
+    if (!selectedWorksheetMajor || !activeWorksheetId) return;
+    const updated = await apiUpdateWorksheetMajor(
+      Number(activeWorksheetId), selectedWorksheetMajor.id,
+      { declared_choices: declaredChoices, fact_ids: factIds },
+    );
+    setUserData((previous) => previous && ({
+      ...previous,
+      FYP: {
+        ...previous.FYP,
+        worksheets: previous.FYP.worksheets.map((worksheet) =>
+          worksheet.id !== activeWorksheetId ? worksheet : {
+            ...worksheet,
+            majors: (worksheet.majors ?? []).map((item) => item.id === updated.id ? updated : item),
+          },
+        ),
+      },
+    }));
+  };
 
   const handleAddMajor = async () => {
     if (!selectedMajorInfo || !selectedSpecialization) return;
@@ -353,11 +386,11 @@ function Programs() {
     });
   };
 
-  // Map audit results by description for quick lookup
-  const auditByDescription = useMemo(() => {
+  // Requirement descriptions are mutable display text; semantic IDs are stable.
+  const auditById = useMemo(() => {
     if (!auditResult) return {};
     return Object.fromEntries(
-      auditResult.per_requirement.map((r) => [r.description, r]),
+      auditResult.per_requirement.map((r) => [r.requirement_id, r]),
     );
   }, [auditResult]);
 
@@ -579,13 +612,13 @@ function Programs() {
                   {auditResult && (
                     <span
                       className={`text-sm font-medium px-2 py-0.5 rounded-full ${
-                        auditResult.total_satisfied ===
+                        auditResult.per_requirement.filter((r) => r.satisfied).length ===
                         auditResult.per_requirement.length
                           ? "bg-green-100 text-green-700"
                           : "bg-yellow-100 text-yellow-700"
                       }`}
                     >
-                      {auditResult.total_satisfied}/
+                      {auditResult.per_requirement.filter((r) => r.satisfied).length}/
                       {auditResult.per_requirement.length} satisfied
                     </span>
                   )}
@@ -622,6 +655,56 @@ function Programs() {
                 </DropdownMenu>
               </div>
 
+              {mqlData && selectedWorksheetMajor &&
+                ((mqlData.choices?.some((choice) => choice.owner === "DECLARED") ?? false) ||
+                  (mqlData.facts?.length ?? 0) > 0) && (
+                <div className="mb-4 rounded-lg border border-blue-100 bg-blue-50 p-3">
+                  <p className="mb-2 text-sm font-semibold text-blue-900">Audit configuration</p>
+                  <div className="grid gap-3 md:grid-cols-2">
+                    {mqlData.choices?.filter((choice) => choice.owner === "DECLARED").map((choice) => {
+                      const choiceId = String(choice.meta.id);
+                      return (
+                        <label key={choiceId} className="text-xs text-gray-700">
+                          <span className="mb-1 block font-medium">{choice.description ?? choiceId}</span>
+                          <select
+                            className="w-full rounded border border-gray-300 bg-white px-2 py-1"
+                            value={String(selectedWorksheetMajor.declared_choices[choiceId] ?? "")}
+                            onChange={(event) => void saveProgramConfiguration(
+                              { ...selectedWorksheetMajor.declared_choices, [choiceId]: event.target.value },
+                              selectedWorksheetMajor.fact_ids,
+                            )}
+                          >
+                            <option value="" disabled>Select…</option>
+                            {choice.alternatives.map((alternative: unknown) => (
+                              <option key={String(alternative)} value={String(alternative)}>{String(alternative)}</option>
+                            ))}
+                          </select>
+                        </label>
+                      );
+                    })}
+                    {mqlData.facts?.map((fact) => {
+                      const factId = String(fact.meta.id);
+                      const enabled = selectedWorksheetMajor.fact_ids.includes(factId);
+                      return (
+                        <label key={factId} className="flex items-start gap-2 text-xs text-gray-700">
+                          <input
+                            type="checkbox"
+                            checked={enabled}
+                            onChange={(event) => void saveProgramConfiguration(
+                              selectedWorksheetMajor.declared_choices,
+                              event.target.checked
+                                ? [...selectedWorksheetMajor.fact_ids, factId]
+                                : selectedWorksheetMajor.fact_ids.filter((id) => id !== factId),
+                            )}
+                          />
+                          <span>{fact.description ?? factId}</span>
+                        </label>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
               {isLoadingMQL ? (
                 <div className="flex items-center justify-center flex-1 text-gray-400 text-sm">
                   Loading requirements...
@@ -636,7 +719,7 @@ function Programs() {
                     <RequirementCard
                       key={i}
                       req={req}
-                      auditReq={auditByDescription[req.description]}
+                      auditReq={auditById[req.requirement_id ?? req.meta?.id ?? ""]}
                     />
                   ))}
                 </div>

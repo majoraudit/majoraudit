@@ -204,3 +204,8 @@ if DEBUG:
 
 YALIES_URL = os.getenv('YALIES_URL')
 YALIES_API_KEY = os.getenv('YALIES_API_KEY')
+
+# MQL 0.2 degree-audit data embedded in the container image.
+MAJORS_DATA_ROOT = Path(os.getenv('MAJORS_DATA_ROOT', '/opt/majoraudit/majors'))
+MAJORS_DEFAULT_CATALOG_YEAR = os.getenv('MAJORS_DEFAULT_CATALOG_YEAR', '2026-2027')
+MQL_AUDIT_MAX_TIME_SECONDS = float(os.getenv('MQL_AUDIT_MAX_TIME_SECONDS', '10'))

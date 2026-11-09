@@ -2,7 +2,6 @@ import { type AppData } from "../types/type-program";
 import React, { useState, createContext, useContext, useEffect } from "react";
 import { loadCourses, CourseDatabase } from "../services/CourseDatabase";
 
-import { loadMajorTemplates, MajorProcessor } from "../services/MajorProcessor";
 import { useAuth } from "../contexts/AuthContext";
 
 import Loading from "@/pages/Loading/Loading";
@@ -21,7 +20,7 @@ type AppContextType = {
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export async function fetchCourses() {
-  const res = await fetch(`${apiUrl}/courses?limit=10000`, {
+  const res = await fetch(`${apiUrl}/courses`, {
     credentials: "include",
   });
   if (!res.ok) throw new Error("Courses unavailable - getting json");
@@ -70,13 +69,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
           .getAllCourses()
           .filter((c) => c.credit != 0);
 
-        const major_processor = new MajorProcessor(course_database);
-
         setAppData({
           courses,
           major_templates: major_templates,
           course_database,
-          major_processor,
         });
       } catch (e) {
         console.error(e);
@@ -106,15 +102,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
           if (raw === undefined) return s; // already hydrated, skip
 
           const studentCourses = raw.flatMap((c: any): StudentCourse[] => {
-            const externalId = String(c.course ?? c.course_instance);
-            const fullCourse = appData.course_database.getCourse(
-              Number(externalId),
-            );
+            const fullCourse = c.course_instance != null
+              ? appData.course_database.getCourseByInstance(Number(c.course_instance))
+              : appData.course_database.getCourse(Number(c.course));
             if (!fullCourse) return [];
             return [
               {
                 worksheetClassId: c.id,
                 course: fullCourse,
+                enrolledCourseCode: c.enrolled_course_code || fullCourse.codes[0],
                 term: s.season,
                 status: "DA_COMPLETE",
               },

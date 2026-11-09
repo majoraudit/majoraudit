@@ -19,7 +19,7 @@ function formatQuantity(q: Quantity): string {
 
 function formatSelector(sel: Selector): string {
   if ("Class" in sel) return formatClass(sel.Class);
-  if ("Placement" in sel) return `Placement: ${sel.Placement}`;
+  if ("Placement" in sel) return sel.Placement;
   if ("Tag" in sel) return `Tag: ${sel.Tag}`;
   if ("TagCode" in sel) return `${sel.TagCode.tag}: ${sel.TagCode.code}`;
   if ("Dist" in sel) return `Dist: ${sel.Dist}`;
@@ -136,9 +136,9 @@ function MajorRequirementList({
     );
   }
 
-  const auditByDescription = auditResult
+  const auditById = auditResult
     ? Object.fromEntries(
-        auditResult.per_requirement.map((r) => [r.description, r]),
+        auditResult.per_requirement.map((r) => [r.requirement_id, r]),
       )
     : {};
 
@@ -179,7 +179,7 @@ function MajorRequirementList({
                 "Single" in req.query.quantity
                   ? req.query.quantity.Single
                   : req.query.quantity.Many.from;
-              const auditReq = auditByDescription[req.description];
+              const auditReq = auditById[req.requirement_id ?? req.meta?.id ?? ""];
               const satisfied = auditReq?.satisfied;
               const isEvaluated = auditReq !== undefined;
 

@@ -1,7 +1,6 @@
 
 import { type Course, type StudentCourse } from "./type-user";
 import { CourseDatabase } from "../services/CourseDatabase";
-import type { MajorProcessor } from "../services/MajorProcessor";
 // also have to import MajorResolver
 
 interface DUS {
@@ -155,12 +154,13 @@ export interface GroupItemProgress extends GroupItemTemplate {
 }
 
 export interface MajorTemplate {
-	id: string;
+	id?: string;
 	name: string;
 	totalCourses: number;
 	totalRequirementGroups: number;
 	requirements: GroupItemTemplate[];
-	info: DegreeMetadata;
+	info?: DegreeMetadata;
+  requirementsProgress?: unknown;
 };
 
 export interface MajorProgress extends MajorTemplate {
@@ -171,7 +171,6 @@ export interface MajorProgress extends MajorTemplate {
 
 export interface AppData {
 	courses: Course[];
-	major_templates: {id: string; name: string}[]; // changed from MajorTemplate to string
+	major_templates: {id: string; name: string; programs: string[]}[];
 	course_database: CourseDatabase;
-	major_processor: MajorProcessor;
 }

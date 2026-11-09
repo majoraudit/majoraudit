@@ -3,8 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { useUser } from "@/contexts/UserContext";
 import { useWorksheetManager } from "@/hooks/useWorksheetManager";
 import { apiCreateSemester } from "@/api/semesters";
-import { apiUpdateProfile } from "@/api/auth";
 import { apiAddWorksheetMajor } from "@/api/worksheetMajors";
+import { apiUpdateProfile } from "@/api/auth";
 
 import {
   CLASS_YEARS,
@@ -78,17 +78,13 @@ function Onboarding() {
     const newWorksheet = await createWorksheet("Main Worksheet");
     if (!newWorksheet) return;
 
-    // 3. Auto-attach the general_degree major to the new worksheet.
-    try {
-      await apiAddWorksheetMajor(parseInt(newWorksheet.id), {
-        major_id: "general_degree",
-        specialization: "",
-      });
-    } catch (err) {
-      console.error("Failed to add general_degree to new worksheet", err);
-    }
+    const generalDegree = await apiAddWorksheetMajor(parseInt(newWorksheet.id), {
+      catalog_year: "2026-2027",
+      major_id: "general_degree",
+      program_id: "general_degree",
+    });
 
-    // 4. Create semesters via API using the new worksheet ID.
+    // 3. Create semesters via API using the new worksheet ID.
     const semesterTemplates = classYear
       ? generateSemesters(parseInt(classYear))
       : [];
@@ -130,7 +126,9 @@ function Onboarding() {
           ...prev.FYP,
           languageRequirement: languageLevel,
           worksheets: prev.FYP.worksheets.map((w) =>
-            w.id === newWorksheet.id ? { ...w, studentSemesters } : w,
+            w.id === newWorksheet.id
+              ? { ...w, studentSemesters, majors: [generalDegree] }
+              : w,
           ),
         },
       };

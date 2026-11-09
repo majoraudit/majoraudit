@@ -451,12 +451,12 @@ class WorksheetMajorPermissionTests(APITestCase):
         self.user1_major = WorksheetMajor.objects.create(
             worksheet=self.user1_worksheet,
             major_id='computer_science',
-            specialization='computer_science_ba',
+            program_id='ba',
         )
         self.user2_major = WorksheetMajor.objects.create(
             worksheet=self.user2_worksheet,
             major_id='mathematics',
-            specialization='mathematics_ba',
+            program_id='ba',
         )
 
     def test_unauthenticated_cannot_list_majors(self):
@@ -491,14 +491,14 @@ class WorksheetMajorPermissionTests(APITestCase):
             'worksheet_pk': self.user1_worksheet.pk
         })
         response = self.client.post(url, {
-            'major_id': 'economics',
-            'specialization': 'economics_ba',
+            'major_id': 'physics',
+            'program_id': 'bs',
         }, format='json', secure=True)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertTrue(
             WorksheetMajor.objects.filter(
                 worksheet=self.user1_worksheet,
-                major_id='economics',
+                major_id='physics',
             ).exists()
         )
 
@@ -508,8 +508,8 @@ class WorksheetMajorPermissionTests(APITestCase):
             'worksheet_pk': self.user2_worksheet.pk
         })
         response = self.client.post(url, {
-            'major_id': 'economics',
-            'specialization': 'economics_ba',
+            'major_id': 'physics',
+            'program_id': 'bs',
         }, format='json', secure=True)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
@@ -520,18 +520,18 @@ class WorksheetMajorPermissionTests(APITestCase):
         })
         response = self.client.post(url, {
             'major_id': 'computer_science',
-            'specialization': 'computer_science_ba',
+            'program_id': 'ba',
         }, format='json', secure=True)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
-    def test_can_add_same_major_different_specialization(self):
+    def test_can_add_same_major_different_program(self):
         self.client.force_authenticate(user=self.user1)
         url = reverse('ws-major-list', kwargs={
             'worksheet_pk': self.user1_worksheet.pk
         })
         response = self.client.post(url, {
             'major_id': 'computer_science',
-            'specialization': 'computer_science_bs',
+            'program_id': 'bs',
         }, format='json', secure=True)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(

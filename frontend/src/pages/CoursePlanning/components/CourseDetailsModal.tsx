@@ -184,6 +184,7 @@ function CourseDetailsModal({
         const query = new URLSearchParams({
           course_code: courseCode as string,
         });
+        if (course.seasonCode) query.set("season_code", course.seasonCode);
         const response = await fetch(`${apiUrl}/courses/coursetable/?${query}`, {
           credentials: "include",
           signal: controller.signal,

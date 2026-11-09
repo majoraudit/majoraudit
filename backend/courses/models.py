@@ -48,6 +48,8 @@ class Course(models.Model):
     credits = models.DecimalField(decimal_places=1, max_digits=2)
     distributionals = models.ManyToManyField(CourseDistribution, blank=True)
     course_tags = models.ManyToManyField(CourseTag)
+    format = models.CharField(max_length=32, default="lecture")
+    language = models.CharField(max_length=64, blank=True, default="English")
 
     def __str__(self):
         return self.title

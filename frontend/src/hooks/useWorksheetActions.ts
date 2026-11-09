@@ -2,7 +2,7 @@ import { useCallback } from "react";
 import { useUser } from "@/contexts/UserContext";
 import { useWorksheetManager } from "@/hooks/useWorksheetManager";
 import { apiCreateSemester, apiDeleteSemester } from "@/api/semesters";
-import {apiAddCourse, apiRemoveCourse } from "@/api/courses";
+import {apiAddCourse, apiRemoveCourse, apiUpdateCourse } from "@/api/courses";
 import { apiUpdateSemester } from "@/api/semesters";
 import {
   apiAddWorksheetMajor,
@@ -70,7 +70,12 @@ export function useWorksheetActions() {
       // Create on the backend first to get the real ID
       const created = await apiCreateSemester(parseInt(activeWorksheetId), {
         year: Math.floor(newSemester.season / 100),
-        season: newSemester.season % 100 === 1 ? "SP" : "FA",
+        season:
+          newSemester.season % 100 === 1
+            ? "SP"
+            : newSemester.season % 100 === 2
+              ? "SU"
+              : "FA",
         title: newSemester.title
       });
 
@@ -129,11 +134,30 @@ export function useWorksheetActions() {
       if (courseAlreadyExists) return { ok: false, error: "Course already in semester." };
 
       // Add on the backend using the semester's backend ID
-      const created = await apiAddCourse(parseInt(activeWorksheetId), semester.id, {
-        course: newCourse.course.id,
-      });
+      if (newCourse.course.id == null) {
+        return { ok: false, error: "Course is missing its catalog identifier." };
+      }
+      const created = await apiAddCourse(
+        parseInt(activeWorksheetId),
+        semester.id,
+        newCourse.course.instanceId != null
+          ? {
+              course_instance: newCourse.course.instanceId,
+              enrolled_course_code:
+                newCourse.enrolledCourseCode ?? newCourse.course.codes.find(Boolean) ?? "",
+            }
+          : {
+              course: String(newCourse.course.id),
+              enrolled_course_code:
+                newCourse.enrolledCourseCode ?? newCourse.course.codes.find(Boolean) ?? "",
+            },
+      );
 
-      const courseWithId: StudentCourse = { ...newCourse, worksheetClassId: created.id };
+      const courseWithId: StudentCourse = {
+        ...newCourse,
+        worksheetClassId: created.id,
+        enrolledCourseCode: created.enrolled_course_code || newCourse.course.codes[0],
+      };
  
 
       updateActiveWorksheet((ws) => ({
@@ -193,6 +217,47 @@ export function useWorksheetActions() {
     [canMutate, activeWorksheetId, worksheet, updateActiveWorksheet]
   );
 
+  const updateEnrolledCourseCode = useCallback(
+    async (season: number, worksheetClassId: number, code: string) => {
+      if (!canMutate || !activeWorksheetId) {
+        return { ok: false as const, error: "No active worksheet." };
+      }
+      const semester = worksheet.studentSemesters.find(
+        (item: StudentSemester) => item.season === season,
+      );
+      if (!semester?.id) {
+        return { ok: false as const, error: "Semester not found." };
+      }
+      try {
+        const updated = await apiUpdateCourse(
+          parseInt(activeWorksheetId),
+          semester.id,
+          String(worksheetClassId),
+          { enrolled_course_code: code },
+        );
+        updateActiveWorksheet((ws) => ({
+          ...ws,
+          studentSemesters: ws.studentSemesters.map((item: StudentSemester) =>
+            item.season !== season
+              ? item
+              : {
+                  ...item,
+                  studentCourses: item.studentCourses.map((studentCourse: StudentCourse) =>
+                    studentCourse.worksheetClassId !== worksheetClassId
+                      ? studentCourse
+                      : { ...studentCourse, enrolledCourseCode: updated.enrolled_course_code },
+                  ),
+                },
+          ),
+        }));
+        return { ok: true as const };
+      } catch (error: any) {
+        return { ok: false as const, error: String(error?.message ?? error) };
+      }
+    },
+    [canMutate, activeWorksheetId, worksheet, updateActiveWorksheet],
+  );
+
   const setSemesterCompleted = useCallback(
     async (season: number, isCompleted: boolean) => {
       if (!canMutate || !activeWorksheetId)
@@ -206,7 +271,8 @@ export function useWorksheetActions() {
       // Persist to backend — reuse year/season derived from season code
       await apiUpdateSemester(parseInt(activeWorksheetId), semester.id, {
         year: Math.floor(season / 100),
-        season: season % 100 === 1 ? "SP" : "FA",
+        season:
+          season % 100 === 1 ? "SP" : season % 100 === 2 ? "SU" : "FA",
         is_completed: isCompleted
       });
 
@@ -249,14 +315,15 @@ export function useWorksheetActions() {
   }, [activeWorksheetId, setUserData]);
 
   const addProgram = useCallback(
-    async (majorId: string, specialization: string = "") => {
+    async (majorId: string, programId: string) => {
       if (!activeWorksheetId) {
         return { ok: false as const, error: "No active worksheet." };
       }
       try {
         await apiAddWorksheetMajor(parseInt(activeWorksheetId), {
           major_id: majorId,
-          specialization,
+          catalog_year: "2026-2027",
+          program_id: programId,
         });
         await refreshActiveWorksheetMajors();
         return { ok: true as const };
@@ -291,6 +358,7 @@ export function useWorksheetActions() {
     removeSemester,
     addCourse,
     removeCourse,
+    updateEnrolledCourseCode,
     setSemesterCompleted,
     addProgram,
     removeProgram,

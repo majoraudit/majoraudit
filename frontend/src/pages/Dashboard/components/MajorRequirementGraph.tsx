@@ -18,7 +18,7 @@ function formatQuantity(q: Quantity): string {
 
 function formatSelector(sel: Selector): string {
   if ("Class" in sel) return formatClass(sel.Class);
-  if ("Placement" in sel) return `Placement: ${sel.Placement}`;
+  if ("Placement" in sel) return sel.Placement;
   if ("Tag" in sel) return `Tag: ${sel.Tag}`;
   if ("TagCode" in sel) return `${sel.TagCode.tag}: ${sel.TagCode.code}`;
   if ("Dist" in sel) return `Dist: ${sel.Dist}`;
@@ -136,9 +136,9 @@ function MajorRequirementGraph({
     );
   }
 
-  const auditByDescription = auditResult
+  const auditById = auditResult
     ? Object.fromEntries(
-        auditResult.per_requirement.map((r) => [r.description, r]),
+        auditResult.per_requirement.map((r) => [r.requirement_id, r]),
       )
     : {};
 
@@ -148,7 +148,7 @@ function MajorRequirementGraph({
         <RequirementColumn
           key={i}
           req={req}
-          auditReq={auditByDescription[req.description]}
+          auditReq={auditById[req.requirement_id ?? req.meta?.id ?? ""]}
         />
       ))}
     </div>

@@ -345,6 +345,7 @@ export const cs_requirements_bs_progress: MajorProgress = {
 };
 
 export const cs_requirements_ba_progress: MajorProgress = {
+    requirements: [],
     name: "Computer Science B.A.",
     totalCourses: 10,
     totalRequirementGroups: 3,

@@ -7,6 +7,7 @@ import cancel from "../assets/cancel.svg";
 
 import { useDrag } from "react-dnd";
 import { useRef } from "react";
+import type { KeyboardEvent as ReactKeyboardEvent } from "react";
 import clsx from "clsx";
 import { GripVertical } from "lucide-react";
 
@@ -16,6 +17,8 @@ interface CourseOutputProps {
   removable?: boolean;
   semesterSeasonCode?: number;
   semesterCompleted?: boolean;
+  worksheetClassId?: number;
+  enrolledCourseCode?: string;
   onCourseClick?: (course: Course) => void;
 }
 
@@ -25,15 +28,18 @@ function CourseOutput({
   removable = false,
   semesterSeasonCode = -1,
   semesterCompleted = false,
+  worksheetClassId,
+  enrolledCourseCode,
   onCourseClick,
 }: CourseOutputProps) {
-  const { removeCourse } = useWorksheetActions();
+  const { removeCourse, updateEnrolledCourseCode } = useWorksheetActions();
   const ref = useRef<HTMLDivElement>(null);
   const [{ isDragging }, drag] = useDrag(
     () => ({
       type: "course",
       item: {
         selectedCourse: course,
+        enrolledCourseCode,
         sourceSemesterSeasonCode:
           semesterSeasonCode > 0 ? semesterSeasonCode : undefined,
       },
@@ -42,13 +48,13 @@ function CourseOutput({
         isDragging: !!monitor.isDragging(),
       }),
     }),
-    [course, draggable, semesterCompleted, semesterSeasonCode],
+    [course, draggable, semesterCompleted, semesterSeasonCode, enrolledCourseCode],
   );
 
   drag(ref);
 
-  const handleCourseRemove = () => {
-    const res = removeCourse(semesterSeasonCode, course);
+  const handleCourseRemove = async () => {
+    const res = await removeCourse(semesterSeasonCode, course);
     if (!res.ok) {
       return;
     }
@@ -59,7 +65,7 @@ function CourseOutput({
     onCourseClick(course);
   };
 
-  const handleCourseKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
+  const handleCourseKeyDown = (e: ReactKeyboardEvent<HTMLDivElement>) => {
     if (e.key !== "Enter" && e.key !== " ") return;
     e.preventDefault();
     handleCourseClick();
@@ -105,13 +111,32 @@ function CourseOutput({
             <img src={cancel} alt="cancel button"></img>
           </button>
         )}
-        <p className="font-bold truncate overflow-hidden whitespace-nowrap">
-          {course.codes[0]}
-          {/*<span className="text-gray-500 text-sm font-medium">
-            {" "}
-            ({formatSeason(course.seasons)})
-          </span>*/}
-        </p>
+        {worksheetClassId != null && course.codes.length > 1 ? (
+          <select
+            value={enrolledCourseCode || course.codes[0]}
+            onMouseDown={(event) => event.stopPropagation()}
+            onClick={(event) => event.stopPropagation()}
+            onChange={(event) => {
+              event.stopPropagation();
+              void updateEnrolledCourseCode(
+                semesterSeasonCode,
+                worksheetClassId,
+                event.target.value,
+              );
+            }}
+            className="mr-6 max-w-full truncate rounded border border-gray-400 bg-white px-1 py-0.5 text-sm font-bold cursor-pointer"
+            aria-label={`Enrolled code for ${course.title}`}
+            title="Select the course code used on your transcript"
+          >
+            {course.codes.map((code) => (
+              <option key={code} value={code}>{code}</option>
+            ))}
+          </select>
+        ) : (
+          <p className="font-bold truncate overflow-hidden whitespace-nowrap">
+            {enrolledCourseCode || course.codes[0]}
+          </p>
+        )}
         <p className="truncate overflow-hidden whitespace-nowrap">
           {course.title}
         </p>
