@@ -39,6 +39,9 @@ class CourseSerializer(serializers.ModelSerializer):
     distributionals = serializers.StringRelatedField(many=True, read_only=True)
     course_codes = serializers.SerializerMethodField()
     course_tags = CourseTagSerializer(many=True, read_only=True)
+    course_instances = CourseInstanceSerializer(
+        many=True, read_only=True, source='courseinstance_set'
+    )
 
     class Meta:
         model = Course
@@ -50,6 +53,7 @@ class CourseSerializer(serializers.ModelSerializer):
             'distributionals',
             'course_codes',
             'course_tags',
+            'course_instances',
         ]
 
     def get_course_codes(self, obj):

@@ -5,9 +5,14 @@ export type U16 = number;
 export interface MQLQueryFile {
   version: string;
   requirements: MQLRequirement[];
+  choices?: any[];
+  facts?: any[];
 }
 
 export interface MQLRequirement {
+  requirement_id?: string;
+  meta?: { id: string; [key: string]: unknown };
+  children?: MQLRequirement[];
   query: MQLQuery;
   description: string;
   priority: U16;

@@ -162,8 +162,13 @@ function CoursePlanning() {
     semester: StudentSemester,
     course: Course,
   ) => {
+    const destinationCourse = appData?.course_database.getCourseForTerm(
+      Number(course.id),
+      semester.season,
+    );
+    if (!destinationCourse) return;
     const newStudentCourse: StudentCourse = {
-      course,
+      course: destinationCourse,
       term: semester.season,
       status: "DA_COMPLETE",
     };
@@ -180,17 +185,24 @@ function CoursePlanning() {
 
   // ---------- Search ----------
   const searchNormalized = searchTerm.toLowerCase().replace(/\s+/g, "");
+  const codeSearchNormalized = searchNormalized.replace(/([0-9])[ab]$/, "$1");
   const filteredCourses = appData.courses.filter(
     (course) =>
       course.title
         .toLowerCase()
         .replace(/\s+/g, "")
         .includes(searchNormalized) ||
-      course.codes[0]
-        .toLowerCase()
-        .replace(/\s+/g, "")
-        .includes(searchNormalized),
-  );
+      course.codes.some((code) =>
+        code.toLowerCase().replace(/\s+/g, "").includes(codeSearchNormalized),
+      ),
+  ).map((course) => {
+    const matchingCode = course.codes.find((code) =>
+      code.toLowerCase().replace(/\s+/g, "").includes(codeSearchNormalized),
+    );
+    return matchingCode
+      ? { ...course, codes: [matchingCode, ...course.codes.filter((code) => code !== matchingCode)] }
+      : course;
+  });
 
   const slicedCourses = filteredCourses.slice(0, 250);
 

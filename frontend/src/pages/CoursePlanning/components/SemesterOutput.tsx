@@ -10,6 +10,7 @@ import lockAnimation from "../assets/lockAnimation.json";
 import { useWorksheetManager } from "@/hooks/useWorksheetManager";
 import { useWorksheetActions } from "@/hooks/useWorksheetActions";
 import { useWorksheetData } from "@/hooks/useWorksheetData";
+import { useApp } from "@/contexts/AppContext";
 
 import { useDrop } from "react-dnd";
 import { useRef, useEffect } from "react";
@@ -26,6 +27,7 @@ interface SemesterOutputProps {
 interface CourseDragItem {
   selectedCourse: Course;
   sourceSemesterSeasonCode?: number;
+  enrolledCourseCode?: string;
 }
 
 function codeToYear(code: number): number {
@@ -51,6 +53,7 @@ function SemesterOutput({
     useWorksheetActions();
   const { activeSemesters } = useWorksheetManager();
   const { getSemesterCredits } = useWorksheetData();
+  const { appData } = useApp();
 
   const updatedSemester =
     activeSemesters.find((s) => s.id === semester.id) ?? semester;
@@ -107,17 +110,28 @@ function SemesterOutput({
           return;
         }
 
+        const destinationCourse = appData?.course_database.getCourseForTerm(
+          Number(item.selectedCourse.id),
+          semester.season,
+        );
+        if (!destinationCourse) {
+          return;
+        }
+
         const newStudentCourse: StudentCourse = {
-          course: item.selectedCourse,
+          course: destinationCourse,
+          enrolledCourseCode: destinationCourse.codes.includes(item.enrolledCourseCode ?? "")
+            ? item.enrolledCourseCode
+            : destinationCourse.codes[0],
           term: semester.season,
           status: "DA_COMPLETE",
         };
 
-        const res = addCourse(semester.season, newStudentCourse);
-
-        if (typeof item.sourceSemesterSeasonCode === "number") {
-          removeCourse(item.sourceSemesterSeasonCode, item.selectedCourse);
-        }
+        void addCourse(semester.season, newStudentCourse).then((result) => {
+          if (result.ok && typeof item.sourceSemesterSeasonCode === "number") {
+            void removeCourse(item.sourceSemesterSeasonCode, item.selectedCourse);
+          }
+        });
       },
       canDrop: (item) =>
         !isCompleted && item.sourceSemesterSeasonCode !== semester.season,
@@ -125,7 +139,7 @@ function SemesterOutput({
         isOver: !!monitor.isOver(),
       }),
     }),
-    [addCourse, removeCourse, updatedSemester.season, isCompleted],
+    [addCourse, removeCourse, updatedSemester.season, isCompleted, appData],
   );
 
   // connects useDrop to DOM element
@@ -181,6 +195,8 @@ function SemesterOutput({
                   removable={true}
                   semesterSeasonCode={updatedSemester.season}
                   semesterCompleted={isCompleted}
+                  worksheetClassId={studentCourse.worksheetClassId}
+                  enrolledCourseCode={studentCourse.enrolledCourseCode}
                   onCourseClick={onCourseClick}
                 />
               </div>
@@ -199,11 +215,17 @@ function SemesterOutput({
           )}
         </ul>
         {!isCompleted && (
-          <button onClick={handleSemesterRemove}>
+          <button
+            type="button"
+            onClick={handleSemesterRemove}
+            className="self-end inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-red-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400"
+            aria-label={`Delete ${updatedSemester.title || "semester"}`}
+            title="Delete semester"
+          >
             <img
               src={trashcan}
               alt="trashcan"
-              className="h-6 w-6 float-right active:scale-125 transition duration-300 ease-in-out cursor-pointer"
+              className="h-6 w-6 pointer-events-none active:scale-125 transition duration-300 ease-in-out"
             ></img>
           </button>
         )}

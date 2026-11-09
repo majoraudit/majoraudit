@@ -16,6 +16,5 @@ six==1.17.0
 sqlparse==0.5.3
 typing_extensions==4.14.1
 urllib3==2.6.3
-pylibmql==0.1.11
-ortools==9.15.6755
+pylibmql>=0.3,<0.4
 gunicorn==23.0.0

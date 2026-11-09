@@ -5,6 +5,9 @@ services:
     build:
       context: ./backend
       target: production
+      args:
+        MAJORS_COMMIT: ${MAJORS_COMMIT:-main}
+        MQL_AUDIT_COMMIT: ${MQL_AUDIT_COMMIT:-f77ab02faf8fc9dd39a56097731c77349ab6c9fc}
     env_file:
       - ${ENV_FILE:-.env}
     environment:

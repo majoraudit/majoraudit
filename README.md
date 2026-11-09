@@ -7,10 +7,20 @@ file.
 
 ```sh
 cp .env.example .env
-# Replace DJANGO_SECRET_KEY, set DJANGO_ADMIN_NETID to your Yale NetID, and
-# configure any external API credentials in .env.
-docker compose up --build
+# Replace DJANGO_SECRET_KEY and set DJANGO_ADMIN_NETID to your Yale NetID.
+./scripts/docker-build-latest-majors.sh
+docker compose up
 ```
+
+Do not add `--build` to the second command; the helper has already built the
+images with an exact resolved majors revision. If `docker compose up --build`
+is used anyway, Compose fetches public `majors/main` rather than falling back
+to an obsolete snapshot.
+
+The build helper resolves the latest public `majoraudit/majors` `main` commit,
+validates all MQL programs, and embeds the exact revision in the backend image.
+Set `MAJORS_COMMIT` and invoke `docker compose build` directly when reproducing
+a specific revision.
 
 This is the default development environment. Vite and Django run inside Docker
 with the repository source mounted into their containers. After the first
@@ -22,7 +32,8 @@ Rebuild when `package.json`, `package-lock.json`, `requirements.txt`, a
 Dockerfile, or Compose configuration changes:
 
 ```sh
-docker compose up --build
+./scripts/docker-build-latest-majors.sh
+docker compose up
 ```
 
 Open <https://localhost:5173>. The frontend uses HTTPS because Yale NetID/CAS
@@ -66,7 +77,8 @@ The production stack contains no source mounts. It builds the frontend into an
 Nginx image and serves Django with Gunicorn:
 
 ```sh
-docker compose -f compose.prod.yaml up --build
+COMPOSE_FILE=compose.prod.yaml ./scripts/docker-build-latest-majors.sh
+docker compose -f compose.prod.yaml up
 ```
 
 Stop it with:

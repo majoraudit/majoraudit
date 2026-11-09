@@ -5,6 +5,33 @@ from courses.models import Course, CourseCode, CourseProfessor, CourseInstance, 
 
 API_URL = "https://api.coursetable.com/api/catalog/public/"
 
+
+def infer_format(item, flags):
+    text = " ".join(str(item.get(key) or "") for key in ("title", "description", "classnotes", "regnotes")).lower()
+    flag_text = " ".join(flags).lower()
+    if "senior project" in text or "senior project" in flag_text:
+        return "senior_project"
+    if "independent study" in text or "directed study" in text:
+        return "independent_study"
+    if "research" in str(item.get("title") or "").lower():
+        return "research"
+    if "studio" in text or "studio" in flag_text:
+        return "studio"
+    if "laboratory" in text or " lab" in flag_text:
+        return "lab"
+    if item.get("colsem") or item.get("fysem") or item.get("sysem") or "seminar" in flag_text:
+        return "seminar"
+    if "tutorial" in text:
+        return "tutorial"
+    if "colloquium" in text:
+        return "colloquium"
+    return "lecture"
+
+
+def infer_language(flags):
+    marker = " Taught in "
+    return next((flag.rsplit(marker, 1)[1] for flag in flags if marker in flag), "English")
+
 class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument(
@@ -26,12 +53,15 @@ class Command(BaseCommand):
 
         payload = resp.json()
         for item in payload:
+            flag_texts = [entry["flag"]["flag_text"] for entry in item.get("course_flags", [])]
             course, _ = Course.objects.update_or_create(
                 external_id=item["same_course_id"],
                 defaults={
                     "title": item["title"],
                     "description": item["description"],
                     "credits": item["credits"],
+                    "format": infer_format(item, flag_texts),
+                    "language": infer_language(flag_texts),
                 },
             )
 
@@ -39,10 +69,8 @@ class Command(BaseCommand):
             dists = CourseDistribution.objects.filter(code__in=codes)
             course.distributionals.set(dists)
     
-            course_flags = item.get("course_flags", [])
             course_tags = []
-            for flag_item in course_flags:
-                flag_text = flag_item["flag"]["flag_text"]
+            for flag_text in flag_texts:
                 tag, _ = CourseTag.objects.get_or_create(name=flag_text)
                 course_tags.append(tag)
             course.course_tags.set(course_tags)

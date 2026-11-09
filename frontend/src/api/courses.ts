@@ -7,17 +7,19 @@ export interface WorksheetCourse {
   course: number | null;
   course_instance: number | null;
   creditdf: boolean;
+  enrolled_course_code: string;
 }
 
 // Exactly one of course or course_instance must be provided — mirrors the backend constraint
 export type CreateWorksheetCoursePayload =
-  | { course: string; course_instance?: never; creditdf?: boolean }
-  | { course_instance: number; course?: never; creditdf?: boolean };
+  | { course: string; course_instance?: never; creditdf?: boolean; enrolled_course_code?: string }
+  | { course_instance: number; course?: never; creditdf?: boolean; enrolled_course_code?: string };
 
 export type UpdateWorksheetCoursePayload =
   | { course: number; course_instance?: never; creditdf?: boolean }
   | { course_instance: number; course?: never; creditdf?: boolean }
-  | { creditdf: boolean; course?: never; course_instance?: never };
+  | { creditdf: boolean; course?: never; course_instance?: never }
+  | { enrolled_course_code: string; course?: never; course_instance?: never };
 
 // GET /worksheets/:worksheetId/semesters/:semesterId/classes/
 export async function apiGetCourses(
@@ -61,14 +63,14 @@ export async function apiAddCourse(
   return res.json();
 }
 
-// PUT /worksheets/:worksheetId/semesters/:semesterId/classes/:courseId/
+// PATCH /worksheets/:worksheetId/semesters/:semesterId/classes/:courseId/
 export async function apiUpdateCourse(
   worksheetId: number,
   semesterId: number,
   courseId: string,
   payload: UpdateWorksheetCoursePayload
 ): Promise<WorksheetCourse> {
-  const res = await apiClient.put(
+  const res = await apiClient.patch(
     `${BASE}/${worksheetId}/semesters/${semesterId}/classes/${courseId}/`,
     payload
   );

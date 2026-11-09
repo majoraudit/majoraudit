@@ -80,6 +80,7 @@ const CustomCourseModal: React.FC<CustomCourseModalProps> = ({
   }, [open, semester]);
 
   const searchNormalized = catalogSearch.toLowerCase().replace(/\s+/g, "");
+  const codeSearchNormalized = searchNormalized.replace(/([0-9])[ab]$/, "$1");
   const filteredCatalog = useMemo(() => {
     if (!searchNormalized) return catalogCourses;
     return catalogCourses.filter(
@@ -88,12 +89,18 @@ const CustomCourseModal: React.FC<CustomCourseModalProps> = ({
           .toLowerCase()
           .replace(/\s+/g, "")
           .includes(searchNormalized) ||
-        (course.codes[0] ?? "")
-          .toLowerCase()
-          .replace(/\s+/g, "")
-          .includes(searchNormalized),
-    );
-  }, [catalogCourses, searchNormalized]);
+        course.codes.some((code) =>
+          code.toLowerCase().replace(/\s+/g, "").includes(codeSearchNormalized),
+        ),
+    ).map((course) => {
+      const matchingCode = course.codes.find((code) =>
+        code.toLowerCase().replace(/\s+/g, "").includes(codeSearchNormalized),
+      );
+      return matchingCode
+        ? { ...course, codes: [matchingCode, ...course.codes.filter((code) => code !== matchingCode)] }
+        : course;
+    });
+  }, [catalogCourses, searchNormalized, codeSearchNormalized]);
   const slicedCatalog = filteredCatalog.slice(0, 80);
 
   if (!open || !semester) return null;
