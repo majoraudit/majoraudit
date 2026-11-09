@@ -37,10 +37,16 @@ function formatSelector(sel: Selector): string {
 }
 
 function buildSlots(req: MQLRequirement): string[] {
-  const count =
-    "Single" in req.query.quantity
-      ? req.query.quantity.Single
-      : req.query.quantity.Many.from;
+  if (!req.query) {
+    const rawCount = req.lower?.kind === "FIXED" ? req.lower.value : 1;
+    const count = Math.max(1, Math.min(rawCount, 12));
+    let label = "Eligible course";
+    if (req.selector?.kind === "COURSE_LIST") label = req.selector.canonical_course_ids.join(" or ");
+    if (req.selector?.kind === "CHILD_REQUIREMENTS") label = "Satisfied child requirement";
+    if (req.selector?.kind === "PREDICATE") label = "Matches eligibility rules";
+    return Array.from({ length: count }, () => label);
+  }
+  const count = "Single" in req.query.quantity ? req.query.quantity.Single : req.query.quantity.Many.from;
   const selectors = req.query.selector;
   const slots: string[] = [];
   for (let i = 0; i < count; i++) {
@@ -57,7 +63,11 @@ interface RequirementColumnProps {
 
 function RequirementColumn({ req, auditReq }: RequirementColumnProps) {
   const slots = buildSlots(req);
-  const quantityLabel = formatQuantity(req.query.quantity);
+  const quantityLabel = req.query
+    ? formatQuantity(req.query.quantity)
+    : req.lower?.kind === "FIXED"
+      ? `${req.lower.value} ${req.contribution?.unit?.toLowerCase().replace(/_/g, " ") ?? "items"}`
+      : "variable";
   const satisfied = auditReq?.satisfied;
   const selectedCourses = auditReq?.selected ?? [];
 
@@ -81,7 +91,7 @@ function RequirementColumn({ req, auditReq }: RequirementColumnProps) {
           </span>
         )}
         <span className="truncate whitespace-nowrap overflow-hidden text-ellipsis max-w-[70%] text-center text-sm">
-          {req.description}
+          {req.meta?.description ?? req.description ?? req.meta?.id ?? "Requirement"}
         </span>
         <span className="text-gray-400 text-xs whitespace-nowrap">
           · {quantityLabel}

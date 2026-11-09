@@ -38,6 +38,11 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 import { Plus, Check } from "lucide-react";
+import {
+  ActivationExpression,
+  RequirementExpression,
+} from "@/components/requirements/RequirementExpression";
+import { groupRequirements } from "@/utils/groupRequirements";
 
 // ---------- Formatters ----------
 
@@ -130,11 +135,18 @@ function SelectorItem({ sel }: { sel: Selector }) {
 interface RequirementCardProps {
   req: MQLRequirement;
   auditReq?: AuditResult["per_requirement"][number];
+  auditById?: Record<string, AuditResult["per_requirement"][number]>;
 }
 
-function RequirementCard({ req, auditReq }: RequirementCardProps) {
-  const quantityLabel = formatQuantity(req.query.quantity);
-  const isLimit = req.query.type === "Limit";
+function RequirementCard({ req, auditReq, auditById }: RequirementCardProps) {
+  const description = req.meta?.description ?? req.description ?? req.meta?.id ?? "Requirement";
+  const semanticAmount = req.lower?.kind === "FIXED" ? req.lower.value : null;
+  const quantityLabel = req.query
+    ? formatQuantity(req.query.quantity)
+    : semanticAmount === null
+      ? "Varies by choice"
+      : `${semanticAmount} ${req.contribution?.unit?.toLowerCase().replace(/_/g, " ") ?? "items"}`;
+  const isLimit = req.query?.type === "Limit";
   const satisfied = auditReq?.satisfied;
   const selectedCourses = auditReq?.selected ?? [];
 
@@ -158,7 +170,7 @@ function RequirementCard({ req, auditReq }: RequirementCardProps) {
             </span>
           )}
           <p className="font-semibold text-gray-800 text-sm">
-            {req.description}
+            {description}
           </p>
         </div>
         <span
@@ -168,7 +180,7 @@ function RequirementCard({ req, auditReq }: RequirementCardProps) {
               : "bg-blue-100 text-blue-700"
           }`}
         >
-          {isLimit ? "Limit" : "Select"} · {quantityLabel}
+          {req.obligation ? req.obligation.toLowerCase() : isLimit ? "Limit" : "Select"} · {quantityLabel}
         </span>
       </div>
 
@@ -187,15 +199,56 @@ function RequirementCard({ req, auditReq }: RequirementCardProps) {
       )}
 
       {/* Show selectors if not yet audited or not satisfied */}
-      {(auditReq === undefined || !satisfied) && (
+      {req.selector && (
+        <div className="mt-1 flex flex-col gap-2">
+          <RequirementExpression selector={req.selector} />
+          {req.active_when && req.active_when.kind !== "CONSTANT" && (
+            <div>
+              <p className="mb-1 text-[11px] font-medium uppercase tracking-wide text-slate-400">Active when</p>
+              <ActivationExpression condition={req.active_when} />
+            </div>
+          )}
+        </div>
+      )}
+
+      {(auditReq === undefined || !satisfied) && !req.selector && req.query && (
         <ul className="flex flex-col gap-1">
           {req.query.selector.map((sel, j) => (
             <SelectorItem key={j} sel={sel} />
           ))}
         </ul>
       )}
+
+      {req.children && req.children.length > 0 && (
+        <div className="ml-2 mt-1 flex flex-col gap-2 border-l-2 border-slate-200 pl-3">
+          {req.children.map((child) => (
+            <RequirementCard
+              key={child.requirement_id ?? child.meta?.id}
+              req={child}
+              auditReq={auditById?.[child.requirement_id ?? child.meta?.id ?? ""]}
+              auditById={auditById}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
+}
+
+function ChoiceRequirementCard({ description, branches, auditById }: { description: string; branches: MQLRequirement[]; auditById: Record<string, AuditResult["per_requirement"][number]> }) {
+  const audits = branches.map((branch) => auditById[branch.requirement_id ?? branch.meta?.id ?? ""]).filter(Boolean);
+  const satisfied = audits.some((audit) => audit.active && audit.satisfied);
+  const evaluated = audits.length > 0;
+  return <div className={`rounded-lg border p-4 ${!evaluated ? "border-gray-200 bg-gray-50" : satisfied ? "border-green-200 bg-green-50" : "border-red-200 bg-red-50"}`}>
+    <div className="mb-3 flex items-center justify-between gap-3">
+      <div className="flex items-center gap-2"><span className={satisfied ? "text-green-600" : evaluated ? "text-red-500" : "text-gray-400"}>{evaluated ? satisfied ? "✓" : "✗" : "○"}</span><p className="font-semibold text-gray-800 text-sm">{description}</p></div>
+      <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700">Complete one path</span>
+    </div>
+    <div className="flex flex-col gap-2">{branches.map((branch, index) => <div key={branch.requirement_id ?? branch.meta?.id}>
+      {index > 0 && <div className="my-2 flex items-center gap-2"><span className="h-px flex-1 bg-gray-200" /><span className="rounded-full bg-white px-2 py-0.5 text-[11px] font-bold text-amber-700">OR</span><span className="h-px flex-1 bg-gray-200" /></div>}
+      <RequirementCard req={branch} auditReq={auditById[branch.requirement_id ?? branch.meta?.id ?? ""]} auditById={auditById} />
+    </div>)}</div>
+  </div>;
 }
 
 // ---------- Main component ----------
@@ -393,6 +446,10 @@ function Programs() {
       auditResult.per_requirement.map((r) => [r.requirement_id, r]),
     );
   }, [auditResult]);
+  const requirementDisplayItems = useMemo(
+    () => groupRequirements(mqlData?.requirements ?? [], mqlData?.choices),
+    [mqlData],
+  );
 
   if (!appData) return <div>Loading courses and majors...</div>;
 
@@ -715,13 +772,9 @@ function Programs() {
                 </div>
               ) : (
                 <div className="flex flex-col gap-3 overflow-y-auto">
-                  {mqlData.requirements.map((req, i) => (
-                    <RequirementCard
-                      key={i}
-                      req={req}
-                      auditReq={auditById[req.requirement_id ?? req.meta?.id ?? ""]}
-                    />
-                  ))}
+                  {requirementDisplayItems.map((item) => item.kind === "choice"
+                    ? <ChoiceRequirementCard key={item.id} description={item.description} branches={item.branches} auditById={auditById} />
+                    : <RequirementCard key={item.id} req={item.requirement} auditReq={auditById[item.requirement.requirement_id ?? item.requirement.meta?.id ?? ""]} auditById={auditById} />)}
                 </div>
               )}
             </section>
