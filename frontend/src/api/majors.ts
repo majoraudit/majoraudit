@@ -76,7 +76,10 @@ export interface EngineAudit {
   requirements: Omit<AuditRequirement, "description" | "selected">[];
   totals: unknown[];
   objective: unknown;
-  alternate_witnesses: unknown[];
+  // The primary audit endpoint intentionally skips the expensive candidate
+  // usefulness analysis. Detailed explanations should use a separate lazy
+  // endpoint if/when the UI exposes them.
+  alternate_witnesses: [];
   trace: unknown[];
 }
 export interface AuditResult {

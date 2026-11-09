@@ -4,7 +4,7 @@ FROM python:3.12-slim AS module-sources
 ARG MAJORS_REPOSITORY_URL=https://github.com/majoraudit/majors.git
 ARG MAJORS_COMMIT=main
 ARG MQL_AUDIT_REPOSITORY_URL=https://github.com/majoraudit/mql-audit.git
-ARG MQL_AUDIT_COMMIT=f77ab02faf8fc9dd39a56097731c77349ab6c9fc
+ARG MQL_AUDIT_COMMIT=3fe5b4fcb9b722cdc8e1e03f953262492836e429
 RUN apt-get update \
     && apt-get install -y --no-install-recommends git ca-certificates \
     && rm -rf /var/lib/apt/lists/*

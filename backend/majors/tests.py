@@ -52,6 +52,7 @@ class CatalogContractTests(APITestCase):
         self.assertEqual(response.data["scope"], "completed")
         self.assertEqual(response.data["program"]["semantic_program_id"], "computer_science_ba")
         self.assertEqual(response.data["audit"]["status"], "INCOMPLETE")
+        self.assertEqual(response.data["audit"]["alternate_witnesses"], [])
 
     def test_cannot_audit_another_users_worksheet(self):
         other = get_user_model().objects.create_user(username="other")

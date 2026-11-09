@@ -179,5 +179,10 @@ def run_audit(selected: WorksheetMajor, asset: ProgramAsset) -> tuple[dict, list
             num_search_workers=1,
             random_seed=0,
         ),
+        # The interactive audit response is the page's fast path. Candidate
+        # usefulness requires additional solves and is not consumed here, so
+        # keep it out of this request explicitly rather than relying on the
+        # library default.
+        include_candidate_usefulness=False,
     )
     return result.to_dict(), transcript["attempts"]
