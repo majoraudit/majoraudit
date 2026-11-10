@@ -5,6 +5,34 @@ from courses.models import Course, CourseCode, CourseProfessor, CourseInstance, 
 
 API_URL = "https://api.coursetable.com/api/catalog/public/"
 
+CANONICAL_DISTRIBUTION_CODES = {
+    "hu": "Hu",
+    "so": "So",
+    "sc": "Sc",
+    "qr": "QR",
+    "wr": "WR",
+    "l1": "L1",
+    "l2": "L2",
+    "l3": "L3",
+    "l4": "L4",
+    "l5": "L5",
+}
+
+
+def normalize_distribution_code(value):
+    """Return the database/RFC spelling for a CourseTable skill code."""
+    return CANONICAL_DISTRIBUTION_CODES.get(str(value).strip().casefold())
+
+
+def distribution_codes(item):
+    """Merge Yale's area and skill classifications into MQL distributions."""
+    raw_codes = [*item.get("areas", []), *item.get("skills", [])]
+    return sorted({
+        code
+        for raw_code in raw_codes
+        if (code := normalize_distribution_code(raw_code)) is not None
+    })
+
 
 def infer_format(item, flags):
     text = " ".join(str(item.get(key) or "") for key in ("title", "description", "classnotes", "regnotes")).lower()
@@ -65,7 +93,7 @@ class Command(BaseCommand):
                 },
             )
 
-            codes = [c.upper() for c in item["skills"]]
+            codes = distribution_codes(item)
             dists = CourseDistribution.objects.filter(code__in=codes)
             course.distributionals.set(dists)
     

@@ -7,7 +7,7 @@ from worksheets.models import UserWorksheet, WorksheetMajor
 from courses.models import Course, CourseCode, CourseInstance
 
 from .catalog import catalog
-from .audit import build_catalog
+from .audit import build_catalog, build_profile
 
 
 class CatalogContractTests(APITestCase):
@@ -93,3 +93,19 @@ class CatalogContractTests(APITestCase):
         ]
         self.assertEqual(len(records), 1)
         self.assertEqual(records[0]["credit_units"], 2)
+
+    def test_general_degree_language_choice_defaults_from_user_profile(self):
+        self.user.language_requirement = "L5"
+        self.user.save(update_fields=["language_requirement"])
+        worksheet = UserWorksheet.objects.create(user=self.user, name="Main")
+        selected = WorksheetMajor.objects.create(
+            worksheet=worksheet,
+            catalog_year="2026-2027",
+            major_id="general_degree",
+            program_id="general_degree",
+        )
+        asset = catalog.program("2026-2027", "general_degree", "general_degree")
+
+        profile = build_profile(selected, asset)
+
+        self.assertEqual(profile["declared_choices"]["language_start"], "L5")
