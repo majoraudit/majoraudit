@@ -160,10 +160,22 @@ def build_profile(selected: WorksheetMajor, asset: ProgramAsset) -> dict:
         {"fact_type": facts_by_id[fid]["fact_type"], "parameters": facts_by_id[fid].get("parameters", {})}
         for fid in selected.fact_ids
     ]
+    declared_choices = dict(selected.declared_choices)
+    choices_by_id = {str(choice["meta"]["id"]): choice for choice in asset.ir.get("choices", [])}
+    language_choice = choices_by_id.get("language_start")
+    language_requirement = selected.worksheet.user.language_requirement
+    if (
+        language_choice
+        and language_choice.get("owner") == "DECLARED"
+        and "language_start" not in declared_choices
+        and language_requirement in language_choice.get("alternatives", [])
+    ):
+        declared_choices["language_start"] = language_requirement
+
     return {
         "schema_version": "0.2.0",
         "class_year": selected.worksheet.user.class_year,
-        "declared_choices": selected.declared_choices,
+        "declared_choices": declared_choices,
         "facts": facts,
     }
 

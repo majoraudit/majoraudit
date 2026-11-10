@@ -19,32 +19,18 @@ export async function apiFetchMajorTemplate(majorId: string) {
   return { ...major, specializations: major.programs };
 }
 
-function fixedBound(bound: any): number {
-  return bound?.kind === "FIXED" ? Number(bound.value) : 1;
-}
-
-function displayQuantity(req: any): number {
-  const amount = fixedBound(req.lower);
-  // MQL credit bounds use half-credit units; slot bounds are already counts.
-  return req.contribution?.kind === "CREDITS" ? Math.max(1, amount / 2) : amount;
-}
-
 export async function apiFetchMajorMQL(majorId: string, programId: string): Promise<MQLQueryFile> {
   const res = await fetch(`${apiUrl}/majors/${majorId}/programs/${programId}/?catalog_year=${catalogYear}`, { credentials: "include" });
   if (!res.ok) throw new Error(`Failed to fetch program ${majorId}/${programId}`);
   const { program } = await res.json();
-  // Preserve the semantic node while providing the small display projection used
-  // by the existing cards during the UI migration.
+  // Keep the RFC semantic node intact. The display aliases are temporary
+  // compatibility fields for consumers that still identify requirements by the
+  // legacy top-level properties.
   const project = (req: any): any => ({
     ...req,
     requirement_id: String(req.meta.id),
     description: String(req.meta.description ?? req.meta.id),
     children: (req.children ?? []).map(project),
-    query: {
-      quantity: { Single: displayQuantity(req) },
-      type: "Select",
-      selector: [{ Placement: String(req.meta.description ?? req.meta.id) }],
-    },
   });
   return {
     version: program.schema_version,
@@ -106,7 +92,7 @@ export async function apiRunAudit(worksheetId: number, worksheetMajorId: number)
   });
   const body = await res.json();
   if (!res.ok) throw new Error(body.message ?? `Audit failed: ${res.status}`);
-  const descriptions = Object.fromEntries(flattenRequirements(body.program.requirements).map((r) => [String(r.meta.id), r.description]));
+  const descriptions = Object.fromEntries(flattenRequirements(body.program.requirements).map((r) => [String(r.meta.id), r.meta.description ?? r.meta.id]));
   const assignments = body.audit.assignments as EngineAudit["assignments"];
   const courseByAttempt = Object.fromEntries(body.attempts.map((attempt: any) => [attempt.attempt_id, attempt.canonical_course_id]));
   body.per_requirement = body.audit.requirements.map((req: any) => ({

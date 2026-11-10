@@ -4,6 +4,26 @@ from django.test import TestCase
 
 from .models import Course, CourseCode, CourseInstance, CourseProfessor
 from .serializers import CourseSerializer
+from .management.commands.fetch_courses import distribution_codes, normalize_distribution_code
+
+
+class DistributionCodeTests(TestCase):
+    def test_normalizes_coursetable_codes_to_rfc_spelling(self):
+        self.assertEqual(normalize_distribution_code("Hu"), "Hu")
+        self.assertEqual(normalize_distribution_code("HU"), "Hu")
+        self.assertEqual(normalize_distribution_code("so"), "So")
+        self.assertEqual(normalize_distribution_code("SC"), "Sc")
+        self.assertEqual(normalize_distribution_code("qr"), "QR")
+        self.assertEqual(normalize_distribution_code("L5"), "L5")
+
+    def test_ignores_non_distribution_course_skills(self):
+        self.assertIsNone(normalize_distribution_code("First-year seminar"))
+
+    def test_combines_area_and_skill_distributions(self):
+        self.assertEqual(
+            distribution_codes({"areas": ["So"], "skills": ["QR"]}),
+            ["QR", "So"],
+        )
 
 
 class CourseOfferingContractTests(TestCase):
