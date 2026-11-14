@@ -34,6 +34,33 @@ class CourseInstanceSerializer(serializers.ModelSerializer):
             'course_codes'
         ]
 
+class CourseIndexSerializer(serializers.ModelSerializer):
+    distributionals = serializers.StringRelatedField(many=True, read_only=True)
+    course_codes = serializers.SerializerMethodField()
+    instance_ids = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Course
+        fields = [
+            'external_id',
+            'title',
+            'credits',
+            'distributionals',
+            'course_codes',
+            'instance_ids',
+        ]
+
+    def get_course_codes(self, obj):
+        codes = set()
+        for instance in obj.courseinstance_set.all():
+            for code in instance.course_codes.all():
+                codes.add(code)
+
+        return CourseCodeSerializer(codes, many=True).data
+
+    def get_instance_ids(self, obj):
+        return [instance.external_id for instance in obj.courseinstance_set.all()]
+
 
 class CourseSerializer(serializers.ModelSerializer):
     distributionals = serializers.StringRelatedField(many=True, read_only=True)
@@ -72,6 +99,8 @@ class CourseDetailSerializer(serializers.ModelSerializer):
         read_only=True,
         source='courseinstance_set'
     )
+    course_codes = serializers.SerializerMethodField()
+    course_tags = CourseTagSerializer(many=True, read_only=True)
 
     class Meta:
         model = Course
@@ -80,6 +109,16 @@ class CourseDetailSerializer(serializers.ModelSerializer):
             'title',
             'description',
             'credits',
+            'course_codes',
+            'course_tags',
             'distributionals',
             'course_instances'
         ]
+
+    def get_course_codes(self, obj):
+        codes = set()
+        for instance in obj.courseinstance_set.all():
+            for code in instance.course_codes.all():
+                codes.add(code)
+
+        return CourseCodeSerializer(codes, many=True).data

@@ -129,7 +129,7 @@ export function useWorksheetActions() {
       if (!semester) return { ok: false, error: "Semester not found." };
 
       const courseAlreadyExists = semester.studentCourses.some(
-        (sc: StudentCourse) => sc.course.codes?.[0] === newCourse.course.codes?.[0]
+        (sc: StudentCourse) => (sc.course.codes?.[0] === newCourse.course.codes?.[0] || (sc.course.id != null && sc.course.id === newCourse.course.id))
       );
       if (courseAlreadyExists) return { ok: false, error: "Course already in semester." };
 

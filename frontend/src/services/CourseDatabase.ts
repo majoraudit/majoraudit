@@ -1,4 +1,5 @@
 import {type Course, type CourseOffering} from "../types/type-user";
+import { apiUrl } from "@/constants";
 
 export async function loadCourses(json_file : string)
 {
@@ -78,6 +79,10 @@ export class CourseDatabase {
             offerings.forEach((offering) => {
                 this.coursesByInstance.set(offering.instanceId, this.withOffering(newCourse, offering));
             });
+            
+            (course.instance_ids ?? []).forEach((id: number) => {
+                if (!this.coursesByInstance.has(id)) this.coursesByInstance.set(id, { ...newCourse, instanceId: id });
+            });
         })
     }
 
@@ -91,9 +96,18 @@ export class CourseDatabase {
         };
     }
 
-    getCourseForTerm(courseId: number, seasonCode: number | string): Course | undefined {
-        const course = this.courses.get(courseId);
+    async getCourseForTerm(courseId: number, seasonCode: number | string): Promise<Course | undefined> {
+        let course = this.courses.get(courseId);
         if (!course) return undefined;
+
+        if (!course.offerings?.length) {
+            const res = await fetch(`${apiUrl}/courses/${courseId}/`, { credentials: "include" });
+            if (!res.ok) return undefined;
+            course = new CourseDatabase([await res.json()]).getCourse(courseId);
+            if (!course) return undefined;
+            this.courses.set(courseId, course);
+        }
+
         const offering = course.offerings?.find((item) => item.seasonCode === String(seasonCode));
         return offering ? this.withOffering(course, offering) : undefined;
     }
