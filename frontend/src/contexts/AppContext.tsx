@@ -20,7 +20,7 @@ type AppContextType = {
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export async function fetchCourses() {
-  const res = await fetch(`${apiUrl}/courses`, {
+  const res = await fetch(`${apiUrl}/courses/index/`, {
     credentials: "include",
   });
   if (!res.ok) throw new Error("Courses unavailable - getting json");
@@ -109,7 +109,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
             return [
               {
                 worksheetClassId: c.id,
-                course: fullCourse,
+                course: fullCourse.seasonCode ? fullCourse : { ...fullCourse, seasonCode: String(s.season) },
                 enrolledCourseCode: c.enrolled_course_code || fullCourse.codes[0],
                 term: s.season,
                 status: "DA_COMPLETE",

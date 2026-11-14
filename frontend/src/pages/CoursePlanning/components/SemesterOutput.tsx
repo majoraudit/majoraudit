@@ -110,27 +110,28 @@ function SemesterOutput({
           return;
         }
 
-        const destinationCourse = appData?.course_database.getCourseForTerm(
+        void appData?.course_database.getCourseForTerm(
           Number(item.selectedCourse.id),
           semester.season,
-        );
-        if (!destinationCourse) {
-          return;
-        }
-
-        const newStudentCourse: StudentCourse = {
-          course: destinationCourse,
-          enrolledCourseCode: destinationCourse.codes.includes(item.enrolledCourseCode ?? "")
-            ? item.enrolledCourseCode
-            : destinationCourse.codes[0],
-          term: semester.season,
-          status: "DA_COMPLETE",
-        };
-
-        void addCourse(semester.season, newStudentCourse).then((result) => {
-          if (result.ok && typeof item.sourceSemesterSeasonCode === "number") {
-            void removeCourse(item.sourceSemesterSeasonCode, item.selectedCourse);
+        ).then((destinationCourse) => {
+          if (!destinationCourse) {
+            return;
           }
+
+          const newStudentCourse: StudentCourse = {
+            course: destinationCourse,
+            enrolledCourseCode: destinationCourse.codes.includes(item.enrolledCourseCode ?? "")
+              ? item.enrolledCourseCode
+              : destinationCourse.codes[0],
+            term: semester.season,
+            status: "DA_COMPLETE",
+          };
+
+          void addCourse(semester.season, newStudentCourse).then((result) => {
+            if (result.ok && typeof item.sourceSemesterSeasonCode === "number") {
+              void removeCourse(item.sourceSemesterSeasonCode, item.selectedCourse);
+            }
+          });
         });
       },
       canDrop: (item) =>

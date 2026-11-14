@@ -89,7 +89,7 @@ export function addCourse(user: User, newCourse: StudentCourse, season: number):
     if (semester.season !== season) return semester;
 
     const courseAlreadyExists = semester.studentCourses.some(
-      (sc) => sc.course.codes?.[0] === newCourse.course.codes?.[0]
+      (sc) => (sc.course.codes?.[0] === newCourse.course.codes?.[0] || (sc.course.id != null && sc.course.id === newCourse.course.id))
     );
 
     if (courseAlreadyExists) return semester;

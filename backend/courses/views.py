@@ -3,7 +3,7 @@ from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from .models import Course
-from .serializers import CourseSerializer, CourseDetailSerializer
+from .serializers import CourseSerializer, CourseDetailSerializer, CourseIndexSerializer
 
 # Create your views here.
 
@@ -24,6 +24,15 @@ class CourseListView(generics.ListAPIView):
             'distributionals'
         ).all()
 
+class CourseIndexView(generics.ListAPIView):
+    serializer_class = CourseIndexSerializer
+    pagination_class = None
+
+    def get_queryset(self):
+        return Course.objects.prefetch_related(
+            'courseinstance_set__course_codes',
+            'distributionals',
+        ).all()
 
 class CourseDetailView(generics.RetrieveAPIView):
     serializer_class = CourseDetailSerializer

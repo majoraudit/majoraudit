@@ -158,11 +158,11 @@ function CoursePlanning() {
     addCourse(semester.season, newStudentCourse);
   };
 
-  const handleAddCatalogFromModal = (
+  const handleAddCatalogFromModal = async (
     semester: StudentSemester,
     course: Course,
   ) => {
-    const destinationCourse = appData?.course_database.getCourseForTerm(
+    const destinationCourse = await appData?.course_database.getCourseForTerm(
       Number(course.id),
       semester.season,
     );
