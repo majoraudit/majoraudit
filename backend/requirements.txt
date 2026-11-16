@@ -19,3 +19,4 @@ urllib3==2.6.3
 pylibmql==0.1.11
 ortools==9.15.6755
 gunicorn==23.0.0
+drf-spectacular==0.30.0

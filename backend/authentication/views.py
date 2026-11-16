@@ -1,12 +1,18 @@
 from django.http import JsonResponse
 from django.middleware.csrf import get_token
-from django.views.decorators.http import require_GET
-from rest_framework import generics, permissions
+from rest_framework import generics, permissions, serializers
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
+from drf_spectacular.utils import extend_schema, inline_serializer
 
 from .serializers import ProfileSerializer
 
 
-@require_GET
+@extend_schema(responses=inline_serializer(
+    name='CsrfToken', fields={'csrfToken': serializers.CharField()},
+))
+@api_view(['GET'])
+@authentication_classes([])
+@permission_classes([permissions.AllowAny])
 def csrf_token(request):
     """Return a CSRF token that cross-origin frontends can read from JSON."""
     return JsonResponse({"csrfToken": get_token(request)})

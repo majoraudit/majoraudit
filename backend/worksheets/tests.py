@@ -39,7 +39,7 @@ class WorksheetPermissionTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_user_can_list_own_worksheets(self):
-        self.client.force_authenticate(user=self.user1)
+        self.client.force_login(user=self.user1)
         url = reverse('worksheet-list')
         response = self.client.get(url, secure=True)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -47,14 +47,14 @@ class WorksheetPermissionTests(APITestCase):
         self.assertEqual(response.data[0]['name'], 'User1 Worksheet')
 
     def test_user_cannot_see_other_users_worksheets_in_list(self):
-        self.client.force_authenticate(user=self.user1)
+        self.client.force_login(user=self.user1)
         url = reverse('worksheet-list')
         response = self.client.get(url, secure=True)
         worksheet_names = [w['name'] for w in response.data]
         self.assertNotIn('User2 Worksheet', worksheet_names)
 
     def test_user_can_create_worksheet(self):
-        self.client.force_authenticate(user=self.user1)
+        self.client.force_login(user=self.user1)
         url = reverse('worksheet-list')
         response = self.client.post(url, {'name': 'My New Worksheet'}, secure=True)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -65,20 +65,20 @@ class WorksheetPermissionTests(APITestCase):
         )
 
     def test_user_can_retrieve_own_worksheet(self):
-        self.client.force_authenticate(user=self.user1)
+        self.client.force_login(user=self.user1)
         url = reverse('worksheet-detail', kwargs={'pk': self.user1_worksheet.pk})
         response = self.client.get(url, secure=True)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['name'], 'User1 Worksheet')
 
     def test_user_cannot_retrieve_other_users_worksheet(self):
-        self.client.force_authenticate(user=self.user1)
+        self.client.force_login(user=self.user1)
         url = reverse('worksheet-detail', kwargs={'pk': self.user2_worksheet.pk})
         response = self.client.get(url, secure=True)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_user_can_update_own_worksheet(self):
-        self.client.force_authenticate(user=self.user1)
+        self.client.force_login(user=self.user1)
         url = reverse('worksheet-detail', kwargs={'pk': self.user1_worksheet.pk})
         response = self.client.patch(url, {'name': 'Updated Name'}, secure=True)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -86,7 +86,7 @@ class WorksheetPermissionTests(APITestCase):
         self.assertEqual(self.user1_worksheet.name, 'Updated Name')
 
     def test_user_cannot_update_other_users_worksheet(self):
-        self.client.force_authenticate(user=self.user1)
+        self.client.force_login(user=self.user1)
         url = reverse('worksheet-detail', kwargs={'pk': self.user2_worksheet.pk})
         response = self.client.patch(url, {'name': 'Hacked Name'}, secure=True)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
@@ -94,7 +94,7 @@ class WorksheetPermissionTests(APITestCase):
         self.assertEqual(self.user2_worksheet.name, 'User2 Worksheet')
 
     def test_user_can_delete_own_worksheet(self):
-        self.client.force_authenticate(user=self.user1)
+        self.client.force_login(user=self.user1)
         url = reverse('worksheet-detail', kwargs={'pk': self.user1_worksheet.pk})
         response = self.client.delete(url, secure=True)
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
@@ -103,7 +103,7 @@ class WorksheetPermissionTests(APITestCase):
         )
 
     def test_user_cannot_delete_other_users_worksheet(self):
-        self.client.force_authenticate(user=self.user1)
+        self.client.force_login(user=self.user1)
         url = reverse('worksheet-detail', kwargs={'pk': self.user2_worksheet.pk})
         response = self.client.delete(url, secure=True)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
@@ -141,7 +141,7 @@ class SemesterPermissionTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_user_can_list_semesters_in_own_worksheet(self):
-        self.client.force_authenticate(user=self.user1)
+        self.client.force_login(user=self.user1)
         url = reverse('semester-list', kwargs={'worksheet_pk': self.user1_worksheet.pk})
         response = self.client.get(url, secure=True)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -149,7 +149,7 @@ class SemesterPermissionTests(APITestCase):
         self.assertEqual(response.data[0]['year'], 2024)
 
     def test_user_cannot_list_semesters_in_other_users_worksheet(self):
-        self.client.force_authenticate(user=self.user1)
+        self.client.force_login(user=self.user1)
         url = reverse('semester-list', kwargs={'worksheet_pk': self.user2_worksheet.pk})
         response = self.client.get(url, secure=True)
         # Should return empty list since queryset filters by user
@@ -157,7 +157,7 @@ class SemesterPermissionTests(APITestCase):
         self.assertEqual(len(response.data), 0)
 
     def test_user_can_create_semester_in_own_worksheet(self):
-        self.client.force_authenticate(user=self.user1)
+        self.client.force_login(user=self.user1)
         url = reverse('semester-list', kwargs={'worksheet_pk': self.user1_worksheet.pk})
         response = self.client.post(url, {'year': 2025, 'season': 'SP'}, secure=True)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -168,7 +168,7 @@ class SemesterPermissionTests(APITestCase):
         )
 
     def test_user_cannot_create_semester_in_other_users_worksheet(self):
-        self.client.force_authenticate(user=self.user1)
+        self.client.force_login(user=self.user1)
         url = reverse('semester-list', kwargs={'worksheet_pk': self.user2_worksheet.pk})
         response = self.client.post(url, {'year': 2025, 'season': 'SP'}, secure=True)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
@@ -179,7 +179,7 @@ class SemesterPermissionTests(APITestCase):
         )
 
     def test_user_can_retrieve_own_semester(self):
-        self.client.force_authenticate(user=self.user1)
+        self.client.force_login(user=self.user1)
         url = reverse('semester-detail', kwargs={
             'worksheet_pk': self.user1_worksheet.pk,
             'pk': self.user1_semester.pk
@@ -189,7 +189,7 @@ class SemesterPermissionTests(APITestCase):
         self.assertEqual(response.data['year'], 2024)
 
     def test_user_cannot_retrieve_other_users_semester(self):
-        self.client.force_authenticate(user=self.user1)
+        self.client.force_login(user=self.user1)
         url = reverse('semester-detail', kwargs={
             'worksheet_pk': self.user2_worksheet.pk,
             'pk': self.user2_semester.pk
@@ -199,7 +199,7 @@ class SemesterPermissionTests(APITestCase):
 
     def test_user_cannot_retrieve_semester_via_wrong_worksheet(self):
         """User1 tries to access their own semester but through user2's worksheet URL."""
-        self.client.force_authenticate(user=self.user1)
+        self.client.force_login(user=self.user1)
         url = reverse('semester-detail', kwargs={
             'worksheet_pk': self.user2_worksheet.pk,
             'pk': self.user1_semester.pk
@@ -208,7 +208,7 @@ class SemesterPermissionTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_user_can_update_own_semester(self):
-        self.client.force_authenticate(user=self.user1)
+        self.client.force_login(user=self.user1)
         url = reverse('semester-detail', kwargs={
             'worksheet_pk': self.user1_worksheet.pk,
             'pk': self.user1_semester.pk
@@ -219,7 +219,7 @@ class SemesterPermissionTests(APITestCase):
         self.assertEqual(self.user1_semester.year, 2026)
 
     def test_user_cannot_update_other_users_semester(self):
-        self.client.force_authenticate(user=self.user1)
+        self.client.force_login(user=self.user1)
         url = reverse('semester-detail', kwargs={
             'worksheet_pk': self.user2_worksheet.pk,
             'pk': self.user2_semester.pk
@@ -230,7 +230,7 @@ class SemesterPermissionTests(APITestCase):
         self.assertEqual(self.user2_semester.year, 2024)
 
     def test_user_can_delete_own_semester(self):
-        self.client.force_authenticate(user=self.user1)
+        self.client.force_login(user=self.user1)
         url = reverse('semester-detail', kwargs={
             'worksheet_pk': self.user1_worksheet.pk,
             'pk': self.user1_semester.pk
@@ -242,7 +242,7 @@ class SemesterPermissionTests(APITestCase):
         )
 
     def test_user_cannot_delete_other_users_semester(self):
-        self.client.force_authenticate(user=self.user1)
+        self.client.force_login(user=self.user1)
         url = reverse('semester-detail', kwargs={
             'worksheet_pk': self.user2_worksheet.pk,
             'pk': self.user2_semester.pk
@@ -303,7 +303,7 @@ class ClassPermissionTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_user_can_list_classes_in_own_semester(self):
-        self.client.force_authenticate(user=self.user1)
+        self.client.force_login(user=self.user1)
         url = reverse('semester-class-list', kwargs={
             'worksheet_pk': self.user1_worksheet.pk,
             'semester_pk': self.user1_semester.pk
@@ -313,7 +313,7 @@ class ClassPermissionTests(APITestCase):
         self.assertEqual(len(response.data), 1)
 
     def test_user_cannot_list_classes_in_other_users_semester(self):
-        self.client.force_authenticate(user=self.user1)
+        self.client.force_login(user=self.user1)
         url = reverse('semester-class-list', kwargs={
             'worksheet_pk': self.user2_worksheet.pk,
             'semester_pk': self.user2_semester.pk
@@ -323,7 +323,7 @@ class ClassPermissionTests(APITestCase):
         self.assertEqual(len(response.data), 0)
 
     def test_user_can_create_class_in_own_semester(self):
-        self.client.force_authenticate(user=self.user1)
+        self.client.force_login(user=self.user1)
         url = reverse('semester-class-list', kwargs={
             'worksheet_pk': self.user1_worksheet.pk,
             'semester_pk': self.user1_semester.pk
@@ -335,7 +335,7 @@ class ClassPermissionTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
     def test_user_cannot_create_class_in_other_users_semester(self):
-        self.client.force_authenticate(user=self.user1)
+        self.client.force_login(user=self.user1)
         url = reverse('semester-class-list', kwargs={
             'worksheet_pk': self.user2_worksheet.pk,
             'semester_pk': self.user2_semester.pk
@@ -347,7 +347,7 @@ class ClassPermissionTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_user_can_retrieve_own_class(self):
-        self.client.force_authenticate(user=self.user1)
+        self.client.force_login(user=self.user1)
         url = reverse('semester-class-detail', kwargs={
             'worksheet_pk': self.user1_worksheet.pk,
             'semester_pk': self.user1_semester.pk,
@@ -357,7 +357,7 @@ class ClassPermissionTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_user_cannot_retrieve_other_users_class(self):
-        self.client.force_authenticate(user=self.user1)
+        self.client.force_login(user=self.user1)
         url = reverse('semester-class-detail', kwargs={
             'worksheet_pk': self.user2_worksheet.pk,
             'semester_pk': self.user2_semester.pk,
@@ -367,7 +367,7 @@ class ClassPermissionTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_user_can_update_own_class(self):
-        self.client.force_authenticate(user=self.user1)
+        self.client.force_login(user=self.user1)
         url = reverse('semester-class-detail', kwargs={
             'worksheet_pk': self.user1_worksheet.pk,
             'semester_pk': self.user1_semester.pk,
@@ -379,7 +379,7 @@ class ClassPermissionTests(APITestCase):
         self.assertTrue(self.user1_class.creditdf)
 
     def test_user_cannot_update_other_users_class(self):
-        self.client.force_authenticate(user=self.user1)
+        self.client.force_login(user=self.user1)
         url = reverse('semester-class-detail', kwargs={
             'worksheet_pk': self.user2_worksheet.pk,
             'semester_pk': self.user2_semester.pk,
@@ -391,7 +391,7 @@ class ClassPermissionTests(APITestCase):
         self.assertFalse(self.user2_class.creditdf)
 
     def test_user_can_delete_own_class(self):
-        self.client.force_authenticate(user=self.user1)
+        self.client.force_login(user=self.user1)
         url = reverse('semester-class-detail', kwargs={
             'worksheet_pk': self.user1_worksheet.pk,
             'semester_pk': self.user1_semester.pk,
@@ -404,7 +404,7 @@ class ClassPermissionTests(APITestCase):
         )
 
     def test_user_cannot_delete_other_users_class(self):
-        self.client.force_authenticate(user=self.user1)
+        self.client.force_login(user=self.user1)
         url = reverse('semester-class-detail', kwargs={
             'worksheet_pk': self.user2_worksheet.pk,
             'semester_pk': self.user2_semester.pk,
@@ -422,7 +422,7 @@ class ClassPermissionTests(APITestCase):
         other_semester = UserWorksheetSemester.objects.create(
             worksheet=self.user1_worksheet, year=2025, season='SP'
         )
-        self.client.force_authenticate(user=self.user1)
+        self.client.force_login(user=self.user1)
         url = reverse('semester-class-detail', kwargs={
             'worksheet_pk': self.user1_worksheet.pk,
             'semester_pk': other_semester.pk,
@@ -467,7 +467,7 @@ class WorksheetMajorPermissionTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_user_can_list_majors_in_own_worksheet(self):
-        self.client.force_authenticate(user=self.user1)
+        self.client.force_login(user=self.user1)
         url = reverse('ws-major-list', kwargs={
             'worksheet_pk': self.user1_worksheet.pk
         })
@@ -477,7 +477,7 @@ class WorksheetMajorPermissionTests(APITestCase):
         self.assertEqual(response.data[0]['major_id'], 'computer_science')
 
     def test_user_cannot_list_majors_in_other_users_worksheet(self):
-        self.client.force_authenticate(user=self.user1)
+        self.client.force_login(user=self.user1)
         url = reverse('ws-major-list', kwargs={
             'worksheet_pk': self.user2_worksheet.pk
         })
@@ -486,7 +486,7 @@ class WorksheetMajorPermissionTests(APITestCase):
         self.assertEqual(len(response.data), 0)
 
     def test_user_can_add_major_to_own_worksheet(self):
-        self.client.force_authenticate(user=self.user1)
+        self.client.force_login(user=self.user1)
         url = reverse('ws-major-list', kwargs={
             'worksheet_pk': self.user1_worksheet.pk
         })
@@ -503,7 +503,7 @@ class WorksheetMajorPermissionTests(APITestCase):
         )
 
     def test_user_cannot_add_major_to_other_users_worksheet(self):
-        self.client.force_authenticate(user=self.user1)
+        self.client.force_login(user=self.user1)
         url = reverse('ws-major-list', kwargs={
             'worksheet_pk': self.user2_worksheet.pk
         })
@@ -514,7 +514,7 @@ class WorksheetMajorPermissionTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_cannot_add_duplicate_major(self):
-        self.client.force_authenticate(user=self.user1)
+        self.client.force_login(user=self.user1)
         url = reverse('ws-major-list', kwargs={
             'worksheet_pk': self.user1_worksheet.pk
         })
@@ -525,7 +525,7 @@ class WorksheetMajorPermissionTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_can_add_same_major_different_specialization(self):
-        self.client.force_authenticate(user=self.user1)
+        self.client.force_login(user=self.user1)
         url = reverse('ws-major-list', kwargs={
             'worksheet_pk': self.user1_worksheet.pk
         })
@@ -543,7 +543,7 @@ class WorksheetMajorPermissionTests(APITestCase):
         )
 
     def test_user_can_retrieve_own_major(self):
-        self.client.force_authenticate(user=self.user1)
+        self.client.force_login(user=self.user1)
         url = reverse('ws-major-detail', kwargs={
             'worksheet_pk': self.user1_worksheet.pk,
             'pk': self.user1_major.pk,
@@ -553,7 +553,7 @@ class WorksheetMajorPermissionTests(APITestCase):
         self.assertEqual(response.data['major_id'], 'computer_science')
 
     def test_user_cannot_retrieve_other_users_major(self):
-        self.client.force_authenticate(user=self.user1)
+        self.client.force_login(user=self.user1)
         url = reverse('ws-major-detail', kwargs={
             'worksheet_pk': self.user2_worksheet.pk,
             'pk': self.user2_major.pk,
@@ -562,7 +562,7 @@ class WorksheetMajorPermissionTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_user_can_delete_own_major(self):
-        self.client.force_authenticate(user=self.user1)
+        self.client.force_login(user=self.user1)
         url = reverse('ws-major-detail', kwargs={
             'worksheet_pk': self.user1_worksheet.pk,
             'pk': self.user1_major.pk,
@@ -574,7 +574,7 @@ class WorksheetMajorPermissionTests(APITestCase):
         )
 
     def test_user_cannot_delete_other_users_major(self):
-        self.client.force_authenticate(user=self.user1)
+        self.client.force_login(user=self.user1)
         url = reverse('ws-major-detail', kwargs={
             'worksheet_pk': self.user2_worksheet.pk,
             'pk': self.user2_major.pk,

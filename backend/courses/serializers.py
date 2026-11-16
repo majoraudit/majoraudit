@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from drf_spectacular.utils import extend_schema_field
 from .models import Course, CourseInstance, CourseProfessor, CourseCode, CourseTag
 
 
@@ -52,6 +53,7 @@ class CourseSerializer(serializers.ModelSerializer):
             'course_tags',
         ]
 
+    @extend_schema_field(CourseCodeSerializer(many=True))
     def get_course_codes(self, obj):
         codes = set()
         for instance in obj.courseinstance_set.all():

@@ -78,6 +78,7 @@ class UserWorksheetClassListCreateView(generics.ListCreateAPIView):
         worksheet_semester_id = self.kwargs.get('semester_pk')
         return UserWorksheetClass.objects.filter(
             worksheet_semester_id=worksheet_semester_id,
+            worksheet_semester__worksheet_id=self.kwargs['worksheet_pk'],
             worksheet_semester__worksheet__user=self.request.user
         )
 
@@ -86,6 +87,7 @@ class UserWorksheetClassListCreateView(generics.ListCreateAPIView):
         worksheet_semester = get_object_or_404(
             UserWorksheetSemester,
             id=worksheet_semester_id,
+            worksheet_id=self.kwargs['worksheet_pk'],
             worksheet__user=self.request.user
         )
         serializer.save(worksheet_semester=worksheet_semester)
@@ -99,5 +101,6 @@ class UserWorksheetClassDetailView(generics.RetrieveUpdateDestroyAPIView):
         worksheet_semester_id = self.kwargs.get('semester_pk')
         return UserWorksheetClass.objects.filter(
             worksheet_semester_id=worksheet_semester_id,
+            worksheet_semester__worksheet_id=self.kwargs['worksheet_pk'],
             worksheet_semester__worksheet__user=self.request.user
         )

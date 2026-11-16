@@ -5,6 +5,7 @@ from rest_framework.views import APIView
 from rest_framework.pagination import LimitOffsetPagination
 from .models import Course
 from .serializers import CourseSerializer, CourseDetailSerializer
+from drf_spectacular.utils import extend_schema, OpenApiParameter
 
 # Create your views here.
 
@@ -50,6 +51,17 @@ class CourseTableDetailProxyView(APIView):
     graphql_endpoint = "https://api.coursetable.com/ferry/v1/graphql"
     timeout_seconds = 8
 
+    @extend_schema(
+        parameters=[
+            OpenApiParameter('course_code', str, required=True),
+            OpenApiParameter('season_code', str),
+        ],
+        responses={
+            200: {'type': 'object', 'required': ['listing'], 'properties': {'listing': {'type': 'object'}}},
+            400: {'type': 'object', 'required': ['detail']},
+            502: {'type': 'object', 'required': ['detail']},
+        },
+    )
     def get(self, request):
         course_code = (request.query_params.get("course_code") or "").strip()
         season_code = (request.query_params.get("season_code") or "").strip()

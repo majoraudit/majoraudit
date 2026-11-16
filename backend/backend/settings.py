@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'sslserver',
     'rest_framework',
+    'drf_spectacular',
     'django_cas_ng',
     'authentication',
     'worksheets',
@@ -161,12 +162,58 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 # REST Framework Settings
 
 REST_FRAMEWORK = {
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
     'DEFAULT_AUTHENTICATION_CLASSES': [
         "rest_framework.authentication.SessionAuthentication",
     ],
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
     ]
+}
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Major Audit API',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+    'SERVE_PERMISSIONS': ['rest_framework.permissions.IsAuthenticated'],
+    'COMPONENT_SPLIT_REQUEST': True,
+    'POSTPROCESSING_HOOKS': [
+        'drf_spectacular.hooks.postprocess_schema_enums',
+        'backend.schema.add_error_responses',
+    ],
+    'APPEND_PATHS': {
+        '/api/auth/login/': {
+            'get': {
+                'operationId': 'cas_login',
+                'description': 'Redirect to Yale CAS, or validate its service ticket and create a session.',
+                'security': [],
+                'parameters': [
+                    {'name': 'ticket', 'in': 'query', 'schema': {'type': 'string'}},
+                    {'name': 'next', 'in': 'query', 'schema': {'type': 'string'}},
+                ],
+                'responses': {
+                    '302': {
+                        'description': 'CAS login or application redirect.',
+                        'headers': {'Location': {'required': True, 'schema': {'type': 'string'}}},
+                    },
+                    '403': {'description': 'Invalid CAS ticket.'},
+                },
+            },
+        },
+        '/api/auth/logout/': {
+            'get': {
+                'operationId': 'cas_logout',
+                'description': 'Invalidate the local session and redirect to the frontend.',
+                'security': [],
+                'responses': {
+                    '302': {
+                        'description': 'Logged out.',
+                        'headers': {'Location': {'required': True, 'schema': {'type': 'string'}}},
+                    },
+                },
+            },
+        },
+    },
 }
 
 # CORS and CSRF Settings
@@ -191,7 +238,8 @@ AUTHENTICATION_BACKENDS = (
 CAS_SERVER_URL = os.getenv('CAS_URL')
 CAS_LOGOUT_COMPLETELY = False
 CAS_VERSION = 2
-CAS_REDIRECT_URL = FRONTEND_URL
+# django-cas-ng strips a matching origin; retain a nonempty root path.
+CAS_REDIRECT_URL = FRONTEND_URL.rstrip('/') + '/'
 CAS_LOGOUT_REDIRECT_URL = FRONTEND_URL
 
 # Dev-only CAS settings

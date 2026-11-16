@@ -1,4 +1,5 @@
 from unittest.mock import Mock, patch
+import requests
 
 from django.test import TestCase, override_settings
 from django.urls import reverse
@@ -57,6 +58,25 @@ class YaliesSignalTests(TestCase):
 
         post.assert_not_called()
 
+    @patch('authentication.signals.requests.post')
+    def test_enrichment_failures_preserve_existing_profile(self, post):
+        from authentication.signals import update_user_from_yalies
+
+        self.user.first_name = 'Existing'
+        self.user.save(update_fields=['first_name'])
+        for payload in ([], {}, [None]):
+            with self.subTest(payload=payload):
+                post.return_value.json.return_value = payload
+                update_user_from_yalies(sender=None, user=self.user)
+                self.user.refresh_from_db()
+                self.assertEqual(self.user.first_name, 'Existing')
+        for error in (requests.Timeout('timeout'), ValueError('invalid JSON')):
+            with self.subTest(error=type(error).__name__):
+                post.side_effect = error
+                update_user_from_yalies(sender=None, user=self.user)
+                self.user.refresh_from_db()
+                self.assertEqual(self.user.first_name, 'Existing')
+
 
 class ProfileTests(APITestCase):
     """Test the GET/PATCH profile endpoint at /api/auth/profile/."""
@@ -76,7 +96,7 @@ class ProfileTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_user_can_get_profile(self):
-        self.client.force_authenticate(user=self.user)
+        self.client.force_login(user=self.user)
         response = self.client.get(self.url, secure=True)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['id'], 'testuser')
@@ -85,7 +105,7 @@ class ProfileTests(APITestCase):
         self.assertEqual(response.data['email'], 'alice@example.com')
 
     def test_profile_contains_all_expected_fields(self):
-        self.client.force_authenticate(user=self.user)
+        self.client.force_login(user=self.user)
         response = self.client.get(self.url, secure=True)
         expected_fields = {
             'id', 'email', 'first_name', 'last_name',
@@ -94,7 +114,7 @@ class ProfileTests(APITestCase):
         self.assertEqual(set(response.data.keys()), expected_fields)
 
     def test_user_can_patch_class_year(self):
-        self.client.force_authenticate(user=self.user)
+        self.client.force_login(user=self.user)
         response = self.client.patch(
             self.url, {'class_year': 2027}, format='json', secure=True,
         )
@@ -104,7 +124,7 @@ class ProfileTests(APITestCase):
         self.assertEqual(self.user.class_year, 2027)
 
     def test_user_can_patch_language_fields(self):
-        self.client.force_authenticate(user=self.user)
+        self.client.force_login(user=self.user)
         response = self.client.patch(self.url, {
             'intended_language_code': 'CHNS',
             'language_requirement': 'L4',
@@ -115,7 +135,7 @@ class ProfileTests(APITestCase):
         self.assertEqual(self.user.language_requirement, 'L4')
 
     def test_user_cannot_patch_read_only_fields(self):
-        self.client.force_authenticate(user=self.user)
+        self.client.force_login(user=self.user)
         response = self.client.patch(self.url, {
             'email': 'hacker@evil.com',
             'first_name': 'Hacked',
@@ -128,7 +148,7 @@ class ProfileTests(APITestCase):
         self.assertEqual(self.user.last_name, 'Smith')
 
     def test_put_not_allowed(self):
-        self.client.force_authenticate(user=self.user)
+        self.client.force_login(user=self.user)
         response = self.client.put(self.url, {
             'class_year': 2027,
             'intended_language_code': 'FR',

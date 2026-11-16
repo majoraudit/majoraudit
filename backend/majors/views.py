@@ -9,8 +9,6 @@ from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
-from django.utils.decorators import method_decorator
-from django.views import View
 
 from django.shortcuts import get_object_or_404
 from rest_framework import generics, permissions
@@ -18,6 +16,11 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.exceptions import ValidationError, NotFound, ParseError
+from drf_spectacular.utils import extend_schema, OpenApiParameter
+from backend.schema import (
+    MAJOR_LIST, MAJOR, MQL, SOLVE_REQUEST, SOLVE_RESULT,
+    BATCH_REQUEST, BATCH_RESULT,
+)
 
 import pylibmql
 
@@ -89,8 +92,15 @@ def create_success_response(data: dict, status_code: int = 200) -> JsonResponse:
     return JsonResponse(data, status=status_code)
 
 
-@csrf_exempt
-@require_http_methods(["POST"])
+def get_request_object(request) -> dict:
+    body = request.data
+    if not isinstance(body, dict):
+        raise ParseError('Expected a JSON object.')
+    return body
+
+
+@extend_schema(request={'application/json': SOLVE_REQUEST}, responses={200: SOLVE_RESULT})
+@api_view(['POST'])
 def solve_requirements(request):
     """
     Solve course matching requirements using CP-SAT.
@@ -130,15 +140,10 @@ def solve_requirements(request):
             ]
         }
     """
+    body = get_request_object(request)
     solver = Solver(API_LATEST)
     
     try:
-        # Parse request body
-        try:
-            body = json.loads(request.body)
-        except json.JSONDecodeError as e:
-            return create_error_response(f"Invalid JSON: {str(e)}")
-        
         # Extract parameters
         matching_eval = body.get("matching_eval")
         include_query = body.get("include_query", False)
@@ -169,8 +174,8 @@ def solve_requirements(request):
         )
 
 
-@csrf_exempt
-@require_http_methods(["POST"])
+@extend_schema(request={'application/json': SOLVE_REQUEST}, responses={200: SOLVE_RESULT})
+@api_view(['POST'])
 def solve_requirements_detailed(request):
     """
     Solve course matching requirements with detailed query information.
@@ -179,9 +184,9 @@ def solve_requirements_detailed(request):
     
     Same as solve_requirements but always includes query information in response.
     """
+    body = get_request_object(request)
     solver = Solver(API_LATEST)
     try:
-        body = json.loads(request.body)
         matching_eval = body.get("matching_eval")
         
         if matching_eval is None:
@@ -194,15 +199,12 @@ def solve_requirements_detailed(request):
         result = solver.solve(matching_eval, include_query=True)
         return create_success_response(result.to_dict())
     
-    except json.JSONDecodeError as e:
-        return create_error_response(f"Invalid JSON: {str(e)}")
     except Exception as e:
         logger.error(f"Error in solve_requirements_detailed: {str(e)}", exc_info=True)
         return create_error_response(f"Internal server error: {str(e)}", status_code=500)
 
 
-@method_decorator(csrf_exempt, name='dispatch')
-class SolverView(View):
+class SolverView(APIView):
     """
     Class-based view for solver operations.
     
@@ -210,11 +212,12 @@ class SolverView(View):
         Run the solver with standard options
     """
     
+    @extend_schema(request={'application/json': SOLVE_REQUEST}, responses={200: SOLVE_RESULT})
     def post(self, request):
         """Handle POST requests to solve requirements."""
+        body = get_request_object(request)
         solver = Solver(API_LATEST)
         try:
-            body = json.loads(request.body)
             matching_eval = body.get("matching_eval")
             include_query = body.get("include_query", False)
             
@@ -228,12 +231,11 @@ class SolverView(View):
             result = solver.solve(matching_eval, include_query=include_query)
             return create_success_response(result.to_dict())
         
-        except json.JSONDecodeError as e:
-            return create_error_response(f"Invalid JSON: {str(e)}")
         except Exception as e:
             logger.error(f"Error in SolverView.post: {str(e)}", exc_info=True)
             return create_error_response(f"Internal server error: {str(e)}", status_code=500)
     
+    @extend_schema(responses={200: {'type': 'object', 'required': ['api', 'version', 'endpoints', 'documentation']}})
     def get(self, request):
         """Handle GET requests - return API documentation."""
         return create_success_response({
@@ -249,8 +251,7 @@ class SolverView(View):
         })
 
 
-@method_decorator(csrf_exempt, name='dispatch')
-class BatchSolverView(View):
+class BatchSolverView(APIView):
     """
     Batch solver for multiple independent matching problems.
     
@@ -258,6 +259,7 @@ class BatchSolverView(View):
         Run solver on multiple matching_eval inputs
     """
     
+    @extend_schema(request={'application/json': BATCH_REQUEST}, responses={200: BATCH_RESULT})
     def post(self, request):
         """
         Solve multiple matching problems in batch.
@@ -298,9 +300,9 @@ class BatchSolverView(View):
                 }
             }
         """
+        body = get_request_object(request)
         solver = Solver(API_LATEST)
         try:
-            body = json.loads(request.body)
             batch = body.get("batch", [])
             include_query = body.get("include_query", False)
             
@@ -378,8 +380,6 @@ class BatchSolverView(View):
                 }
             })
         
-        except json.JSONDecodeError as e:
-            return create_error_response(f"Invalid JSON: {str(e)}")
         except Exception as e:
             logger.error(f"Error in BatchSolverView.post: {str(e)}", exc_info=True)
             return create_error_response(f"Internal server error: {str(e)}", status_code=500)
@@ -405,6 +405,7 @@ class MajorListView(APIView):
         ]
     """
     
+    @extend_schema(operation_id="majors_list", responses={200: MAJOR_LIST})
     def get(self, request):
         templates_dir = './major_templates/'
         try:
@@ -468,6 +469,7 @@ class MajorIDView(MajorOpView):
         }
     """
     
+    @extend_schema(responses={200: MAJOR})
     def get(self, request, major_id):
         if not self.SAFE_NAME.fullmatch(major_id):
             raise ValidationError({"major_id": "Invalid format."})
@@ -504,6 +506,10 @@ class MajorIDMQLView(MajorOpView):
         }
     """
     
+    @extend_schema(
+        parameters=[OpenApiParameter('specialization', str, required=True)],
+        responses={200: MQL},
+    )
     def get(self, request, major_id):
         major_id = self.validate_name(major_id, "major_id")
         specialization = self.validate_name(
@@ -600,6 +606,16 @@ def evaluate_major_template(major_id: str, degree_type: str, course_list: list) 
         raise ParseError(f"Solver failed: {e}")
 
 
+@extend_schema(
+    request={'application/json': {
+        'type': 'object', 'required': ['courses', 'major_id', 'degree_type'],
+        'properties': {
+            'courses': {'type': 'array', 'minItems': 1, 'items': {'type': 'object'}},
+            'major_id': {'type': 'string'}, 'degree_type': {'type': 'string'},
+        },
+    }},
+    responses={200: SOLVE_RESULT},
+)
 @api_view(['POST'])
 def check_major_status(request):
     """
@@ -637,9 +653,10 @@ def check_major_status(request):
             ]
         }
     """
-    course_list = request.data.get('courses', [])
-    major_id = request.data.get('major_id')
-    degree_type = request.data.get('degree_type')
+    body = get_request_object(request)
+    course_list = body.get('courses', [])
+    major_id = body.get('major_id')
+    degree_type = body.get('degree_type')
     
     if not major_id:
         return Response(
